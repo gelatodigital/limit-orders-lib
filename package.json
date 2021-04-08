@@ -1,0 +1,43 @@
+{
+  "name": "limit-orders",
+  "version": "1.0.0",
+  "description": "Create uniswap v2 limit order",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gelatodigital/limit-orders.git"
+  },
+  "keywords": [
+    "Uniswap",
+    "Limit",
+    "Orders",
+    "solidity",
+    "ethereum",
+    "smart",
+    "contracts",
+    "gelato",
+    "network"
+  ],
+  "author": "Gelato Network",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gelatodigital/limit-orders/issues"
+  },
+  "homepage": "https://github.com/gelatodigital/limit-orders#readme",
+  "dependencies": {
+    "eslint": "^7.23.0",
+    "eslint-config-prettier": "^8.1.0",
+    "ethers": "^5.1.0"
+  },
+  "devDependencies": {
+    "prettier": "^2.2.1"
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache",
+    "*.{js,sol,json,css,md,yml}": "prettier --write"
+  }
+}
