@@ -2,10 +2,12 @@
   "name": "limit-orders",
   "version": "1.0.0",
   "description": "Create uniswap v2 limit order",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "build": "tsc",
+    "generate-contracts-typings": "typechain --target=ethers-v5 --outDir src/types './src/**/abis/*.json'"
   },
   "repository": {
     "type": "git",
@@ -29,12 +31,20 @@
   },
   "homepage": "https://github.com/gelatodigital/limit-orders#readme",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "eslint": "^7.23.0",
     "eslint-config-prettier": "^8.1.0",
-    "ethers": "^5.1.0"
+    "ethers": "^5.1.0",
+    "graphql": "^15.5.0",
+    "graphql-request": "^3.4.0"
   },
   "devDependencies": {
-    "prettier": "^2.2.1"
+    "@typechain/ethers-v5": "^6.0.5",
+    "@typechain/hardhat": "^1.0.1",
+    "prettier": "^2.2.1",
+    "ts-generator": "^0.1.1",
+    "typechain": "^4.0.3",
+    "typescript": "^4.2.4"
   },
   "lint-staged": {
     "*.js": "eslint --cache",
