@@ -1,5 +1,5 @@
 import { Interface } from "@ethersproject/abi";
-import { ethers } from "ethers";
+import { ethers, providers } from "ethers";
 import {
   ETH_ADDRESS,
   MAINNET_LIMIT_ORDER_MODULE,
@@ -22,19 +22,17 @@ import {
 
 // Convention ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
 export const getLimitOrderPayload = async (
-  providerOrSigner: ethers.Signer,
+  signer: ethers.Signer,
   fromCurrency: string,
   toCurrency: string,
-  account: string,
   amount: ethers.BigNumber,
   minimumReturn: ethers.BigNumber
 ): Promise<TransactionData> => {
   return (
     await getLimitOrderPayloadWithSecret(
-      providerOrSigner,
+      signer,
       fromCurrency,
       toCurrency,
-      account,
       amount,
       minimumReturn
     )
@@ -45,7 +43,6 @@ export const getLimitOrderPayloadWithSecret = async (
   signer: ethers.Signer,
   fromCurrency: string,
   toCurrency: string,
-  account: string,
   amount: ethers.BigNumber,
   minimumReturn: ethers.BigNumber
 ): Promise<TransactionDataWithSecret> => {
@@ -55,14 +52,14 @@ export const getLimitOrderPayloadWithSecret = async (
   const fullSecret = `2070696e652e66696e616e63652020d83ddc09${secret}`;
   const { privateKey, address } = new ethers.Wallet(fullSecret);
 
-  const gelatoPineCore = await getGelatoPineCore(signer);
+  const gelatoPineCore = await getGelatoPineCore(signer.provider);
 
   const [data, value] = await getEncodedData(
     await signer.getChainId(),
     gelatoPineCore,
     fromCurrency,
     toCurrency,
-    account,
+    await signer.getAddress(),
     address,
     amount,
     minimumReturn,
@@ -100,8 +97,7 @@ const getEncodedData = async (
 
   return fromCurrency === ETH_ADDRESS
     ? [
-        gelatoPineCore.interface.encodeFunctionData(
-          "depositEth",
+        gelatoPineCore.interface.encodeFunctionData("depositEth", [
           await gelatoPineCore.encodeEthOrder(
             chainId == 1
               ? MAINNET_LIMIT_ORDER_MODULE
@@ -111,8 +107,8 @@ const getEncodedData = async (
             address,
             encodedData,
             privateKey
-          )
-        ),
+          ),
+        ]),
         amount,
       ]
     : [
@@ -142,7 +138,6 @@ export const sendLimitOrder = async (
     signer,
     fromCurrency,
     toCurrency,
-    await signer.getAddress(),
     amount,
     minimumReturn
   );
@@ -163,11 +158,10 @@ export const cancelLimitOrder = async (
   fromCurrency: string,
   toCurrency: string,
   minReturn: ethers.BigNumber,
-  witness: string,
-  pending: boolean
+  witness: string
 ): Promise<any> => {
   const abiCoder = new ethers.utils.AbiCoder();
-  const gelatoPineCore = await getGelatoPineCore(signer);
+  const gelatoPineCore = await getGelatoPineCore(signer.provider);
   return await gelatoPineCore.cancelOrder(
     (await signer.provider?.getNetwork())?.chainId === 1
       ? MAINNET_LIMIT_ORDER_MODULE
@@ -177,6 +171,32 @@ export const cancelLimitOrder = async (
     witness,
     abiCoder.encode(["address", "uint256"], [toCurrency, minReturn])
   );
+};
+
+export const cancelLimitOrderPayload = async (
+  provider: providers.Provider,
+  fromCurrency: string,
+  toCurrency: string,
+  minReturn: ethers.BigNumber,
+  account: string,
+  witness: string
+): Promise<TransactionData> => {
+  const abiCoder = new ethers.utils.AbiCoder();
+  const gelatoPineCore = await getGelatoPineCore(provider);
+
+  return {
+    to: gelatoPineCore.address,
+    data: gelatoPineCore.interface.encodeFunctionData("cancelOrder", [
+      (await provider.getNetwork())?.chainId === 1
+        ? MAINNET_LIMIT_ORDER_MODULE
+        : ROPSTEN_LIMIT_ORDER_MODULE,
+      fromCurrency,
+      account,
+      witness,
+      abiCoder.encode(["address", "uint256"], [toCurrency, minReturn]),
+    ]),
+    value: ethers.constants.Zero,
+  };
 };
 
 //#endregion Limit Orders Cancellation

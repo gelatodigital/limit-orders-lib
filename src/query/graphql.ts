@@ -20,10 +20,9 @@ export const GET_ALL_ORDERS = gql`
   }
 `;
 
-
 export const GET_ALL_OPEN_ORDERS = gql`
   query GetOrdersByOwner($owner: String) {
-    orders(where: { owner: $owner, status:open }) {
+    orders(where: { owner: $owner, status: open }) {
       id
       owner
       inputToken
@@ -41,7 +40,7 @@ export const GET_ALL_OPEN_ORDERS = gql`
 
 export const GET_ALL_EXECUTED_ORDERS = gql`
   query GetOrdersByOwner($owner: String) {
-    orders(where: { owner: $owner, status:executed }) {
+    orders(where: { owner: $owner, status: executed }) {
       id
       owner
       inputToken
@@ -60,7 +59,7 @@ export const GET_ALL_EXECUTED_ORDERS = gql`
 
 export const GET_ALL_CANCELLED_ORDERS = gql`
   query GetOrdersByOwner($owner: String) {
-    orders(where: { owner: $owner, status:cancelled }) {
+    orders(where: { owner: $owner, status: cancelled }) {
       id
       owner
       inputToken
@@ -75,4 +74,3 @@ export const GET_ALL_CANCELLED_ORDERS = gql`
     }
   }
 `;
-

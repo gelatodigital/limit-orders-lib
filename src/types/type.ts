@@ -7,9 +7,9 @@ export interface TransactionData {
 }
 
 export interface TransactionDataWithSecret {
-    txData: TransactionData,
-    secret: string,
-    witness: string,
+  txData: TransactionData;
+  secret: string;
+  witness: string;
 }
 
 export interface Order {
