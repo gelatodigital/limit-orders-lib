@@ -1,6 +1,6 @@
 import { request } from "graphql-request";
 import { MAINNET_SUBGRAPH_URL, ROPSTEN_SUBGRAPH_URL } from "../constants";
-import { Order } from "../types/type";
+import { Order } from "../types";
 import {
   GET_ALL_ORDERS,
   GET_ALL_OPEN_ORDERS,

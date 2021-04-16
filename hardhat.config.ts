@@ -1,10 +1,13 @@
 import { HardhatUserConfig } from "hardhat/config";
+
+// Plugins
 import "@nomiclabs/hardhat-ethers";
-import "@typechain/hardhat";
 import "@nomiclabs/hardhat-waffle";
 
 // Libraries
-const assert = require("assert");
+import assert from "assert";
+import { mainnetDeployment } from "./hardhat/mainnet/mainnetDeployments";
+
 // Process Env Variables
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
@@ -12,8 +15,6 @@ dotenv.config({ path: __dirname + "/.env" });
 // assert.ok(INFURA_ID, "no Infura ID in process.env");
 const ALCHEMY_ID = process.env.ALCHEMY_ID;
 assert.ok(ALCHEMY_ID, "no Alchemy ID in process.env");
-
-import { mainnetDeployment } from "./hardhat/mainnet/mainnetDeployments";
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
@@ -33,11 +34,6 @@ const config: HardhatUserConfig = {
       // Custom
       ...mainnetDeployment,
     },
-  },
-  solidity: "0.7.3",
-  typechain: {
-    outDir: "typechain",
-    target: "ethers-v5",
   },
 };
 

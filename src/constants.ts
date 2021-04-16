@@ -2,9 +2,9 @@ export const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
 export const MAINNET_GELATOPINECORE =
   "0x36049D479A97CdE1fC6E2a5D2caE30B666Ebf92B";
-  export const MAINNET_LIMIT_ORDER_MODULE =
+export const MAINNET_LIMIT_ORDER_MODULE =
   "0x037fc8e71445910e1E0bBb2a0896d5e9A7485318";
-  export const MAINNET_SUBGRAPH_URL =
+export const MAINNET_SUBGRAPH_URL =
   "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders";
 
 export const ROPSTEN_GELATOPINECORE =

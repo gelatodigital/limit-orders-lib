@@ -1,4 +1,3 @@
-import { Interface } from "@ethersproject/abi";
 import { ethers, providers } from "ethers";
 import {
   ETH_ADDRESS,
@@ -12,11 +11,9 @@ import {
   getExecutedOrders,
   getCancelledOrders,
 } from "./query/orders";
-import {
-  Order,
-  TransactionData,
-  TransactionDataWithSecret,
-} from "./types/type";
+import { Order, TransactionData, TransactionDataWithSecret } from "./types";
+import { ContractTransaction } from "ethers";
+import { TransactionResponse } from "@ethersproject/abstract-provider";
 
 //#region Limit Orders Submission
 
@@ -52,6 +49,9 @@ export const getLimitOrderPayloadWithSecret = async (
   const fullSecret = `2070696e652e66696e616e63652020d83ddc09${secret}`;
   const { privateKey, address } = new ethers.Wallet(fullSecret);
 
+  if (!signer.provider)
+    throw new Error("getLimitOrderPayloadWithSecret: no provider on signer");
+
   const gelatoPineCore = await getGelatoPineCore(signer.provider);
 
   const [data, value] = await getEncodedData(
@@ -78,7 +78,7 @@ export const getLimitOrderPayloadWithSecret = async (
 };
 
 const getEncodedData = async (
-  chainId: Number,
+  chainId: number,
   gelatoPineCore: ethers.Contract,
   fromCurrency: string,
   toCurrency: string,
@@ -133,8 +133,8 @@ export const sendLimitOrder = async (
   toCurrency: string,
   amount: ethers.BigNumber,
   minimumReturn: ethers.BigNumber
-): Promise<any> => {
-  let txData = await getLimitOrderPayload(
+): Promise<TransactionResponse> => {
+  const txData = await getLimitOrderPayload(
     signer,
     fromCurrency,
     toCurrency,
@@ -142,7 +142,7 @@ export const sendLimitOrder = async (
     minimumReturn
   );
 
-  return await signer.sendTransaction({
+  return signer.sendTransaction({
     to: txData.to,
     data: txData.data,
     value: txData.value,
@@ -159,11 +159,16 @@ export const cancelLimitOrder = async (
   toCurrency: string,
   minReturn: ethers.BigNumber,
   witness: string
-): Promise<any> => {
+): Promise<ContractTransaction> => {
+  if (!signer.provider)
+    throw new Error("getLimitOrderPayloadWithSecret: no provider on signer");
+
   const abiCoder = new ethers.utils.AbiCoder();
+
   const gelatoPineCore = await getGelatoPineCore(signer.provider);
-  return await gelatoPineCore.cancelOrder(
-    (await signer.provider?.getNetwork())?.chainId === 1
+
+  return gelatoPineCore.cancelOrder(
+    (await signer.provider.getNetwork())?.chainId === 1
       ? MAINNET_LIMIT_ORDER_MODULE
       : ROPSTEN_LIMIT_ORDER_MODULE,
     fromCurrency,
@@ -209,28 +214,28 @@ export const getAllOrders = async (
   account: string,
   chainID: string
 ): Promise<Order> => {
-  return await getOrders(account, chainID);
+  return getOrders(account, chainID);
 };
 
 export const getAllOpenOrders = async (
   account: string,
   chainID: string
 ): Promise<Order> => {
-  return await getOpenOrders(account, chainID);
+  return getOpenOrders(account, chainID);
 };
 
 export const getAllExecutedOrders = async (
   account: string,
   chainID: string
 ): Promise<Order> => {
-  return await getExecutedOrders(account, chainID);
+  return getExecutedOrders(account, chainID);
 };
 
 export const getAllCancelledOrders = async (
   account: string,
   chainID: string
 ): Promise<Order> => {
-  return await getCancelledOrders(account, chainID);
+  return getCancelledOrders(account, chainID);
 };
 
 //#endregion Get All Orders
