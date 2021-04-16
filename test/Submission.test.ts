@@ -34,11 +34,12 @@ describe("Test Limit Orders Submission", async function () {
   it("#1: ETh to DAI Task Submission should work", async function () {
     await expect(
       getLimitOrderPayload(
-        userWallet,
+        userWallet.provider,
         ETH,
         DAI,
         ethers.utils.parseEther("3"),
-        ethers.utils.parseUnits("6000", 18)
+        ethers.utils.parseUnits("6000", 18),
+        await userWallet.getAddress()
       )
     ).to.not.throw;
   });
@@ -46,22 +47,24 @@ describe("Test Limit Orders Submission", async function () {
   it("#2: DAI to UNI Task Submission should work", async function () {
     await expect(
       getLimitOrderPayload(
-        userWallet,
+        userWallet.provider,
         DAI,
         UNI,
         ethers.utils.parseUnits("3000", 18),
-        ethers.utils.parseUnits("20", 18)
+        ethers.utils.parseUnits("20", 18),
+        await userWallet.getAddress()
       )
     ).to.not.throw;
   });
 
   it("#3: Should Cancel a previous order", async function () {
     const transactionDataWithSecret = await getLimitOrderPayloadWithSecret(
-      userWallet,
+      userWallet.provider,
       ETH,
       UNI,
       ethers.utils.parseUnits("3000", 18),
-      ethers.utils.parseUnits("20", 18)
+      ethers.utils.parseUnits("20", 18),
+      await userWallet.getAddress()
     );
 
     let transactionData = transactionDataWithSecret.txData;
