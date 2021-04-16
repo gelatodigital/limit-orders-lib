@@ -1,6 +1,6 @@
 {
   "name": "@gelatonetwork/limit-orders-lib",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Library for creating limit orders via Gelato",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,30 +8,26 @@
     "dist/**/*"
   ],
   "scripts": {
-    "build": "tsc && yarn generate-contracts-typings && yarn copy-contracts-types",
-    "compile": "npx hardhat compile",
-    "format": "prettier --write .",
-    "lint": "eslint --cache .",
-    "test": "npx hardhat test",
-    "generate-contracts-typings": "typechain --target=ethers-v5 --outDir src/contracts/types './src/**/abis/*.json'",
+    "build": "yarn generate-contracts-typings && tsc && yarn copy-contracts-types",
     "copy-contracts-types": "cp ./src/contracts/types/*.d.ts ./dist/contracts/types",
-    "prepare": "yarn build && yarn format && yarn lint",
-    "start": "npx ts-node src/index.ts",
-    "start:prod": "node dist/index.js"
+    "format": "prettier --write .",
+    "generate-contracts-typings": "typechain --target=ethers-v5 --outDir src/contracts/types './src/**/abis/*.json'",
+    "lint": "eslint --cache .",
+    "prepublishOnly": "yarn build && yarn format && yarn lint",
+    "test": "npx hardhat test"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gelatodigital/limit-orders-lib.git"
   },
   "keywords": [
-    "Uniswap",
-    "Limit Orders",
-    "solidity",
     "ethereum",
-    "smart",
-    "contracts",
-    "gelato",
-    "network"
+    "uniswap",
+    "limit orders",
+    "solidity",
+    "web3",
+    "smart contracts",
+    "gelato"
   ],
   "author": "Gelato Network",
   "license": "GPL-3.0-only",

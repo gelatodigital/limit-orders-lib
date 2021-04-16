@@ -30,12 +30,8 @@ export const getLimitOrderModule = async (
   return (await provider.getNetwork()).chainId === 1
     ? MAINNET_LIMIT_ORDER_MODULE
     : ROPSTEN_LIMIT_ORDER_MODULE;
-}
+};
 
-export const getSubgraphUrl = (
-  chainId: string
-): string => {
-  return chainId === "1"
-    ? MAINNET_SUBGRAPH_URL
-    : ROPSTEN_SUBGRAPH_URL;
-}
+export const getSubgraphUrl = (chainId: string): string => {
+  return chainId === "1" ? MAINNET_SUBGRAPH_URL : ROPSTEN_SUBGRAPH_URL;
+};

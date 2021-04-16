@@ -1,8 +1,5 @@
 import { ethers, providers } from "ethers";
-import {
-  ETH_ADDRESS,
-  getLimitOrderModule
-} from "./constants";
+import { ETH_ADDRESS, getLimitOrderModule } from "./constants";
 import { getGelatoPineCore } from "./gelatoPineCore";
 import {
   getOrders,
@@ -38,7 +35,7 @@ export const getLimitOrderPayload = async (
 };
 
 export const getLimitOrderPayloadWithSecret = async (
-  provider: providers.Provider  | undefined,
+  provider: providers.Provider | undefined,
   fromCurrency: string,
   toCurrency: string,
   amount: ethers.BigNumber,
@@ -77,7 +74,7 @@ export const getLimitOrderPayloadWithSecret = async (
     secret: privateKey,
     witness: address,
   };
-}
+};
 
 const getEncodedData = async (
   provider: providers.Provider,
