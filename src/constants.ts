@@ -1,3 +1,5 @@
+import { providers } from "ethers";
+
 export const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
 export const MAINNET_GELATOPINECORE =
@@ -13,3 +15,27 @@ export const ROPSTEN_LIMIT_ORDER_MODULE =
   "0x3f3C13b09B601fb6074124fF8D779d2964caBf8B";
 export const ROPSTEN_SUBGRAPH_URL =
   "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-ropsten";
+
+export const getGelatoPineCoreAddr = async (
+  provider: providers.Provider
+): Promise<string> => {
+  return (await provider.getNetwork()).chainId === 1
+    ? MAINNET_GELATOPINECORE
+    : ROPSTEN_GELATOPINECORE;
+};
+
+export const getLimitOrderModule = async (
+  provider: providers.Provider
+): Promise<string> => {
+  return (await provider.getNetwork()).chainId === 1
+    ? MAINNET_LIMIT_ORDER_MODULE
+    : ROPSTEN_LIMIT_ORDER_MODULE;
+}
+
+export const getSubgraphUrl = (
+  chainId: string
+): string => {
+  return chainId === "1"
+    ? MAINNET_SUBGRAPH_URL
+    : ROPSTEN_SUBGRAPH_URL;
+}

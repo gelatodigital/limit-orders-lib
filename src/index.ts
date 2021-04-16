@@ -1,8 +1,7 @@
 import { ethers, providers } from "ethers";
 import {
   ETH_ADDRESS,
-  MAINNET_LIMIT_ORDER_MODULE,
-  ROPSTEN_LIMIT_ORDER_MODULE,
+  getLimitOrderModule
 } from "./constants";
 import { getGelatoPineCore } from "./gelatoPineCore";
 import {
@@ -19,29 +18,32 @@ import { TransactionResponse } from "@ethersproject/abstract-provider";
 
 // Convention ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
 export const getLimitOrderPayload = async (
-  signer: ethers.Signer,
+  provider: providers.Provider | undefined,
   fromCurrency: string,
   toCurrency: string,
   amount: ethers.BigNumber,
-  minimumReturn: ethers.BigNumber
+  minimumReturn: ethers.BigNumber,
+  owner: string
 ): Promise<TransactionData> => {
   return (
     await getLimitOrderPayloadWithSecret(
-      signer,
+      provider,
       fromCurrency,
       toCurrency,
       amount,
-      minimumReturn
+      minimumReturn,
+      owner
     )
   ).txData;
 };
 
 export const getLimitOrderPayloadWithSecret = async (
-  signer: ethers.Signer,
+  provider: providers.Provider  | undefined,
   fromCurrency: string,
   toCurrency: string,
   amount: ethers.BigNumber,
-  minimumReturn: ethers.BigNumber
+  minimumReturn: ethers.BigNumber,
+  owner: string
 ): Promise<TransactionDataWithSecret> => {
   const secret = ethers.utils
     .hexlify(ethers.utils.randomBytes(13))
@@ -49,17 +51,17 @@ export const getLimitOrderPayloadWithSecret = async (
   const fullSecret = `2070696e652e66696e616e63652020d83ddc09${secret}`;
   const { privateKey, address } = new ethers.Wallet(fullSecret);
 
-  if (!signer.provider)
+  if (!provider)
     throw new Error("getLimitOrderPayloadWithSecret: no provider on signer");
 
-  const gelatoPineCore = await getGelatoPineCore(signer.provider);
+  const gelatoPineCore = await getGelatoPineCore(provider);
 
   const [data, value] = await getEncodedData(
-    await signer.getChainId(),
+    provider,
     gelatoPineCore,
     fromCurrency,
     toCurrency,
-    await signer.getAddress(),
+    owner,
     address,
     amount,
     minimumReturn,
@@ -75,10 +77,10 @@ export const getLimitOrderPayloadWithSecret = async (
     secret: privateKey,
     witness: address,
   };
-};
+}
 
 const getEncodedData = async (
-  chainId: number,
+  provider: providers.Provider,
   gelatoPineCore: ethers.Contract,
   fromCurrency: string,
   toCurrency: string,
@@ -95,13 +97,13 @@ const getEncodedData = async (
     [toCurrency, minimumReturn]
   );
 
+  const limitOrderModuleAddr = await getLimitOrderModule(provider);
+
   return fromCurrency === ETH_ADDRESS
     ? [
         gelatoPineCore.interface.encodeFunctionData("depositEth", [
           await gelatoPineCore.encodeEthOrder(
-            chainId == 1
-              ? MAINNET_LIMIT_ORDER_MODULE
-              : ROPSTEN_LIMIT_ORDER_MODULE,
+            limitOrderModuleAddr,
             fromCurrency,
             account,
             address,
@@ -113,9 +115,7 @@ const getEncodedData = async (
       ]
     : [
         await gelatoPineCore.encodeTokenOrder(
-          chainId == 1
-            ? MAINNET_LIMIT_ORDER_MODULE
-            : ROPSTEN_LIMIT_ORDER_MODULE,
+          limitOrderModuleAddr,
           fromCurrency,
           account,
           address,
@@ -135,11 +135,12 @@ export const sendLimitOrder = async (
   minimumReturn: ethers.BigNumber
 ): Promise<TransactionResponse> => {
   const txData = await getLimitOrderPayload(
-    signer,
+    signer.provider,
     fromCurrency,
     toCurrency,
     amount,
-    minimumReturn
+    minimumReturn,
+    await signer.getAddress()
   );
 
   return signer.sendTransaction({
@@ -168,9 +169,7 @@ export const cancelLimitOrder = async (
   const gelatoPineCore = await getGelatoPineCore(signer.provider);
 
   return gelatoPineCore.cancelOrder(
-    (await signer.provider.getNetwork())?.chainId === 1
-      ? MAINNET_LIMIT_ORDER_MODULE
-      : ROPSTEN_LIMIT_ORDER_MODULE,
+    await getLimitOrderModule(signer.provider),
     fromCurrency,
     await signer.getAddress(),
     witness,
@@ -192,9 +191,7 @@ export const cancelLimitOrderPayload = async (
   return {
     to: gelatoPineCore.address,
     data: gelatoPineCore.interface.encodeFunctionData("cancelOrder", [
-      (await provider.getNetwork())?.chainId === 1
-        ? MAINNET_LIMIT_ORDER_MODULE
-        : ROPSTEN_LIMIT_ORDER_MODULE,
+      await getLimitOrderModule(provider),
       fromCurrency,
       account,
       witness,
