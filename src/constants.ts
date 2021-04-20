@@ -23,16 +23,16 @@ export const getGelatoPineCoreAddr = (chainId: number): string => {
       return ROPSTEN_GELATOPINECORE;
     }
     case 4: {
-      throw Error("GelatoPine is not available on Rinkeby");
+      throw new Error("GelatoPine is not available on Rinkeby");
     }
     case 5: {
-      throw Error("GelatoPine is not available on Görli");
+      throw new Error("GelatoPine is not available on Görli");
     }
     case 42: {
-      throw Error("GelatoPine is not available on Kovan");
+      throw new Error("GelatoPine is not available on Kovan");
     }
     default: {
-      throw Error("undefined network");
+      throw new Error("NETWORK NOT SUPPORTED");
     }
   }
 };
@@ -46,16 +46,16 @@ export const getLimitOrderModuleAddr = (chainId: number): string => {
       return ROPSTEN_LIMIT_ORDER_MODULE;
     }
     case 4: {
-      throw Error("Gelato Limit Orders not available on Rinkeby");
+      throw new Error("Gelato Limit Orders not available on Rinkeby");
     }
     case 5: {
-      throw Error("Gelato Limit Orders not available on Görli");
+      throw new Error("Gelato Limit Orders not available on Görli");
     }
     case 42: {
-      throw Error("Gelato Limit Orders not available on Kovan");
+      throw new Error("Gelato Limit Orders not available on Kovan");
     }
     default: {
-      throw Error("undefined network");
+      throw new Error("NETWORK NOT SUPPORTED");
     }
   }
 };
@@ -69,16 +69,16 @@ export const getSubgraphUrl = (chainId: number): string => {
       return ROPSTEN_SUBGRAPH_URL;
     }
     case 4: {
-      throw Error("Subgraph not available on Rinkeby");
+      throw new Error("Subgraph not available on Rinkeby");
     }
     case 5: {
-      throw Error("Subgraph not available on Görli");
+      throw new Error("Subgraph not available on Görli");
     }
     case 42: {
-      throw Error("Subgraph not available on Kovan");
+      throw new Error("Subgraph not available on Kovan");
     }
     default: {
-      throw Error("undefined network");
+      throw new Error("NETWORK NOT SUPPORTED");
     }
   }
 };
@@ -101,7 +101,7 @@ export const getNetworkName = (chainId: number): string => {
       return "kovan";
     }
     default: {
-      throw Error("undefined network");
+      throw new Error("NETWORK NOT SUPPORTED");
     }
   }
 };

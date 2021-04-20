@@ -1,11 +1,20 @@
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { ContractTransaction, ethers } from "ethers";
+import {
+  BigNumber,
+  constants,
+  ContractTransaction,
+  getDefaultProvider,
+  Signer,
+  utils,
+  Wallet,
+} from "ethers";
 import {
   ETH_ADDRESS,
   getLimitOrderModuleAddr,
   getNetworkName,
 } from "./constants";
 import { getGelatoPineCore } from "./gelatoPineCore";
+import { GelatoPineCore } from "./contracts/types";
 import {
   getCancelledOrders,
   getExecutedOrders,
@@ -21,8 +30,8 @@ export const getLimitOrderPayload = async (
   chainId: number,
   fromCurrency: string,
   toCurrency: string,
-  amount: ethers.BigNumber,
-  minimumReturn: ethers.BigNumber,
+  amount: BigNumber,
+  minimumReturn: BigNumber,
   owner: string
 ): Promise<TransactionData> => {
   return (
@@ -41,17 +50,15 @@ export const getLimitOrderPayloadWithSecret = async (
   chainId: number,
   fromCurrency: string,
   toCurrency: string,
-  amount: ethers.BigNumber,
-  minimumReturn: ethers.BigNumber,
+  amount: BigNumber,
+  minimumReturn: BigNumber,
   owner: string
 ): Promise<TransactionDataWithSecret> => {
-  const secret = ethers.utils
-    .hexlify(ethers.utils.randomBytes(13))
-    .replace("0x", "");
+  const secret = utils.hexlify(utils.randomBytes(13)).replace("0x", "");
   const fullSecret = `4200696e652e66696e616e63652020d83ddc09${secret}`;
-  const { privateKey, address } = new ethers.Wallet(fullSecret);
+  const { privateKey, address } = new Wallet(fullSecret);
 
-  const provider = await ethers.getDefaultProvider(getNetworkName(chainId));
+  const provider = await getDefaultProvider(getNetworkName(chainId));
 
   if (!provider)
     throw new Error("getLimitOrderPayloadWithSecret: no provider on provider");
@@ -83,18 +90,18 @@ export const getLimitOrderPayloadWithSecret = async (
 
 const getEncodedData = async (
   chainId: number,
-  gelatoPineCore: ethers.Contract,
+  gelatoPineCore: GelatoPineCore,
   fromCurrency: string,
   toCurrency: string,
   account: string,
   address: string,
-  amount: ethers.BigNumber,
-  minimumReturn: ethers.BigNumber,
+  amount: BigNumber,
+  minimumReturn: BigNumber,
   privateKey: string
-): Promise<[ethers.BytesLike, ethers.BigNumber]> => {
+): Promise<[string, BigNumber]> => {
   if (fromCurrency === toCurrency) throw "currency 1 is equal to currency 2";
 
-  const encodedData = new ethers.utils.AbiCoder().encode(
+  const encodedData = new utils.AbiCoder().encode(
     ["address", "uint256"],
     [toCurrency, minimumReturn]
   );
@@ -125,19 +132,19 @@ const getEncodedData = async (
           privateKey,
           amount
         ),
-        ethers.constants.Zero,
+        constants.Zero,
       ];
 };
 
 export const sendLimitOrder = async (
-  signer: ethers.Signer,
+  signer: Signer,
   fromCurrency: string,
   toCurrency: string,
-  amount: ethers.BigNumber,
-  minimumReturn: ethers.BigNumber
+  amount: BigNumber,
+  minimumReturn: BigNumber
 ): Promise<TransactionResponse> => {
   if (!signer.provider) {
-    throw Error("Provider undefined");
+    throw new Error("Provider undefined");
   }
   const chainId = (await signer.provider?.getNetwork()).chainId;
   const txData = await getLimitOrderPayload(
@@ -161,18 +168,18 @@ export const sendLimitOrder = async (
 //#region Limit Orders Cancellation
 
 export const cancelLimitOrder = async (
-  signer: ethers.Signer,
+  signer: Signer,
   fromCurrency: string,
   toCurrency: string,
-  minReturn: ethers.BigNumber,
+  minReturn: BigNumber,
   witness: string
 ): Promise<ContractTransaction> => {
   if (!signer.provider)
     throw new Error("getLimitOrderPayloadWithSecret: no signer on signer");
 
   const chainId = (await signer.provider?.getNetwork()).chainId;
-  const provider = await ethers.getDefaultProvider(getNetworkName(chainId));
-  const abiCoder = new ethers.utils.AbiCoder();
+  const provider = await getDefaultProvider(getNetworkName(chainId));
+  const abiCoder = new utils.AbiCoder();
 
   const gelatoPineCore = await getGelatoPineCore(provider);
 
@@ -189,12 +196,12 @@ export const getCancelLimitOrderPayload = async (
   chainId: number,
   fromCurrency: string,
   toCurrency: string,
-  minReturn: ethers.BigNumber,
+  minReturn: BigNumber,
   account: string,
   witness: string
 ): Promise<TransactionData> => {
-  const abiCoder = new ethers.utils.AbiCoder();
-  const provider = await ethers.getDefaultProvider(getNetworkName(chainId));
+  const abiCoder = new utils.AbiCoder();
+  const provider = await getDefaultProvider(getNetworkName(chainId));
   const gelatoPineCore = await getGelatoPineCore(provider);
 
   return {
@@ -206,7 +213,7 @@ export const getCancelLimitOrderPayload = async (
       witness,
       abiCoder.encode(["address", "uint256"], [toCurrency, minReturn]),
     ]),
-    value: ethers.constants.Zero,
+    value: constants.Zero,
   };
 };
 

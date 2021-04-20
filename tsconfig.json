@@ -9,9 +9,9 @@
     "resolveJsonModule": true,
     "typeRoots": ["./node_modules/@types"],
     "outDir": "dist",
-    "rootDir": "src",
     "declaration": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "files": ["hardhat.config.ts"],
+  "include": ["test", "src/**/*.ts", "src/**/*.d.ts"],
   "exclude": ["node_modules"]
 }
