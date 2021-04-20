@@ -1,13 +1,12 @@
 import chai, { expect } from "chai";
 import { solidity } from "ethereum-waffle";
-
-import { providers, Signer } from "ethers";
+import { Signer } from "ethers";
+import { ethers, network } from "hardhat";
 import {
-  cancelLimitOrderPayload,
+  getCancelLimitOrderPayload,
   getLimitOrderPayload,
   getLimitOrderPayloadWithSecret,
 } from "../src/index";
-import { ethers, network, waffle } from "hardhat";
 
 chai.use(solidity);
 
@@ -24,8 +23,9 @@ describe("Test Limit Orders Submission", async function () {
     process.exit(1);
   }
 
-  let userAddress: string;
   let userWallet: Signer;
+  if (!network.config.chainId) throw Error("No Chain Id");
+  let chainId = network.config.chainId;
 
   beforeEach(async function () {
     [userWallet] = await ethers.getSigners();
@@ -34,7 +34,7 @@ describe("Test Limit Orders Submission", async function () {
   it("#1: ETh to DAI Task Submission should work", async function () {
     await expect(
       getLimitOrderPayload(
-        userWallet.provider,
+        chainId,
         ETH,
         DAI,
         ethers.utils.parseEther("3"),
@@ -47,7 +47,7 @@ describe("Test Limit Orders Submission", async function () {
   it("#2: DAI to UNI Task Submission should work", async function () {
     await expect(
       getLimitOrderPayload(
-        userWallet.provider,
+        chainId,
         DAI,
         UNI,
         ethers.utils.parseUnits("3000", 18),
@@ -59,7 +59,7 @@ describe("Test Limit Orders Submission", async function () {
 
   it("#3: Should Cancel a previous order", async function () {
     const transactionDataWithSecret = await getLimitOrderPayloadWithSecret(
-      userWallet.provider,
+      chainId,
       ETH,
       UNI,
       ethers.utils.parseUnits("3000", 18),
@@ -75,8 +75,8 @@ describe("Test Limit Orders Submission", async function () {
       value: transactionData.value,
     });
 
-    transactionData = await cancelLimitOrderPayload(
-      userWallet.provider as providers.Provider,
+    transactionData = await getCancelLimitOrderPayload(
+      chainId,
       DAI,
       UNI,
       ethers.utils.parseUnits("3000", 18),
