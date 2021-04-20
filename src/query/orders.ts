@@ -2,15 +2,15 @@ import { request } from "graphql-request";
 import { getSubgraphUrl } from "../constants";
 import { Order } from "../types";
 import {
-  GET_ALL_ORDERS,
-  GET_ALL_OPEN_ORDERS,
-  GET_ALL_EXECUTED_ORDERS,
   GET_ALL_CANCELLED_ORDERS,
+  GET_ALL_EXECUTED_ORDERS,
+  GET_ALL_OPEN_ORDERS,
+  GET_ALL_ORDERS,
 } from "./graphql";
 
 export const getOrders = async (
   account: string,
-  chainID: string
+  chainID: number
 ): Promise<Order> => {
   return await request(getSubgraphUrl(chainID), GET_ALL_ORDERS, {
     owner: account.toLowerCase(),
@@ -21,7 +21,7 @@ export const getOrders = async (
 
 export const getOpenOrders = async (
   account: string,
-  chainID: string
+  chainID: number
 ): Promise<Order> => {
   return await request(getSubgraphUrl(chainID), GET_ALL_OPEN_ORDERS, {
     owner: account.toLowerCase(),
@@ -32,7 +32,7 @@ export const getOpenOrders = async (
 
 export const getExecutedOrders = async (
   account: string,
-  chainID: string
+  chainID: number
 ): Promise<Order> => {
   return await request(getSubgraphUrl(chainID), GET_ALL_EXECUTED_ORDERS, {
     owner: account.toLowerCase(),
@@ -43,7 +43,7 @@ export const getExecutedOrders = async (
 
 export const getCancelledOrders = async (
   account: string,
-  chainID: string
+  chainID: number
 ): Promise<Order> => {
   return await request(getSubgraphUrl(chainID), GET_ALL_CANCELLED_ORDERS, {
     owner: account.toLowerCase(),
