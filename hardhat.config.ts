@@ -6,7 +6,6 @@ import "@nomiclabs/hardhat-waffle";
 
 // Libraries
 import assert from "assert";
-import { mainnetDeployment } from "./hardhat/mainnet/mainnetDeployments";
 
 // Process Env Variables
 import * as dotenv from "dotenv";
@@ -31,8 +30,6 @@ const config: HardhatUserConfig = {
       accounts: {
         accountsBalance: "10000000000000000000000000",
       },
-      // Custom
-      ...mainnetDeployment,
     },
   },
 };

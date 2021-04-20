@@ -1,3 +1,4 @@
-cache/
-dist/
-test/
+cache
+dist
+src/contracts/types
+node_modules
