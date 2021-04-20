@@ -144,7 +144,7 @@ export const sendLimitOrder = async (
   minimumReturn: BigNumber
 ): Promise<TransactionResponse> => {
   if (!signer.provider) {
-    throw Error("Provider undefined");
+    throw new Error("Provider undefined");
   }
   const chainId = (await signer.provider?.getNetwork()).chainId;
   const txData = await getLimitOrderPayload(

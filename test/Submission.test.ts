@@ -20,7 +20,7 @@ describe("Test Limit Orders Submission", async function () {
 
   let userWallet: Signer;
 
-  if (!network.config.chainId) throw Error("No Chain Id");
+  if (!network.config.chainId) throw new Error("No Chain Id");
   const chainId = network.config.chainId;
 
   before(async function () {
