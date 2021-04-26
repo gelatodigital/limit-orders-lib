@@ -167,31 +167,6 @@ export const sendLimitOrder = async (
 
 //#region Limit Orders Cancellation
 
-export const cancelLimitOrder = async (
-  signer: Signer,
-  fromCurrency: string,
-  toCurrency: string,
-  minReturn: BigNumber,
-  witness: string
-): Promise<ContractTransaction> => {
-  if (!signer.provider)
-    throw new Error("getLimitOrderPayloadWithSecret: no signer on signer");
-
-  const chainId = (await signer.provider?.getNetwork()).chainId;
-  const provider = await getDefaultProvider(getNetworkName(chainId));
-  const abiCoder = new utils.AbiCoder();
-
-  const gelatoPineCore = await getGelatoPineCore(provider);
-
-  return gelatoPineCore.cancelOrder(
-    await getLimitOrderModuleAddr((await signer.provider.getNetwork()).chainId),
-    fromCurrency,
-    await signer.getAddress(),
-    witness,
-    abiCoder.encode(["address", "uint256"], [toCurrency, minReturn])
-  );
-};
-
 export const getCancelLimitOrderPayload = async (
   chainId: number,
   fromCurrency: string,
