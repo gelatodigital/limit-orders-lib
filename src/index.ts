@@ -183,13 +183,17 @@ export const cancelLimitOrder = async (
 
   const gelatoPineCore = await getGelatoPineCore(provider);
 
-  return gelatoPineCore.cancelOrder(
-    await getLimitOrderModuleAddr((await signer.provider.getNetwork()).chainId),
-    fromCurrency,
-    await signer.getAddress(),
-    witness,
-    abiCoder.encode(["address", "uint256"], [toCurrency, minReturn])
-  );
+  return gelatoPineCore
+    .connect(signer)
+    .cancelOrder(
+      await getLimitOrderModuleAddr(
+        (await signer.provider.getNetwork()).chainId
+      ),
+      fromCurrency,
+      await signer.getAddress(),
+      witness,
+      abiCoder.encode(["address", "uint256"], [toCurrency, minReturn])
+    );
 };
 
 export const getCancelLimitOrderPayload = async (
