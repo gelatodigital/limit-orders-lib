@@ -13,13 +13,14 @@ import {
   getLimitOrderModuleAddr,
   getNetworkName,
 } from "./constants";
-import { getGelatoPineCore } from "./gelatoPineCore";
 import { GelatoPineCore } from "./contracts/types";
+import { getGelatoPineCore } from "./gelatoPineCore";
 import {
   getCancelledOrders,
   getExecutedOrders,
   getOpenOrders,
   getOrders,
+  getPastOrders,
 } from "./query/orders";
 import { Order, TransactionData, TransactionDataWithSecret } from "./types";
 
@@ -239,6 +240,13 @@ export const getAllOpenOrders = async (
   chainID: number
 ): Promise<Order> => {
   return getOpenOrders(account, chainID);
+};
+
+export const getAllPastOrders = async (
+  account: string,
+  chainID: number
+): Promise<Order> => {
+  return getPastOrders(account, chainID);
 };
 
 export const getAllExecutedOrders = async (

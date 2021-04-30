@@ -38,6 +38,24 @@ export const GET_ALL_OPEN_ORDERS = gql`
   }
 `;
 
+export const GET_ALL_PAST_ORDERS = gql`
+  query GetOrdersByOwner($owner: String) {
+    orders(where: { owner: $owner, status_not: open }) {
+      id
+      owner
+      inputToken
+      outputToken
+      inputAmount
+      minReturn
+      bought
+      status
+      updatedAt
+      secret
+      witness
+    }
+  }
+`;
+
 export const GET_ALL_EXECUTED_ORDERS = gql`
   query GetOrdersByOwner($owner: String) {
     orders(where: { owner: $owner, status: executed }) {
