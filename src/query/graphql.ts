@@ -49,6 +49,8 @@ export const GET_ALL_PAST_ORDERS = gql`
       minReturn
       bought
       status
+      cancelledTxHash
+      executedTxHash
       updatedAt
       secret
       witness
