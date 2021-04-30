@@ -6,6 +6,7 @@ import {
   GET_ALL_EXECUTED_ORDERS,
   GET_ALL_OPEN_ORDERS,
   GET_ALL_ORDERS,
+  GET_ALL_PAST_ORDERS,
 } from "./graphql";
 
 export const getOrders = async (
@@ -24,6 +25,17 @@ export const getOpenOrders = async (
   chainID: number
 ): Promise<Order> => {
   return await request(getSubgraphUrl(chainID), GET_ALL_OPEN_ORDERS, {
+    owner: account.toLowerCase(),
+  }).then((data) => {
+    return data.orders;
+  });
+};
+
+export const getPastOrders = async (
+  account: string,
+  chainID: number
+): Promise<Order> => {
+  return await request(getSubgraphUrl(chainID), GET_ALL_PAST_ORDERS, {
     owner: account.toLowerCase(),
   }).then((data) => {
     return data.orders;
