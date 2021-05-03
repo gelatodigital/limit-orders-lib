@@ -2,7 +2,7 @@ import { gql } from "graphql-request";
 
 export const GET_ALL_ORDERS = gql`
   query GetOrdersByOwner($owner: String) {
-    orders(where: { owner: $owner }) {
+    orders(orderBy: createdAt, orderDirection: desc, where: { owner: $owner }) {
       id
       owner
       inputToken
@@ -22,7 +22,7 @@ export const GET_ALL_ORDERS = gql`
 
 export const GET_ALL_OPEN_ORDERS = gql`
   query GetOrdersByOwner($owner: String) {
-    orders(where: { owner: $owner, status: open }) {
+    orders(orderBy: createdAt, orderDirection: desc, where: { owner: $owner, status: open }) {
       id
       owner
       inputToken
@@ -40,7 +40,7 @@ export const GET_ALL_OPEN_ORDERS = gql`
 
 export const GET_ALL_EXECUTED_ORDERS = gql`
   query GetOrdersByOwner($owner: String) {
-    orders(where: { owner: $owner, status: executed }) {
+    orders(orderBy: createdAt, orderDirection: desc, where: { owner: $owner, status: executed }) {
       id
       owner
       inputToken
@@ -59,7 +59,7 @@ export const GET_ALL_EXECUTED_ORDERS = gql`
 
 export const GET_ALL_CANCELLED_ORDERS = gql`
   query GetOrdersByOwner($owner: String) {
-    orders(where: { owner: $owner, status: cancelled }) {
+    orders(orderBy: createdAt, orderDirection: desc, where: { owner: $owner, status: cancelled }) {
       id
       owner
       inputToken
