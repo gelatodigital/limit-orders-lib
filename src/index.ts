@@ -9,7 +9,7 @@ import {
   Wallet,
 } from "ethers";
 import {
-  ETH_ADDRESS,
+  isNetworkGasToken,
   getLimitOrderModuleAddr,
   getNetworkName,
 } from "./constants";
@@ -61,8 +61,7 @@ export const getLimitOrderPayloadWithSecret = async (
 
   const provider = await getDefaultProvider(getNetworkName(chainId));
 
-  if (!provider)
-    throw new Error("getLimitOrderPayloadWithSecret: no provider on provider");
+  if (!provider) throw new Error("getLimitOrderPayloadWithSecret: no provider");
 
   const gelatoPineCore = await getGelatoPineCore(provider);
 
@@ -80,7 +79,9 @@ export const getLimitOrderPayloadWithSecret = async (
 
   return {
     txData: {
-      to: fromCurrency === ETH_ADDRESS ? gelatoPineCore.address : fromCurrency,
+      to: isNetworkGasToken(chainId, fromCurrency)
+        ? gelatoPineCore.address
+        : fromCurrency,
       data: data,
       value: value,
     },
@@ -100,7 +101,8 @@ const getEncodedData = async (
   minimumReturn: BigNumber,
   privateKey: string
 ): Promise<[string, BigNumber]> => {
-  if (fromCurrency === toCurrency) throw "currency 1 is equal to currency 2";
+  if (fromCurrency === toCurrency)
+    throw new Error("fromCurrency === toCurrency");
 
   const encodedData = new utils.AbiCoder().encode(
     ["address", "uint256"],
@@ -109,7 +111,7 @@ const getEncodedData = async (
 
   const limitOrderModuleAddr = await getLimitOrderModuleAddr(chainId);
 
-  return fromCurrency === ETH_ADDRESS
+  return isNetworkGasToken(chainId, fromCurrency)
     ? [
         gelatoPineCore.interface.encodeFunctionData("depositEth", [
           await gelatoPineCore.encodeEthOrder(
@@ -144,9 +146,8 @@ export const sendLimitOrder = async (
   amount: BigNumber,
   minimumReturn: BigNumber
 ): Promise<TransactionResponse> => {
-  if (!signer.provider) {
-    throw new Error("Provider undefined");
-  }
+  if (!signer.provider) throw new Error("Provider undefined");
+
   const chainId = (await signer.provider?.getNetwork()).chainId;
   const txData = await getLimitOrderPayload(
     chainId,
@@ -176,13 +177,9 @@ export const cancelLimitOrder = async (
   witness: string
 ): Promise<ContractTransaction> => {
   if (!signer.provider)
-    throw new Error("getLimitOrderPayloadWithSecret: no signer on signer");
+    throw new Error("cancelLimitOrder: no provider on signer");
 
-  const chainId = (await signer.provider?.getNetwork()).chainId;
-  const provider = await getDefaultProvider(getNetworkName(chainId));
-  const abiCoder = new utils.AbiCoder();
-
-  const gelatoPineCore = await getGelatoPineCore(provider);
+  const gelatoPineCore = await getGelatoPineCore(signer.provider);
 
   return gelatoPineCore
     .connect(signer)
@@ -193,7 +190,10 @@ export const cancelLimitOrder = async (
       fromCurrency,
       await signer.getAddress(),
       witness,
-      abiCoder.encode(["address", "uint256"], [toCurrency, minReturn])
+      new utils.AbiCoder().encode(
+        ["address", "uint256"],
+        [toCurrency, minReturn]
+      )
     );
 };
 
@@ -231,35 +231,35 @@ export const getCancelLimitOrderPayload = async (
 export const getAllOrders = async (
   account: string,
   chainID: number
-): Promise<Order> => {
+): Promise<Order[]> => {
   return getOrders(account, chainID);
 };
 
 export const getAllOpenOrders = async (
   account: string,
   chainID: number
-): Promise<Order> => {
+): Promise<Order[]> => {
   return getOpenOrders(account, chainID);
 };
 
 export const getAllPastOrders = async (
   account: string,
   chainID: number
-): Promise<Order> => {
+): Promise<Order[]> => {
   return getPastOrders(account, chainID);
 };
 
 export const getAllExecutedOrders = async (
   account: string,
   chainID: number
-): Promise<Order> => {
+): Promise<Order[]> => {
   return getExecutedOrders(account, chainID);
 };
 
 export const getAllCancelledOrders = async (
   account: string,
   chainID: number
-): Promise<Order> => {
+): Promise<Order[]> => {
   return getCancelledOrders(account, chainID);
 };
 

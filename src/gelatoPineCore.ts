@@ -4,7 +4,7 @@ import { GelatoPineCore, GelatoPineCore__factory } from "./contracts/types";
 
 // cannot name parameter provider
 export const getGelatoPineCore = async (
-  _provider: providers.BaseProvider
+  _provider: providers.Provider
 ): Promise<GelatoPineCore> => {
   return GelatoPineCore__factory.connect(
     await getGelatoPineCoreAddr((await _provider.getNetwork()).chainId),

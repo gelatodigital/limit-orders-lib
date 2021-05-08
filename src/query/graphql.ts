@@ -1,8 +1,8 @@
 import { gql } from "graphql-request";
 
-export const GET_ALL_ORDERS = gql`
-  query GetOrdersByOwner($owner: String) {
-    orders(where: { owner: $owner }) {
+export const GET_ALL_ORDERS_BY_OWNER = gql`
+  query getOrdersByOwner($owner: String) {
+    orders(first: 1000, where: { owner: $owner }) {
       id
       owner
       inputToken
@@ -20,9 +20,9 @@ export const GET_ALL_ORDERS = gql`
   }
 `;
 
-export const GET_ALL_OPEN_ORDERS = gql`
-  query GetOrdersByOwner($owner: String) {
-    orders(where: { owner: $owner, status: open }) {
+export const GET_ALL_OPEN_ORDERS_BY_OWNER = gql`
+  query getOpenOrdersByOwner($owner: String) {
+    orders(first: 1000, where: { owner: $owner, status: open }) {
       id
       owner
       inputToken
@@ -38,9 +38,9 @@ export const GET_ALL_OPEN_ORDERS = gql`
   }
 `;
 
-export const GET_ALL_PAST_ORDERS = gql`
-  query GetOrdersByOwner($owner: String) {
-    orders(where: { owner: $owner, status_not: open }) {
+export const GET_ALL_PAST_ORDERS_BY_OWNER = gql`
+  query getPastOrdersByOwner($owner: String) {
+    orders(first: 1000, where: { owner: $owner, status_not: open }) {
       id
       owner
       inputToken
@@ -58,9 +58,9 @@ export const GET_ALL_PAST_ORDERS = gql`
   }
 `;
 
-export const GET_ALL_EXECUTED_ORDERS = gql`
-  query GetOrdersByOwner($owner: String) {
-    orders(where: { owner: $owner, status: executed }) {
+export const GET_ALL_EXECUTED_ORDERS_BY_OWNER = gql`
+  query getExecutedOrdersByOwner($owner: String) {
+    orders(first: 1000, where: { owner: $owner, status: executed }) {
       id
       owner
       inputToken
@@ -77,9 +77,9 @@ export const GET_ALL_EXECUTED_ORDERS = gql`
   }
 `;
 
-export const GET_ALL_CANCELLED_ORDERS = gql`
-  query GetOrdersByOwner($owner: String) {
-    orders(where: { owner: $owner, status: cancelled }) {
+export const GET_ALL_CANCELLED_ORDERS_BY_OWNER = gql`
+  query getCancelledOrdersByOwner($owner: String) {
+    orders(first: 1000, where: { owner: $owner, status: cancelled }) {
       id
       owner
       inputToken
