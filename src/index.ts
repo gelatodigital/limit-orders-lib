@@ -4,6 +4,7 @@ import {
   constants,
   ContractTransaction,
   getDefaultProvider,
+  providers,
   Signer,
   utils,
   Wallet,
@@ -12,6 +13,7 @@ import {
   isNetworkGasToken,
   getLimitOrderModuleAddr,
   getNetworkName,
+  ETH_ADDRESS,
 } from "./constants";
 import { GelatoPineCore } from "./contracts/types";
 import { getGelatoPineCore } from "./gelatoPineCore";
@@ -33,7 +35,8 @@ export const getLimitOrderPayload = async (
   toCurrency: string,
   amount: BigNumber,
   minimumReturn: BigNumber,
-  owner: string
+  owner: string,
+  provider?: providers.Provider
 ): Promise<TransactionData> => {
   return (
     await getLimitOrderPayloadWithSecret(
@@ -42,7 +45,8 @@ export const getLimitOrderPayload = async (
       toCurrency,
       amount,
       minimumReturn,
-      owner
+      owner,
+      provider
     )
   ).txData;
 };
@@ -53,13 +57,14 @@ export const getLimitOrderPayloadWithSecret = async (
   toCurrency: string,
   amount: BigNumber,
   minimumReturn: BigNumber,
-  owner: string
+  owner: string,
+  provider?: providers.Provider
 ): Promise<TransactionDataWithSecret> => {
   const secret = utils.hexlify(utils.randomBytes(13)).replace("0x", "");
   const fullSecret = `4200696e652e66696e616e63652020d83ddc09${secret}`;
   const { privateKey, address } = new Wallet(fullSecret);
 
-  const provider = await getDefaultProvider(getNetworkName(chainId));
+  provider = provider ?? (await getDefaultProvider(getNetworkName(chainId)));
 
   if (!provider) throw new Error("getLimitOrderPayloadWithSecret: no provider");
 
@@ -116,7 +121,7 @@ const getEncodedData = async (
         gelatoPineCore.interface.encodeFunctionData("depositEth", [
           await gelatoPineCore.encodeEthOrder(
             limitOrderModuleAddr,
-            fromCurrency,
+            ETH_ADDRESS, // we also use ETH_ADDRESS if it's MATIC
             account,
             address,
             encodedData,
@@ -144,7 +149,8 @@ export const sendLimitOrder = async (
   fromCurrency: string,
   toCurrency: string,
   amount: BigNumber,
-  minimumReturn: BigNumber
+  minimumReturn: BigNumber,
+  provider?: providers.Provider
 ): Promise<TransactionResponse> => {
   if (!signer.provider) throw new Error("Provider undefined");
 
@@ -155,7 +161,8 @@ export const sendLimitOrder = async (
     toCurrency,
     amount,
     minimumReturn,
-    await signer.getAddress()
+    await signer.getAddress(),
+    provider
   );
 
   return signer.sendTransaction({
@@ -203,10 +210,11 @@ export const getCancelLimitOrderPayload = async (
   toCurrency: string,
   minReturn: BigNumber,
   account: string,
-  witness: string
+  witness: string,
+  provider?: providers.Provider
 ): Promise<TransactionData> => {
   const abiCoder = new utils.AbiCoder();
-  const provider = await getDefaultProvider(getNetworkName(chainId));
+  provider = provider ?? (await getDefaultProvider(getNetworkName(chainId)));
   const gelatoPineCore = await getGelatoPineCore(provider);
 
   return {
