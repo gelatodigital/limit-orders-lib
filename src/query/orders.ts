@@ -13,13 +13,9 @@ export const getOrders = async (
   owner: string,
   chainID: number
 ): Promise<Order[]> => {
-  const { data } = await request(
-    getSubgraphUrl(chainID),
-    GET_ALL_ORDERS_BY_OWNER,
-    {
-      owner: owner.toLowerCase(),
-    }
-  );
+  const data = await request(getSubgraphUrl(chainID), GET_ALL_ORDERS_BY_OWNER, {
+    owner: owner.toLowerCase(),
+  });
   if (!data) throw new Error("getOrders: NO DATA");
   if (!data.orders) throw new Error("getOrders: NO ORDERS FIELD");
   return data.orders;
@@ -29,7 +25,7 @@ export const getOpenOrders = async (
   owner: string,
   chainID: number
 ): Promise<Order[]> => {
-  const { data } = await request(
+  const data = await request(
     getSubgraphUrl(chainID),
     GET_ALL_OPEN_ORDERS_BY_OWNER,
     {
@@ -45,7 +41,7 @@ export const getPastOrders = async (
   owner: string,
   chainID: number
 ): Promise<Order[]> => {
-  const { data } = await request(
+  const data = await request(
     getSubgraphUrl(chainID),
     GET_ALL_PAST_ORDERS_BY_OWNER,
     {
@@ -61,7 +57,7 @@ export const getExecutedOrders = async (
   owner: string,
   chainID: number
 ): Promise<Order[]> => {
-  const { data } = await request(
+  const data = await request(
     getSubgraphUrl(chainID),
     GET_ALL_EXECUTED_ORDERS_BY_OWNER,
     {
@@ -77,7 +73,7 @@ export const getCancelledOrders = async (
   owner: string,
   chainID: number
 ): Promise<Order[]> => {
-  const { data } = await request(
+  const data = await request(
     getSubgraphUrl(chainID),
     GET_ALL_CANCELLED_ORDERS_BY_OWNER,
     {
