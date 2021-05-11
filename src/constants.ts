@@ -1,17 +1,11 @@
 export const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-export const MATIC_ADDRESS = "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0";
+//export const MATIC_ADDRESS = "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0";
 
-export const isNetworkGasToken = (chainId: number, token: string): boolean => {
-  const networkName = getNetworkName(chainId);
-  const isMatic = networkName === "matic" || networkName === "mumbai";
-
-  switch (token.toLowerCase()) {
-    case ETH_ADDRESS.toLowerCase():
-      return isMatic ? false : true;
-    case MATIC_ADDRESS.toLowerCase():
-      return isMatic ? true : false;
-    default:
-      return false;
+export const isNetworkGasToken = (token: string): boolean => {
+  if (token.toLowerCase() === ETH_ADDRESS.toLowerCase()) {
+    return true;
+  } else {
+    return false;
   }
 };
 

@@ -84,7 +84,7 @@ export const getLimitOrderPayloadWithSecret = async (
 
   return {
     txData: {
-      to: isNetworkGasToken(chainId, fromCurrency)
+      to: isNetworkGasToken(fromCurrency)
         ? gelatoPineCore.address
         : fromCurrency,
       data: data,
@@ -116,7 +116,7 @@ const getEncodedData = async (
 
   const limitOrderModuleAddr = await getLimitOrderModuleAddr(chainId);
 
-  return isNetworkGasToken(chainId, fromCurrency)
+  return isNetworkGasToken(fromCurrency)
     ? [
         gelatoPineCore.interface.encodeFunctionData("depositEth", [
           await gelatoPineCore.encodeEthOrder(
