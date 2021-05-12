@@ -12,6 +12,11 @@ export interface TransactionDataWithSecret {
   witness: string;
 }
 
+export interface WitnessAndSecret {
+  witness: string;
+  secret: string;
+}
+
 export interface Order {
   id: number;
   inputToken: string;
