@@ -10,10 +10,10 @@ import {
   Wallet,
 } from "ethers";
 import {
-  isNetworkGasToken,
+  ETH_ADDRESS,
   getLimitOrderModuleAddr,
   getNetworkName,
-  ETH_ADDRESS,
+  isNetworkGasToken,
 } from "./constants";
 import { GelatoPineCore } from "./contracts/types";
 import { getGelatoPineCore } from "./gelatoPineCore";
@@ -24,7 +24,12 @@ import {
   getOrders,
   getPastOrders,
 } from "./query/orders";
-import { Order, TransactionData, TransactionDataWithSecret } from "./types";
+import {
+  Order,
+  TransactionData,
+  TransactionDataWithSecret,
+  WitnessAndSecret,
+} from "./types";
 
 //#region Limit Orders Submission
 
@@ -51,6 +56,16 @@ export const getLimitOrderPayload = async (
   ).txData;
 };
 
+export const getWitnessAndSecret = (): WitnessAndSecret => {
+  const secret = utils.hexlify(utils.randomBytes(13)).replace("0x", "");
+  const fullSecret = `4200696e652e66696e616e63652020d83ddc09${secret}`;
+  const { privateKey, address } = new Wallet(fullSecret);
+  return {
+    secret: privateKey,
+    witness: address,
+  };
+};
+
 export const getLimitOrderPayloadWithSecret = async (
   chainId: number,
   fromCurrency: string,
@@ -60,9 +75,7 @@ export const getLimitOrderPayloadWithSecret = async (
   owner: string,
   provider?: providers.Provider
 ): Promise<TransactionDataWithSecret> => {
-  const secret = utils.hexlify(utils.randomBytes(13)).replace("0x", "");
-  const fullSecret = `4200696e652e66696e616e63652020d83ddc09${secret}`;
-  const { privateKey, address } = new Wallet(fullSecret);
+  const { secret, witness } = getWitnessAndSecret();
 
   provider = provider ?? (await getDefaultProvider(getNetworkName(chainId)));
 
@@ -76,10 +89,10 @@ export const getLimitOrderPayloadWithSecret = async (
     fromCurrency,
     toCurrency,
     owner,
-    address,
+    witness,
     amount,
     minimumReturn,
-    privateKey
+    secret
   );
 
   return {
@@ -90,8 +103,8 @@ export const getLimitOrderPayloadWithSecret = async (
       data: data,
       value: value,
     },
-    secret: privateKey,
-    witness: address,
+    secret: secret,
+    witness: witness,
   };
 };
 
