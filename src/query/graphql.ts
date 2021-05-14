@@ -1,7 +1,7 @@
 import { gql } from "graphql-request";
 
 export const GET_ALL_ORDERS_BY_OWNER = gql`
-  query GetOrdersByOwner($owner: String) {
+  query getOrdersByOwner($owner: String) {
     orders(first: 1000, orderBy: updatedAt, orderDirection: desc, where: { owner: $owner }) {
       id
       owner
@@ -22,7 +22,7 @@ export const GET_ALL_ORDERS_BY_OWNER = gql`
 
 
 export const GET_ALL_OPEN_ORDERS_BY_OWNER = gql`
-  query GetOrdersByOwner($owner: String) {
+  query getOpenOrdersByOwner($owner: String) {
     orders(first: 1000, orderBy: updatedAt, orderDirection: desc, where: { owner: $owner, status: open }) {
       id
       owner
@@ -60,7 +60,7 @@ export const GET_ALL_PAST_ORDERS_BY_OWNER = gql`
 `;
 
 export const GET_ALL_EXECUTED_ORDERS_BY_OWNER = gql`
-  query GetOrdersByOwner($owner: String) {
+  query getExecutedOrdersByOwner($owner: String) {
     orders(first: 1000, orderBy: updatedAt, orderDirection: desc, where: { owner: $owner, status: executed }) {
       id
       owner
@@ -79,7 +79,7 @@ export const GET_ALL_EXECUTED_ORDERS_BY_OWNER = gql`
 `;
 
 export const GET_ALL_CANCELLED_ORDERS_BY_OWNER = gql`
-  query GetOrdersByOwner($owner: String) {
+  query getCancelledOrdersByOwner($owner: String) {
     orders(first: 1000, orderBy: updatedAt, orderDirection: desc, where: { owner: $owner, status: cancelled }) {
       id
       owner
