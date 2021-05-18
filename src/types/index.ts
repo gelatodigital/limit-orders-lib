@@ -1,5 +1,7 @@
 import { BigNumber, BytesLike } from "ethers";
 
+export type ChainId = 1 | 3 | 137;
+
 export interface TransactionData {
   to: string;
   data: BytesLike;
@@ -7,7 +9,7 @@ export interface TransactionData {
 }
 
 export interface TransactionDataWithSecret {
-  txData: TransactionData;
+  payload: TransactionData;
   secret: string;
   witness: string;
 }
@@ -16,11 +18,11 @@ export interface Order {
   id: number;
   inputToken: string;
   outputToken: string;
-  inputAmount: BigNumber;
-  minReturn: BigNumber;
-  bought: BigNumber;
+  inputAmount: string;
+  minReturn: string;
+  bought: string;
   status: string;
-  cancelledTxHash: BytesLike;
-  executedTxHash: BytesLike;
+  cancelledTxHash: string;
+  executedTxHash: string;
   updatedAt: string;
 }
