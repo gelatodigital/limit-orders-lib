@@ -9,6 +9,13 @@ export const isNetworkGasToken = (token: string): boolean => {
   }
 };
 
+export const FANTOM_GELATOPINECORE =
+  "0x05Ad1094Eb6Cde564d732196F6754Ee464896031";
+export const FANTOM_LIMIT_ORDER_MODULE =
+  "0xf2253BF9a0BD002300cFe6f4E630d755669f6DCa";
+export const FANTOM_SUBGRAPH_URL =
+  "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-fantom";
+
 export const MAINNET_GELATOPINECORE =
   "0x36049D479A97CdE1fC6E2a5D2caE30B666Ebf92B";
 export const MAINNET_LIMIT_ORDER_MODULE =
@@ -50,6 +57,9 @@ export const getGelatoPineCoreAddr = (chainId: number): string => {
     case 137: {
       return MATIC_GELATOPINECORE;
     }
+    case 250: {
+      return FANTOM_GELATOPINECORE;
+    }
     case 80001: {
       throw new Error("GelatoPineCore is not available on Mumbai");
     }
@@ -78,6 +88,9 @@ export const getLimitOrderModuleAddr = (chainId: number): string => {
     }
     case 137: {
       return MATIC_LIMIT_ORDER_MODULE;
+    }
+    case 250: {
+      return FANTOM_LIMIT_ORDER_MODULE;
     }
     case 80001: {
       throw new Error("Gelato Limit Orders is not available on Mumbai");
@@ -108,6 +121,9 @@ export const getSubgraphUrl = (chainId: number): string => {
     case 137: {
       return MATIC_SUBGRAPH_URL;
     }
+    case 250: {
+      return FANTOM_SUBGRAPH_URL;
+    }
     case 80001: {
       throw new Error("Subgraph is not available on Mumbai");
     }
@@ -136,6 +152,9 @@ export const getNetworkName = (chainId: number): string => {
     }
     case 137: {
       return "matic";
+    }
+    case 250: {
+      return "fantom";
     }
     case 80001: {
       return "mumbai";
