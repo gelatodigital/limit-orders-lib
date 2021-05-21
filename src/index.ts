@@ -205,7 +205,9 @@ export const cancelLimitOrder = async (
     .connect(signer)
     .cancelOrder(
       await getLimitOrderModuleAddr(
-        (await signer.provider.getNetwork()).chainId
+        (
+          await signer.provider.getNetwork()
+        ).chainId
       ),
       fromCurrency,
       await signer.getAddress(),

@@ -77,7 +77,9 @@ describe("Test Limit Orders Submission", async function () {
       UNI,
       utils.parseUnits("3000", 18),
       await userWallet.getAddress(),
-      (await transactionDataWithSecret).witness
+      (
+        await transactionDataWithSecret
+      ).witness
     );
 
     await expect(
