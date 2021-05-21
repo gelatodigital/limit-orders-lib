@@ -21,9 +21,9 @@ export interface Order {
   id: number;
   inputToken: string;
   outputToken: string;
-  inputAmount: BigNumber;
-  minReturn: BigNumber;
-  bought: BigNumber;
+  inputAmount: string;
+  minReturn: string;
+  bought: string;
   status: string;
   cancelledTxHash: BytesLike;
   executedTxHash: BytesLike;
