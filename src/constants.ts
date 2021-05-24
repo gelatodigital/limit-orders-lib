@@ -1,5 +1,4 @@
 export const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-//export const MATIC_ADDRESS = "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0";
 
 export const isNetworkGasToken = (token: string): boolean => {
   if (token.toLowerCase() === ETH_ADDRESS.toLowerCase()) {
@@ -8,6 +7,9 @@ export const isNetworkGasToken = (token: string): boolean => {
     return false;
   }
 };
+
+export const FEE_BPS = 2; // 0.02%
+export const MAX_SLIPPAGE_BPS = 20; // 0.2%
 
 export const FANTOM_GELATOPINECORE =
   "0x05Ad1094Eb6Cde564d732196F6754Ee464896031";
@@ -39,128 +41,75 @@ export const ROPSTEN_SUBGRAPH_URL =
 
 export const getGelatoPineCoreAddr = (chainId: number): string => {
   switch (chainId) {
-    case 1: {
+    case 1:
       return MAINNET_GELATOPINECORE;
-    }
-    case 3: {
+    case 3:
       return ROPSTEN_GELATOPINECORE;
-    }
-    case 4: {
-      throw new Error("GelatoPineCore is not available on Rinkeby");
-    }
-    case 5: {
-      throw new Error("GelatoPineCore is not available on Görli");
-    }
-    case 42: {
-      throw new Error("GelatoPineCore is not available on Kovan");
-    }
-    case 137: {
+    case 137:
       return MATIC_GELATOPINECORE;
-    }
-    case 250: {
+    case 250:
       return FANTOM_GELATOPINECORE;
-    }
-    case 80001: {
-      throw new Error("GelatoPineCore is not available on Mumbai");
-    }
-    default: {
+    default:
       throw new Error("NETWORK NOT SUPPORTED");
-    }
   }
 };
 
 export const getLimitOrderModuleAddr = (chainId: number): string => {
   switch (chainId) {
-    case 1: {
+    case 1:
       return MAINNET_LIMIT_ORDER_MODULE;
-    }
-    case 3: {
+    case 3:
       return ROPSTEN_LIMIT_ORDER_MODULE;
-    }
-    case 4: {
-      throw new Error("Gelato Limit Orders not available on Rinkeby");
-    }
-    case 5: {
-      throw new Error("Gelato Limit Orders not available on Görli");
-    }
-    case 42: {
-      throw new Error("Gelato Limit Orders not available on Kovan");
-    }
-    case 137: {
+    case 137:
       return MATIC_LIMIT_ORDER_MODULE;
-    }
-    case 250: {
+    case 250:
       return FANTOM_LIMIT_ORDER_MODULE;
-    }
-    case 80001: {
-      throw new Error("Gelato Limit Orders is not available on Mumbai");
-    }
-    default: {
+    default:
       throw new Error("NETWORK NOT SUPPORTED");
-    }
   }
 };
 
 export const getSubgraphUrl = (chainId: number): string => {
   switch (chainId) {
-    case 1: {
+    case 1:
       return MAINNET_SUBGRAPH_URL;
-    }
-    case 3: {
+    case 3:
       return ROPSTEN_SUBGRAPH_URL;
-    }
-    case 4: {
-      throw new Error("Subgraph not available on Rinkeby");
-    }
-    case 5: {
-      throw new Error("Subgraph not available on Görli");
-    }
-    case 42: {
-      throw new Error("Subgraph not available on Kovan");
-    }
-    case 137: {
+    case 137:
       return MATIC_SUBGRAPH_URL;
-    }
-    case 250: {
+    case 250:
       return FANTOM_SUBGRAPH_URL;
-    }
-    case 80001: {
-      throw new Error("Subgraph is not available on Mumbai");
-    }
-    default: {
+    default:
       throw new Error("NETWORK NOT SUPPORTED");
-    }
   }
 };
 
 export const getNetworkName = (chainId: number): string => {
   switch (chainId) {
-    case 1: {
+    case 1:
       return "homestead";
-    }
-    case 3: {
+    case 3:
       return "ropsten";
-    }
-    case 4: {
-      return "rinkeby";
-    }
-    case 5: {
-      return "goerli";
-    }
-    case 42: {
-      return "kovan";
-    }
-    case 137: {
+    case 137:
       return "matic";
-    }
-    case 250: {
+    case 250:
       return "fantom";
-    }
-    case 80001: {
-      return "mumbai";
-    }
-    default: {
+    default:
       throw new Error("NETWORK NOT SUPPORTED");
-    }
+  }
+};
+
+export const isL2 = (chainId: number): boolean => {
+  switch (chainId) {
+    case 1:
+      return false;
+    case 3:
+      return false;
+    case 137:
+      return true;
+    case 250:
+      return true;
+    default:
+      throw new Error("NETWORK NOT SUPPORTED");
   }
 };
