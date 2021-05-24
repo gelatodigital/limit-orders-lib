@@ -47,12 +47,12 @@
     "@typechain/ethers-v5": "7.0.0",
     "@types/chai": "4.2.18",
     "@types/mocha": "8.2.2",
-    "@types/node": "15.3.1",
-    "@typescript-eslint/eslint-plugin": "4.24.0",
-    "@typescript-eslint/parser": "4.24.0",
+    "@types/node": "15.6.0",
+    "@typescript-eslint/eslint-plugin": "4.25.0",
+    "@typescript-eslint/parser": "4.25.0",
     "chai": "4.3.4",
-    "dotenv": "9.0.2",
-    "eslint": "7.26.0",
+    "dotenv": "10.0.0",
+    "eslint": "7.27.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-prettier": "3.4.0",
     "ethereum-waffle": "3.3.0",
@@ -61,12 +61,12 @@
     "lint-staged": "11.0.0",
     "prettier": "2.3.0",
     "ts-generator": "0.1.1",
-    "ts-node": "9.1.1",
+    "ts-node": "10.0.0",
     "typechain": "5.0.0",
     "typescript": "4.2.4"
   },
   "lint-staged": {
-    "*.{js,json,md,ts,yaml,yml}": "yarn format",
+    "*.{js,json,md,ts,yaml,yml}": "prettier --write",
     "*.{ts,js}": "eslint -c .eslintrc.json"
   }
 }

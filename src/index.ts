@@ -11,9 +11,12 @@ import {
 } from "ethers";
 import {
   ETH_ADDRESS,
+  FEE_BPS,
+  MAX_SLIPPAGE_BPS,
   getLimitOrderModuleAddr,
   getNetworkName,
   isNetworkGasToken,
+  isL2,
 } from "./constants";
 import { GelatoPineCore } from "./contracts/types";
 import { getGelatoPineCore } from "./gelatoPineCore";
@@ -31,9 +34,8 @@ import {
   WitnessAndSecret,
 } from "./types";
 
-//#region Limit Orders Submission
-
 // Convention ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
+
 export const getLimitOrderPayload = async (
   chainId: number,
   fromCurrency: string,
@@ -185,10 +187,6 @@ export const sendLimitOrder = async (
   });
 };
 
-//#endregion Limit Orders Submission
-
-//#region Limit Orders Cancellation
-
 export const cancelLimitOrder = async (
   signer: Signer,
   fromCurrency: string,
@@ -245,45 +243,49 @@ export const getCancelLimitOrderPayload = async (
   };
 };
 
-//#endregion Limit Orders Cancellation
-
-//#region Get All Orders
-
-// available on mainnet (chainId 1) and ropsten (chainId 3)
-
 export const getAllOrders = async (
   account: string,
-  chainID: number
+  chainId: number
 ): Promise<Order[]> => {
-  return getOrders(account, chainID);
+  return getOrders(account, chainId);
 };
 
 export const getAllOpenOrders = async (
   account: string,
-  chainID: number
+  chainId: number
 ): Promise<Order[]> => {
-  return getOpenOrders(account, chainID);
+  return getOpenOrders(account, chainId);
 };
 
 export const getAllPastOrders = async (
   account: string,
-  chainID: number
+  chainId: number
 ): Promise<Order[]> => {
-  return getPastOrders(account, chainID);
+  return getPastOrders(account, chainId);
 };
 
 export const getAllExecutedOrders = async (
   account: string,
-  chainID: number
+  chainId: number
 ): Promise<Order[]> => {
-  return getExecutedOrders(account, chainID);
+  return getExecutedOrders(account, chainId);
 };
 
 export const getAllCancelledOrders = async (
   account: string,
-  chainID: number
+  chainId: number
 ): Promise<Order[]> => {
-  return getCancelledOrders(account, chainID);
+  return getCancelledOrders(account, chainId);
 };
 
-//#endregion Get All Orders
+// Special for L2
+export const getFeeAndSlippageAdjustedMinReturn = (
+  chainId: number,
+  minReturn: BigNumber
+): BigNumber => {
+  if (!isL2(chainId))
+    throw new Error("Use getFeeAndSlippageAdjustedMinReturn only on L2");
+  const fee = minReturn.mul(FEE_BPS).div(10000);
+  const maxSlippage = minReturn.mul(MAX_SLIPPAGE_BPS).div(10000);
+  return minReturn.sub(fee).sub(maxSlippage);
+};
