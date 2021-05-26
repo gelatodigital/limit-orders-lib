@@ -19,13 +19,15 @@ export interface WitnessAndSecret {
 
 export interface Order {
   id: number;
+  owner: string;
   inputToken: string;
   outputToken: string;
   inputAmount: string;
   minReturn: string;
-  bought: string;
   status: string;
-  cancelledTxHash: BytesLike;
-  executedTxHash: BytesLike;
+  createdTxHash: BytesLike;
   updatedAt: string;
+  bought?: string;
+  executedTxHash?: BytesLike;
+  cancelledTxHash?: BytesLike;
 }
