@@ -14,13 +14,12 @@ export const GET_ALL_ORDERS_BY_OWNER = gql`
       outputToken
       inputAmount
       minReturn
-      bought
       status
+      createdTxHash
+      updatedAt
+      bought
       cancelledTxHash
       executedTxHash
-      updatedAt
-      secret
-      witness
     }
   }
 `;
@@ -39,11 +38,9 @@ export const GET_ALL_OPEN_ORDERS_BY_OWNER = gql`
       outputToken
       inputAmount
       minReturn
-      bought
       status
+      createdTxHash
       updatedAt
-      secret
-      witness
     }
   }
 `;
@@ -62,13 +59,12 @@ export const GET_ALL_PAST_ORDERS_BY_OWNER = gql`
       outputToken
       inputAmount
       minReturn
-      bought
       status
+      createdTxHash
+      updatedAt
+      bought
       cancelledTxHash
       executedTxHash
-      updatedAt
-      secret
-      witness
     }
   }
 `;
@@ -87,12 +83,11 @@ export const GET_ALL_EXECUTED_ORDERS_BY_OWNER = gql`
       outputToken
       inputAmount
       minReturn
-      bought
       status
-      executedTxHash
+      createdTxHash
       updatedAt
-      secret
-      witness
+      bought
+      executedTxHash
     }
   }
 `;
@@ -112,10 +107,9 @@ export const GET_ALL_CANCELLED_ORDERS_BY_OWNER = gql`
       inputAmount
       minReturn
       status
-      cancelledTxHash
+      createdTxHash
       updatedAt
-      secret
-      witness
+      cancelledTxHash
     }
   }
 `;
