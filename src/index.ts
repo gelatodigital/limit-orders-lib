@@ -281,11 +281,24 @@ export const getAllCancelledOrders = async (
 // Special for L2
 export const getFeeAndSlippageAdjustedMinReturn = (
   chainId: number,
-  minReturn: BigNumber
+  minReturn: BigNumber,
+  extraSlippageBps?: number
 ): BigNumber => {
   if (!isL2(chainId))
     throw new Error("Use getFeeAndSlippageAdjustedMinReturn only on L2");
+
+  if (extraSlippageBps) {
+    if (extraSlippageBps < 0) throw new Error("extraSlippageBps must gte 0");
+    if (!Number.isInteger(extraSlippageBps))
+      throw new Error("extraSlippageBps must an Unsigned Integer");
+  }
+
   const fee = minReturn.mul(FEE_BPS).div(10000);
-  const maxSlippage = minReturn.mul(MAX_SLIPPAGE_BPS).div(10000);
+
+  const maxSlippageBps = extraSlippageBps
+    ? MAX_SLIPPAGE_BPS + extraSlippageBps
+    : MAX_SLIPPAGE_BPS;
+  const maxSlippage = minReturn.mul(maxSlippageBps).div(10000);
+
   return minReturn.sub(fee).sub(maxSlippage);
 };
