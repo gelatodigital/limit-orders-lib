@@ -17,6 +17,8 @@ export const GET_ALL_ORDERS_BY_OWNER = gql`
       status
       createdTxHash
       updatedAt
+      secret
+      witness
       bought
       cancelledTxHash
       executedTxHash
@@ -41,6 +43,8 @@ export const GET_ALL_OPEN_ORDERS_BY_OWNER = gql`
       status
       createdTxHash
       updatedAt
+      secret
+      witness
     }
   }
 `;
@@ -62,6 +66,8 @@ export const GET_ALL_PAST_ORDERS_BY_OWNER = gql`
       status
       createdTxHash
       updatedAt
+      secret
+      witness
       bought
       cancelledTxHash
       executedTxHash
@@ -86,6 +92,8 @@ export const GET_ALL_EXECUTED_ORDERS_BY_OWNER = gql`
       status
       createdTxHash
       updatedAt
+      secret
+      witness
       bought
       executedTxHash
     }
@@ -109,6 +117,8 @@ export const GET_ALL_CANCELLED_ORDERS_BY_OWNER = gql`
       status
       createdTxHash
       updatedAt
+      secret
+      witness
       cancelledTxHash
     }
   }

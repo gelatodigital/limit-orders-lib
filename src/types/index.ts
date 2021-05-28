@@ -27,6 +27,8 @@ export interface Order {
   status: string;
   createdTxHash: BytesLike;
   updatedAt: string;
+  witness: string;
+  secret: string;
   bought?: string;
   executedTxHash?: BytesLike;
   cancelledTxHash?: BytesLike;
