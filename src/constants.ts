@@ -9,6 +9,7 @@ export const isNetworkGasToken = (token: string): boolean => {
 };
 
 export const FEE_BPS = 2; // 0.02%
+export const LP_FEE_BPS = 20; // 0.2%
 export const MAX_SLIPPAGE_BPS = 20; // 0.2%
 
 export const FANTOM_GELATOPINECORE =
