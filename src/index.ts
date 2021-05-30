@@ -12,6 +12,7 @@ import {
 import {
   ETH_ADDRESS,
   FEE_BPS,
+  LP_FEE_BPS,
   MAX_SLIPPAGE_BPS,
   getLimitOrderModuleAddr,
   getNetworkName,
@@ -295,10 +296,12 @@ export const getFeeAndSlippageAdjustedMinReturn = (
 
   const fee = minReturn.mul(FEE_BPS).div(10000);
 
+  const lpFee = minReturn.mul(LP_FEE_BPS).div(10000);
+
   const maxSlippageBps = extraSlippageBps
     ? MAX_SLIPPAGE_BPS + extraSlippageBps
     : MAX_SLIPPAGE_BPS;
   const maxSlippage = minReturn.mul(maxSlippageBps).div(10000);
 
-  return minReturn.sub(fee).sub(maxSlippage);
+  return minReturn.sub(fee).sub(lpFee).sub(maxSlippage);
 };
