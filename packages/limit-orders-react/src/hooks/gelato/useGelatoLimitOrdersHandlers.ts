@@ -47,12 +47,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const { independentField, rateType } = useOrderState();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const handleLimitOrderSubmission = useCallback(async () => {
     if (!currencies[Field.INPUT]?.wrapped.address) {
@@ -96,7 +92,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       minReturn
     );
     return tx?.hash;
-  }, [gelatoLimitOrders, rawAmounts, currencies]);
+  }, [gelatoLimitOrders, rawAmounts, currencies, chainId]);
 
   const handleLimitOrderCancellation = useCallback(
     async (

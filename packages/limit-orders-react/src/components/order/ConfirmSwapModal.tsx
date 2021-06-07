@@ -1,6 +1,6 @@
 import { Currency, Percent, TradeType } from "@uniswap/sdk-core";
 import { Trade } from "@uniswap/v2-sdk";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback } from "react";
 import TransactionConfirmationModal, {
   ConfirmationModalContent,
   TransactionErrorContent,
@@ -8,29 +8,8 @@ import TransactionConfirmationModal, {
 import SwapModalFooter from "./SwapModalFooter";
 import SwapModalHeader from "./SwapModalHeader";
 
-/**
- * Returns true if the trade requires a confirmation of details before we can submit it
- * @param args either a pair of V2 trades or a pair of V3 trades
- */
-function tradeMeaningfullyDiffers(
-  ...args: [
-    Trade<Currency, Currency, TradeType>,
-    Trade<Currency, Currency, TradeType>
-  ]
-): boolean {
-  const [tradeA, tradeB] = args;
-  return (
-    tradeA.tradeType !== tradeB.tradeType ||
-    !tradeA.inputAmount.currency.equals(tradeB.inputAmount.currency) ||
-    !tradeA.inputAmount.equalTo(tradeB.inputAmount) ||
-    !tradeA.outputAmount.currency.equals(tradeB.outputAmount.currency) ||
-    !tradeA.outputAmount.equalTo(tradeB.outputAmount)
-  );
-}
-
 export default function ConfirmSwapModal({
   trade,
-  originalTrade,
   onAcceptChanges,
   allowedSlippage,
   onConfirm,
@@ -74,7 +53,7 @@ export default function ConfirmSwapModal({
         onAcceptChanges={onAcceptChanges}
       />
     ) : null;
-  }, [allowedSlippage, onAcceptChanges, recipient, showAcceptChanges, trade]);
+  }, [allowedSlippage, onAcceptChanges, recipient, trade]);
 
   const modalBottom = useCallback(() => {
     return trade ? (

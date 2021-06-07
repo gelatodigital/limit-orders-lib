@@ -7,7 +7,6 @@ import chunkArray from "../../utils/chunkArray";
 import { CancelledError, retry, RetryableError } from "../../utils/retry";
 import { useBlockNumber } from "../gapplication/hooks";
 import { AppDispatch, AppState } from "../index";
-import { Web3Provider } from "@ethersproject/providers";
 import {
   Call,
   errorFetchingMulticallResults,
@@ -132,10 +131,8 @@ export function outdatedListeningKeys(
 
 export default function Updater({
   chainId,
-  library,
 }: {
   chainId: number | undefined;
-  library: Web3Provider | undefined;
 }): null {
   const dispatch = useDispatch<AppDispatch>();
   const state = useSelector<AppState, AppState["gmulticall"]>(

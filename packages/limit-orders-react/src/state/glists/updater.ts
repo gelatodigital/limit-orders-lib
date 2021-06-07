@@ -36,7 +36,7 @@ export default function Updater({
         console.debug("interval list fetching error", error)
       )
     );
-  }, [fetchList, isWindowVisible, lists]);
+  }, [fetchList, isWindowVisible, lists, library]);
 
   // fetch all lists every 10 minutes, but only after we initialize library
   useInterval(fetchAllListsCallback, library ? 1000 * 60 * 10 : null);

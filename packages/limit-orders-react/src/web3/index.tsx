@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import type { FC, ReactNode } from "react";
 import { Web3Provider as Web3ProviderEthers } from "@ethersproject/providers";
 

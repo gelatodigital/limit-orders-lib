@@ -148,6 +148,7 @@ export default function SwapModalHeader({
           {"Price:"}
         </TYPE.body>
         <TradePrice
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           price={price!}
           showInverted={showInverted}
           setShowInverted={setShowInverted}
