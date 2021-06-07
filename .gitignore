@@ -31,4 +31,5 @@ dist
 
 # typechain
 typechain
-src/contracts/types
+packages/limit-orders-lib/src/contracts/types
+./src
