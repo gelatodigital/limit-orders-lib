@@ -1,5 +1,3 @@
-import { BigNumber } from "ethers";
-
 export const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
 export const MAX_SLIPPAGE_BPS = 20; // 0.2%
