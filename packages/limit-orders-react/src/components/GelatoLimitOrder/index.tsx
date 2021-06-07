@@ -4,7 +4,6 @@ import { Trade } from "@uniswap/v2-sdk";
 import { AdvancedSwapDetails } from "../order/AdvancedSwapDetails";
 import UnsupportedCurrencyFooter from "../order/UnsupportedCurrencyFooter";
 import { MouseoverTooltipContent } from "../Tooltip";
-import JSBI from "jsbi";
 import React, { useCallback, useMemo, useState, Fragment } from "react";
 import { ArrowDown, Info, Divide, X } from "react-feather";
 import { Text } from "rebass";
@@ -203,16 +202,7 @@ export default function GelatoLimitOrder() {
           txHash: undefined,
         });
       });
-  }, [
-    priceImpact,
-    handleLimitOrderSubmission,
-    tradeToConfirm,
-    showConfirm,
-    recipient,
-    account,
-    trade,
-    singleHopOnly,
-  ]);
+  }, [priceImpact, handleLimitOrderSubmission, tradeToConfirm, showConfirm]);
 
   // errors
   const [showInverted, setShowInverted] = useState<boolean>(false);

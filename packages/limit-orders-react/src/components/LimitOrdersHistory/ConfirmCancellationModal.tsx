@@ -1,6 +1,4 @@
-import { Currency, Percent, TradeType } from "@uniswap/sdk-core";
-import { Trade } from "@uniswap/v2-sdk";
-import React, { Fragment, useCallback, useMemo } from "react";
+import React, { Fragment, useCallback } from "react";
 import { Text } from "rebass";
 import { ButtonError } from "../Button";
 import { SwapCallbackError } from "../order/styleds";

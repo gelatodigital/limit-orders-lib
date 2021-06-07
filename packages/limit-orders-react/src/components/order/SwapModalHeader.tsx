@@ -1,9 +1,9 @@
 import { Currency, Percent, TradeType } from "@uniswap/sdk-core";
 import { Trade } from "@uniswap/v2-sdk";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { ArrowDown, AlertTriangle } from "react-feather";
 import { Text } from "rebass";
-import styled, { ThemeContext } from "styled-components";
+import styled from "styled-components";
 import { useUSDCValue } from "../../hooks/useUSDCPrice";
 import { TYPE } from "../../theme";
 import { ButtonPrimary } from "../Button";
@@ -59,13 +59,13 @@ export default function SwapModalHeader({
     derivedOrderInfo: { price, parsedAmounts },
   } = useGelatoLimitOrders();
 
-  if (!parsedAmounts[Field.INPUT] || !parsedAmounts[Field.OUTPUT]) return null;
-
-  const inputAmount = parsedAmounts[Field.INPUT]!;
-  const outputAmount = parsedAmounts[Field.OUTPUT]!;
+  const inputAmount = parsedAmounts[Field.INPUT];
+  const outputAmount = parsedAmounts[Field.OUTPUT];
 
   const fiatValueInput = useUSDCValue(inputAmount);
   const fiatValueOutput = useUSDCValue(outputAmount);
+
+  if (!inputAmount || !outputAmount) return null;
 
   return (
     <AutoColumn gap={"4px"} style={{ marginTop: "1rem" }}>

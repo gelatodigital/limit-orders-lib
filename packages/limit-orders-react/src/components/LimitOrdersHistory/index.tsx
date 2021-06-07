@@ -1,9 +1,6 @@
 import React, { useCallback, useRef, useState } from "react";
 import styled, { DefaultTheme } from "styled-components/macro";
-import { Button } from "rebass/styled-components";
 import { darken } from "polished";
-import { Link, NavLink } from "react-router-dom";
-import { useWeb3 } from "../../web3";
 import { TYPE } from "../../theme";
 import { AutoColumn } from "../Column";
 import { Wrapper } from "../order/styleds";

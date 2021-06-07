@@ -36,7 +36,7 @@ export const Web3Provider: FC<Web3ProviderProps> = ({
   library,
   chainId,
   account,
-}) => {
+}: Web3ProviderProps) => {
   const [state, setState] = useState<Web3State>(initialWeb3State);
 
   useEffect(() => {
