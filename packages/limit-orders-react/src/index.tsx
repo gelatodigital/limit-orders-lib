@@ -15,6 +15,7 @@ import { Provider } from "react-redux";
 import useGelatoLimitOrdersHistory from "./hooks/gelato/useGelatoLimitOrdersHistory";
 import GelatoLimitOrder from "./components/GelatoLimitOrder";
 import { Web3Provider } from "./web3";
+import { Store } from "@reduxjs/toolkit";
 export * from "@gelatonetwork/limit-orders-lib";
 
 export function GelatoProvider({
@@ -23,11 +24,13 @@ export function GelatoProvider({
   children,
   theme,
   account,
+  store,
 }: {
   chainId: number | undefined;
   library: any | undefined;
   account: string | undefined;
   theme: DefaultTheme;
+  store: Store;
   children?: React.ReactNode;
 }) {
   return (
