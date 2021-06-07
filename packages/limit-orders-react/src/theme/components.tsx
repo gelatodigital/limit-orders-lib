@@ -228,7 +228,7 @@ export function ExternalLink({
         event.preventDefault();
       }
     },
-    [href, target]
+    [target]
   );
   return (
     <StyledLink
@@ -257,7 +257,7 @@ export function ExternalLinkIcon({
         event.preventDefault();
       }
     },
-    [href, target]
+    [target]
   );
   return (
     <LinkIconWrapper

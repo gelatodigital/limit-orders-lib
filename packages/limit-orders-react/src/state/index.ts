@@ -4,7 +4,7 @@ import gtransactions from "./gtransactions/reducer";
 import gorder from "./gorder/reducer";
 import glists from "./glists/reducer";
 import gmulticall from "./gmulticall/reducer";
-import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { load, save } from "redux-localstorage-simple";
 
 const PERSISTED_KEYS: string[] = ["guser", "gtransactions", "glists"];

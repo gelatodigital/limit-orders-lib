@@ -282,10 +282,13 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     [Field.OUTPUT]: relevantTokenBalances[1],
   };
 
-  const currencies: { [field in Field]?: Currency } = {
-    [Field.INPUT]: inputCurrency ?? undefined,
-    [Field.OUTPUT]: outputCurrency ?? undefined,
-  };
+  const currencies: { [field in Field]?: Currency } = useMemo(
+    () => ({
+      [Field.INPUT]: inputCurrency ?? undefined,
+      [Field.OUTPUT]: outputCurrency ?? undefined,
+    }),
+    [inputCurrency, outputCurrency]
+  );
 
   let inputError: string | undefined;
   if (!account) {
@@ -478,7 +481,9 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
   const price =
     parsedAmounts[Field.INPUT] && parsedAmounts[Field.OUTPUT]
       ? new Price({
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           baseAmount: parsedAmounts[Field.OUTPUT]!,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           quoteAmount: parsedAmounts[Field.INPUT]!,
         })
       : undefined;

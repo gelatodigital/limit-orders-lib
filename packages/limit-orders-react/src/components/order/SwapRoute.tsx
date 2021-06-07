@@ -1,19 +1,11 @@
 import { Currency, TradeType } from "@uniswap/sdk-core";
 import { Trade } from "@uniswap/v2-sdk";
-import React, { Fragment, memo, useContext } from "react";
+import React, { Fragment, memo } from "react";
 import { ChevronRight } from "react-feather";
 import { Flex } from "rebass";
-import { ThemeContext } from "styled-components";
 import useTheme from "../../hooks/useTheme";
 import { TYPE } from "../../theme";
 import { unwrappedToken } from "../../utils/unwrappedToken";
-
-// function LabeledArrow({}: { fee: FeeAmount }) {
-//   const theme = useContext(ThemeContext)
-
-//   // todo: render the fee in the label
-//   return <ChevronRight size={14} color={theme.text2} />
-// }
 
 export default memo(function SwapRoute({
   trade,

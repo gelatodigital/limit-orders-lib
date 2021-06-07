@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { GelatoLimitOrders, Order } from "@gelatonetwork/limit-orders-lib";
+import { GelatoLimitOrders } from "@gelatonetwork/limit-orders-lib";
 import useGasPrice from "../useGasPrice";
 import useGelatoLimitOrdersHandlers, {
   GelatoLimitOrdersHandlers,

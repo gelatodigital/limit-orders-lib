@@ -8,7 +8,7 @@ import {
 } from "@uniswap/sdk-core";
 import { Trade } from "@uniswap/v2-sdk";
 import JSBI from "jsbi";
-import React, { useContext, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useGelatoLimitOrders } from "../../hooks/gelato";
 import useTheme from "../../hooks/useTheme";
 import { TYPE } from "../../theme";
@@ -18,18 +18,13 @@ import { useWeb3 } from "../../web3";
 import { AutoColumn } from "../Column";
 import { RowBetween, RowFixed } from "../Row";
 import { MouseoverTooltip } from "../Tooltip";
-import FormattedPriceImpact from "./FormattedPriceImpact";
-import SwapRoute from "./SwapRoute";
 
 export interface AdvancedSwapDetailsProps {
   trade?: Trade<Currency, Currency, TradeType>;
   allowedSlippage: Percent;
 }
 
-export function AdvancedSwapDetails({
-  trade,
-  allowedSlippage,
-}: AdvancedSwapDetailsProps) {
+export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
   const theme = useTheme();
   const { chainId } = useWeb3();
   const {
