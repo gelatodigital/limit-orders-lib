@@ -24,13 +24,67 @@ export function GelatoProvider({
   children,
   theme,
   account,
-  store,
+  storeOut,
 }: {
   chainId: number | undefined;
   library: any | undefined;
   account: string | undefined;
   theme: DefaultTheme;
-  store: Store;
+  storeOut: Store;
+  children?: React.ReactNode;
+}) {
+  return (
+    <Provider store={storeOut}>
+      <ThemeProvider theme={theme}>
+        <Web3Provider chainId={chainId} library={library} account={account}>
+          <ListsUpdater library={library} />
+          <ApplicationUpdater chainId={chainId} library={library} />
+          <TransactionUpdater chainId={chainId} library={library} />
+          <MulticallUpdater chainId={chainId} />
+          {children}
+        </Web3Provider>
+      </ThemeProvider>
+    </Provider>
+  );
+}
+
+export function GelatoProviderStore({
+  chainId,
+  library,
+  children,
+  theme,
+  account,
+}: {
+  chainId: number | undefined;
+  library: any | undefined;
+  account: string | undefined;
+  theme: DefaultTheme;
+  children?: React.ReactNode;
+}) {
+  return (
+    <ThemeProvider theme={theme}>
+      <Web3Provider chainId={chainId} library={library} account={account}>
+        <ListsUpdater library={library} />
+        <ApplicationUpdater chainId={chainId} library={library} />
+        <TransactionUpdater chainId={chainId} library={library} />
+        <MulticallUpdater chainId={chainId} />
+        {children}
+      </Web3Provider>
+    </ThemeProvider>
+  );
+}
+
+export function GelatoProviderInternalStore({
+  chainId,
+  library,
+  children,
+  theme,
+  account,
+}: {
+  chainId: number | undefined;
+  library: any | undefined;
+  account: string | undefined;
+  theme: DefaultTheme;
   children?: React.ReactNode;
 }) {
   return (
@@ -47,6 +101,8 @@ export function GelatoProvider({
     </Provider>
   );
 }
+
+export const getReact = () => React;
 
 export {
   useGelatoLimitOrders,
