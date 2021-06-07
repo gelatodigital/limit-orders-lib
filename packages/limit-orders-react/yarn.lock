@@ -1751,8 +1751,7 @@
     "@ethersproject/properties" "^5.3.0"
     "@ethersproject/strings" "^5.3.0"
 
-"@gelatonetwork/limit-orders-lib @^1.0.0-0":
-  name "@gelatonetwork/limit-orders-lib"
+"@gelatonetwork/limit-orders-lib@^1.0.0-0":
   version "1.0.0-0"
   resolved "https://registry.yarnpkg.com/@gelatonetwork/limit-orders-lib/-/limit-orders-lib-1.0.0-0.tgz#9bcf0a5b9c8de826b5bfad0d5c1cd49a39368021"
   integrity sha512-jp3LMB9mvir9PuX1H/Xf8jsPok8rANO+MYSqbL0PrGPOMw7vI18d7LT5gBr6lOMh0KGCc3YsBUlN+uuvRasHFQ==
