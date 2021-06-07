@@ -1,0 +1,72 @@
+{
+  "name": "@gelatonetwork/limit-orders-lib",
+  "version": "0.6.5",
+  "description": "Library for creating limit orders via Gelato",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "yarn generate-contracts-typings && tsc --project tsconfig.prod.json && yarn copy-contracts-types",
+    "copy-contracts-types": "cp ./src/contracts/types/*.d.ts ./dist/contracts/types",
+    "format": "prettier --write .",
+    "generate-contracts-typings": "typechain --target=ethers-v5 --out-dir src/contracts/types './src/**/abis/*.json'",
+    "lint": "eslint --cache .",
+    "prepare": "yarn build && yarn format && yarn lint",
+    "test": "npx hardhat test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gelatodigital/limit-orders-lib.git"
+  },
+  "keywords": [
+    "ethereum",
+    "uniswap",
+    "limit orders",
+    "solidity",
+    "web3",
+    "smart contracts",
+    "gelato"
+  ],
+  "author": "Gelato Network",
+  "license": "GPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/gelatodigital/limit-orders-lib/issues"
+  },
+  "homepage": "https://github.com/gelatodigital/limit-orders-lib#readme",
+  "dependencies": {
+    "ethers": "5.2.0",
+    "graphql": "15.5.0",
+    "graphql-request": "3.4.0"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "2.0.2",
+    "@nomiclabs/hardhat-waffle": "2.0.1",
+    "@tsconfig/recommended": "1.0.1",
+    "@typechain/ethers-v5": "7.0.0",
+    "@types/chai": "4.2.18",
+    "@types/mocha": "8.2.2",
+    "@types/node": "15.6.1",
+    "@typescript-eslint/eslint-plugin": "4.25.0",
+    "@typescript-eslint/parser": "4.25.0",
+    "chai": "4.3.4",
+    "dotenv": "10.0.0",
+    "eslint": "7.27.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-prettier": "3.4.0",
+    "ethereum-waffle": "3.3.0",
+    "hardhat": "2.3.0",
+    "husky": "6.0.0",
+    "lint-staged": "11.0.0",
+    "prettier": "2.3.0",
+    "ts-generator": "0.1.1",
+    "ts-node": "10.0.0",
+    "typechain": "5.0.0",
+    "typescript": "4.3.2"
+  },
+  "lint-staged": {
+    "*.{js,json,md,ts,yaml,yml}": "prettier --write",
+    "*.{ts,js}": "eslint -c .eslintrc.json"
+  }
+}
