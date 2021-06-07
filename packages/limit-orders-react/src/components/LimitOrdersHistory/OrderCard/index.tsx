@@ -208,49 +208,49 @@ export default function OrderCard({ order }: { order: Order }) {
     });
   }, [attemptingTxn, cancellationErrorMessage, txHash]);
 
-  const handleCancellation = useCallback(
-    (
-      inputToken: string,
-      outputToken: string,
-      minReturn: string,
-      witness: string
-    ) => {
-      if (!handleLimitOrderCancellation) {
-        return;
-      }
+  const handleCancellation = useCallback(() => {
+    if (!handleLimitOrderCancellation) {
+      return;
+    }
 
-      setCancellationState({
-        attemptingTxn: true,
-        showConfirm,
-        cancellationErrorMessage: undefined,
-        txHash: undefined,
-      });
+    setCancellationState({
+      attemptingTxn: true,
+      showConfirm,
+      cancellationErrorMessage: undefined,
+      txHash: undefined,
+    });
 
-      handleLimitOrderCancellation(
-        order.inputToken,
-        order.outputToken,
-        order.minReturn,
-        order.witness
-      )
-        .then((hash) => {
-          setCancellationState({
-            attemptingTxn: false,
-            showConfirm,
-            cancellationErrorMessage: undefined,
-            txHash: hash,
-          });
-        })
-        .catch((error) => {
-          setCancellationState({
-            attemptingTxn: false,
-            showConfirm,
-            cancellationErrorMessage: error.message,
-            txHash: undefined,
-          });
+    handleLimitOrderCancellation(
+      order.inputToken,
+      order.outputToken,
+      order.minReturn,
+      order.witness
+    )
+      .then((hash) => {
+        setCancellationState({
+          attemptingTxn: false,
+          showConfirm,
+          cancellationErrorMessage: undefined,
+          txHash: hash,
         });
-    },
-    [setCancellationState, handleLimitOrderCancellation, showConfirm]
-  );
+      })
+      .catch((error) => {
+        setCancellationState({
+          attemptingTxn: false,
+          showConfirm,
+          cancellationErrorMessage: error.message,
+          txHash: undefined,
+        });
+      });
+  }, [
+    setCancellationState,
+    handleLimitOrderCancellation,
+    showConfirm,
+    order.inputToken,
+    order.outputToken,
+    order.minReturn,
+    order.witness,
+  ]);
 
   return (
     <OrderPanel>
@@ -258,14 +258,7 @@ export default function OrderCard({ order }: { order: Order }) {
         isOpen={showConfirm}
         attemptingTxn={attemptingTxn}
         txHash={txHash}
-        onConfirm={() =>
-          handleCancellation(
-            order.inputToken,
-            order.outputToken,
-            order.minReturn,
-            order.witness
-          )
-        }
+        onConfirm={handleCancellation}
         swapErrorMessage={cancellationErrorMessage}
         onDismiss={handleConfirmDismiss}
       />

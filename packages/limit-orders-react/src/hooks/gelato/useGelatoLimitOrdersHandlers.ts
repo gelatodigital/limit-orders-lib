@@ -47,8 +47,12 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const { independentField, rateType } = useOrderState();
 
-  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
-    useOrderActionHandlers();
+  const {
+    onSwitchTokens,
+    onCurrencySelection,
+    onUserInput,
+    onChangeRateType,
+  } = useOrderActionHandlers();
 
   const handleLimitOrderSubmission = useCallback(async () => {
     if (!currencies[Field.INPUT]?.wrapped.address) {
