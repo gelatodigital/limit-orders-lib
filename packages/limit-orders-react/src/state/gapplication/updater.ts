@@ -5,16 +5,12 @@ import useDebounce from "../../hooks/useDebounce";
 import useIsWindowVisible from "../../hooks/useIsWindowVisible";
 import { updateBlockNumber } from "./actions";
 import { useDispatch } from "react-redux";
-import { Web3Provider } from "@ethersproject/providers";
+import { useWeb3 } from "../../web3";
 
-export default function Updater({
-  chainId,
-  library,
-}: {
-  chainId: number | undefined;
-  library: Web3Provider | undefined;
-}): null {
+export default function Updater(): null {
   const dispatch = useDispatch();
+
+  const { chainId, library } = useWeb3();
 
   const windowVisible = useIsWindowVisible();
 

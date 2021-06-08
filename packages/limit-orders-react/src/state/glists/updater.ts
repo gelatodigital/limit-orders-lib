@@ -14,13 +14,13 @@ import { AppDispatch } from "../index";
 import { acceptListUpdate } from "./actions";
 import { useActiveListUrls } from "./hooks";
 import { UNSUPPORTED_LIST_URLS } from "../../constants/lists";
+import { useWeb3 } from "../../web3";
 
-export default function Updater({
-  library,
-}: {
-  library: Web3Provider | undefined;
-}): null {
+export default function Updater(): null {
   const dispatch = useDispatch<AppDispatch>();
+
+  const { library } = useWeb3();
+
   const isWindowVisible = useIsWindowVisible();
 
   // get all loaded lists, and the active urls

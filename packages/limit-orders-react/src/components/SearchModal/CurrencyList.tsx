@@ -11,7 +11,7 @@ import styled from "styled-components/macro";
 import { useWeb3 } from "../../web3";
 import { useCombinedActiveList } from "../../state/glists/hooks";
 import { WrappedTokenInfo } from "../../state/glists/wrappedTokenInfo";
-import { useCurrencyBalance } from "../../state/gwallet/hooks";
+import { useCurrencyBalance } from "../../hooks/Balances";
 import { TYPE } from "../../theme";
 import { useIsUserAddedToken } from "../../hooks/Tokens";
 import Column from "../Column";

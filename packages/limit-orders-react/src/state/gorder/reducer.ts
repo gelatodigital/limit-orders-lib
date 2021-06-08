@@ -65,7 +65,7 @@ export default createReducer<OrderState>(initialState, (builder) =>
           [Field.OUTPUT]: {
             currencyId: outputCurrencyId,
           },
-          [Field.DESIRED_RATE]: {
+          [Field.PRICE]: {
             currencyId: outputCurrencyId,
           },
           independentField: field,
@@ -76,7 +76,7 @@ export default createReducer<OrderState>(initialState, (builder) =>
     )
     .addCase(selectCurrency, (state, { payload: { currencyId, field } }) => {
       const otherField = field === Field.INPUT ? Field.OUTPUT : Field.INPUT;
-      if (field === Field.DESIRED_RATE)
+      if (field === Field.PRICE)
         return {
           ...state,
         };

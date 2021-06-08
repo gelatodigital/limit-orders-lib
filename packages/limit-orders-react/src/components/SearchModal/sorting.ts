@@ -1,6 +1,6 @@
 import { Token, CurrencyAmount, Currency } from "@uniswap/sdk-core";
 import { useMemo } from "react";
-import { useAllTokenBalances } from "../../state/gwallet/hooks";
+import { useAllTokenBalances } from "../../hooks/Balances";
 
 // compare two token amounts with highest one coming first
 function balanceComparator(

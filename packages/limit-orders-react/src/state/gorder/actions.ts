@@ -3,7 +3,7 @@ import { createAction } from "@reduxjs/toolkit";
 export enum Field {
   INPUT = "INPUT",
   OUTPUT = "OUTPUT",
-  DESIRED_RATE = "DESIRED_RATE",
+  PRICE = "PRICE",
 }
 
 export enum Rate {

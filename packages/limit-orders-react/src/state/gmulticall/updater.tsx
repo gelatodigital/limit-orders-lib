@@ -5,6 +5,7 @@ import { useMulticall2Contract } from "../../hooks/useContract";
 import useDebounce from "../../hooks/useDebounce";
 import chunkArray from "../../utils/chunkArray";
 import { CancelledError, retry, RetryableError } from "../../utils/retry";
+import { useWeb3 } from "../../web3";
 import { useBlockNumber } from "../gapplication/hooks";
 import { AppDispatch, AppState } from "../index";
 import {
@@ -129,11 +130,8 @@ export function outdatedListeningKeys(
   });
 }
 
-export default function Updater({
-  chainId,
-}: {
-  chainId: number | undefined;
-}): null {
+export default function Updater(): null {
+  const { chainId } = useWeb3();
   const dispatch = useDispatch<AppDispatch>();
   const state = useSelector<AppState, AppState["gmulticall"]>(
     (state) => state.gmulticall
@@ -189,7 +187,7 @@ export default function Updater({
     cancellations.current = {
       blockNumber: latestBlockNumber,
       cancellations: chunkedCalls.map((chunk, index) => {
-        const blockDiff = chainId === 1 ? 1 : 10;
+        const blockDiff = chainId === 1 ? 3 : 50;
         const { cancel, promise } = retry(
           () =>
             fetchChunk(

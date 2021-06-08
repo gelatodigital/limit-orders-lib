@@ -3,7 +3,7 @@ import { Currency, CurrencyAmount, Percent, Token } from "@uniswap/sdk-core";
 import React, { useState, useCallback, Fragment } from "react";
 import styled from "styled-components/macro";
 import { darken } from "polished";
-import { useCurrencyBalance } from "../../state/gwallet/hooks";
+import { useCurrencyBalance } from "../../hooks/Balances";
 import CurrencySearchModal from "../SearchModal/CurrencySearchModal";
 import CurrencyLogo from "../CurrencyLogo";
 import DoubleCurrencyLogo from "../DoubleLogo";
