@@ -449,7 +449,7 @@ export default function GelatoLimitOrder() {
                   }}
                   id="limit-order-button"
                   disabled={!isValid}
-                  error={isValid}
+                  error={!isValid}
                 >
                   <Text fontSize={20} fontWeight={500}>
                     {inputError ? inputError : `Place order`}
