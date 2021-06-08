@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { utils } from "@gelatonetwork/limit-orders-lib";
 import {
   Percent,
   Currency,
   TradeType,
   CurrencyAmount,
-  Fraction,
 } from "@uniswap/sdk-core";
 import { Trade } from "@uniswap/v2-sdk";
 import JSBI from "jsbi";
@@ -29,12 +29,21 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
   const { chainId } = useWeb3();
   const {
     library,
-    derivedOrderInfo: { parsedAmounts, rawAmounts },
+    derivedOrderInfo: { parsedAmounts },
   } = useGelatoLimitOrders();
 
-  const inputAmount = parsedAmounts[Field.INPUT]!;
-  const outputAmount = parsedAmounts[Field.OUTPUT]!;
-  const rawOutputAmount = rawAmounts[Field.OUTPUT]!;
+  // const inputAmount = parsedAmounts[Field.INPUT]!;
+  const outputAmount = parsedAmounts.output;
+  const rawOutputAmount = outputAmount
+    ? outputAmount
+        .multiply(
+          JSBI.exponentiate(
+            JSBI.BigInt(10),
+            JSBI.BigInt(outputAmount.currency.decimals)
+          )
+        )
+        .toExact()
+    : "0"!;
 
   const {
     realizedLPFee,
@@ -44,13 +53,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
     lpFeePercentage,
     gelatoFeePercentage,
   } = useMemo(() => {
-    if (
-      !parsedAmounts[Field.OUTPUT] ||
-      !parsedAmounts[Field.INPUT] ||
-      !library ||
-      !trade ||
-      !chainId
-    )
+    if (!outputAmount || !library || !trade || !chainId)
       return {
         realizedGelatoFee: undefined,
         realizedLPFee: undefined,
@@ -72,9 +75,9 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
 
     const {
       minReturn,
-      slippage,
+
       slippageBPS,
-      lpFee,
+
       lpFeeBPS,
       gelatoFee,
       gelatoFeeBPS,
@@ -83,9 +86,9 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
     const realizedLpFeePercent = computeRealizedLPFeePercent(trade, lpFeeBPS);
     const realizedLPFee = outputAmount.multiply(realizedLpFeePercent);
 
-    const realizedGelatoFee = outputAmount.multiply(
-      new Fraction(JSBI.BigInt(gelatoFeeBPS), JSBI.BigInt(10000))
-    );
+    // const realizedGelatoFee = outputAmount.multiply(
+    //   new Fraction(JSBI.BigInt(gelatoFeeBPS), JSBI.BigInt(10000))
+    // );
     const allowedSlippageGelato = Number(slippageBPS) / 100;
     const gelatoFeePercentage = Number(gelatoFeeBPS) / 100;
     const lpFeePercentage = Number(lpFeeBPS) / 100;
@@ -113,7 +116,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
       gelatoFeePercentage,
       lpFeePercentage,
     };
-  }, [trade, inputAmount, outputAmount]);
+  }, [trade, outputAmount, chainId, library, parsedAmounts, rawOutputAmount]);
 
   return !trade ? null : (
     <AutoColumn gap="8px">
@@ -147,7 +150,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
         <TYPE.black textAlign="right" fontSize={12} color={theme.text1}>
           {realizedGelatoFee
             ? `${realizedGelatoFee.toSignificant(4)} ${
-                outputAmount.currency.symbol
+                outputAmount ? outputAmount.currency.symbol : "-"
               }`
             : "-"}
         </TYPE.black>
@@ -187,7 +190,9 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
         </RowFixed>
         <TYPE.black textAlign="right" fontSize={12} color={theme.text1}>
           {minReturn
-            ? `${minReturn.toSignificant(4)} ${outputAmount.currency.symbol}`
+            ? `${minReturn.toSignificant(4)} ${
+                outputAmount ? outputAmount.currency.symbol : "-"
+              }`
             : "-"}
         </TYPE.black>
       </RowBetween>

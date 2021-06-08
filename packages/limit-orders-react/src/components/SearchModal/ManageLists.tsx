@@ -332,7 +332,7 @@ export function ManageLists({
     if (listUrlInput === "") {
       setAddError(undefined);
     }
-  }, [fetchList, listUrlInput, validUrl]);
+  }, [fetchList, listUrlInput, validUrl, library]);
 
   // check if list is already imported
   const isImported = Object.keys(lists).includes(listUrlInput);

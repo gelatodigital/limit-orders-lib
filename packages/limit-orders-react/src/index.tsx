@@ -1,5 +1,5 @@
 import React from "react";
-import store, { gelatoReducers } from "./state";
+import { gelatoReducers } from "./state";
 import ApplicationUpdater from "./state/gapplication/updater";
 import ListsUpdater from "./state/glists/updater";
 import MulticallUpdater from "./state/gmulticall/updater";

@@ -69,7 +69,7 @@ export function ImportList({
         setAddError(error.message);
         dispatch(removeList(listURL));
       });
-  }, [adding, dispatch, fetchList, listURL, setModalView]);
+  }, [adding, dispatch, fetchList, listURL, setModalView, library]);
 
   return (
     <Wrapper>

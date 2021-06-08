@@ -1,4 +1,4 @@
-import { Currency, Ether, Token } from "@uniswap/sdk-core";
+import { Currency, Token } from "@uniswap/sdk-core";
 import React, {
   KeyboardEvent,
   RefObject,

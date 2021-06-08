@@ -1,10 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Currency, CurrencyAmount, TradeType } from "@uniswap/sdk-core";
+import {
+  Currency,
+  CurrencyAmount,
+  Percent,
+  TradeType,
+} from "@uniswap/sdk-core";
 import { Trade } from "@uniswap/v2-sdk";
 import { AdvancedSwapDetails } from "../order/AdvancedSwapDetails";
 import UnsupportedCurrencyFooter from "../order/UnsupportedCurrencyFooter";
 import { MouseoverTooltipContent } from "../Tooltip";
-import React, { useCallback, useMemo, useState, Fragment } from "react";
+import React, { useCallback, useState, Fragment } from "react";
 import { ArrowDown, Info, Divide, X } from "react-feather";
 import { Text } from "rebass";
 import styled from "styled-components";
@@ -31,13 +36,12 @@ import { Field } from "../../state/gorder/actions";
 import { tryParseAmount } from "../../state/gorder/hooks";
 import { computeFiatValuePriceImpact } from "../../utils/computeFiatValuePriceImpact";
 import { maxAmountSpend } from "../../utils/maxAmountSpend";
-import { warningSeverity } from "../../utils/prices";
 import AppBody from "./AppBody";
 import { TYPE } from "../../theme";
 import { useWeb3 } from "../../web3";
 import useTheme from "../../hooks/useTheme";
-import { useSelector } from "react-redux";
 import LimitOrdersHistory from "../LimitOrdersHistory";
+import useGasOverhead from "../../hooks/useGasOverhead";
 
 const StyledInfo = styled(Info)`
   opacity: 0.4;
@@ -70,23 +74,36 @@ export default function GelatoLimitOrder() {
     },
     derivedOrderInfo: {
       parsedAmounts,
-      formattedAmounts,
       currencies,
       currencyBalances,
       trade,
       inputError,
-      allowedSlippage,
-      realExecutionRate,
+      price,
+      inputAmount,
     },
-    gasPrice,
-    orderState: { independentField, rateType },
+    orderState: { independentField, rateType, typedValue },
   } = useGelatoLimitOrders();
 
-  const fiatValueInput = useUSDCValue(parsedAmounts[Field.INPUT]);
-  const fiatValueOutput = useUSDCValue(parsedAmounts[Field.OUTPUT]);
+  const formattedAmounts = {
+    input:
+      independentField === Field.INPUT
+        ? typedValue
+        : inputAmount?.toSignificant(6) ?? "",
+    output:
+      independentField === Field.OUTPUT
+        ? typedValue
+        : parsedAmounts.output?.toSignificant(6) ?? "",
+    price:
+      independentField === Field.PRICE
+        ? typedValue
+        : price?.toSignificant(6) ?? "",
+  };
+
+  const fiatValueInput = useUSDCValue(parsedAmounts.input);
+  const fiatValueOutput = useUSDCValue(parsedAmounts.output);
   const desiredRateInCurrencyAmount = tryParseAmount(
     trade?.outputAmount.toSignificant(6),
-    currencies[Field.OUTPUT]
+    currencies.output
   );
 
   const fiatValueDesiredRate = useUSDCValue(desiredRateInCurrencyAmount);
@@ -135,22 +152,23 @@ export default function GelatoLimitOrder() {
     txHash: undefined,
   });
 
+  const allowedSlippage = new Percent(50, 10_000);
   const userHasSpecifiedInputOutput = Boolean(
     (independentField === Field.INPUT || independentField === Field.OUTPUT) &&
-      currencies[Field.INPUT] &&
-      currencies[Field.OUTPUT]
+      currencies.input &&
+      currencies.output
     // &&
     // parsedAmounts[independentField]?.greaterThan(JSBI.BigInt(0))
   );
   const routeNotFound = !trade?.route;
-  const isLoadingRoute = parsedAmounts[Field.INPUT] && !trade; //V3TradeState.LOADING === v3TradeState
+  const isLoadingRoute = parsedAmounts.input && !trade; //V3TradeState.LOADING === v3TradeState
 
   const maxInputAmount: CurrencyAmount<Currency> | undefined = maxAmountSpend(
-    currencyBalances[Field.INPUT]
+    currencyBalances.input
   );
   const showMaxButton = Boolean(
     maxInputAmount?.greaterThan(0) &&
-      !parsedAmounts[Field.INPUT]?.equalTo(maxInputAmount)
+      !parsedAmounts.input?.equalTo(maxInputAmount)
   );
 
   const handleSwap = useCallback(() => {
@@ -194,18 +212,6 @@ export default function GelatoLimitOrder() {
   // errors
   const [showInverted, setShowInverted] = useState<boolean>(false);
 
-  // warnings on the greater of fiat value price impact and execution price impact
-  const priceImpactSeverity = useMemo(() => {
-    const executionPriceImpact = trade?.priceImpact;
-    return warningSeverity(
-      executionPriceImpact && priceImpact
-        ? executionPriceImpact.greaterThan(priceImpact)
-          ? executionPriceImpact
-          : priceImpact
-        : executionPriceImpact ?? priceImpact
-    );
-  }, [priceImpact, trade]);
-
   const handleConfirmDismiss = useCallback(() => {
     setSwapState({
       showConfirm: false,
@@ -248,18 +254,18 @@ export default function GelatoLimitOrder() {
   );
 
   const swapIsUnsupported = useIsSwapUnsupported(
-    currencies?.INPUT,
-    currencies?.OUTPUT
+    currencies?.input,
+    currencies?.output
+  );
+
+  const { gasPrice, realExecutionRate } = useGasOverhead(
+    parsedAmounts.input,
+    parsedAmounts.output,
+    rateType
   );
 
   return (
     <Fragment>
-      {/* <TokenWarningModal
-        isOpen={importTokensNotInDefault.length > 0 && !dismissTokenWarning}
-        tokens={importTokensNotInDefault}
-        onConfirm={handleConfirmTokenWarning}
-        onDismiss={handleDismissTokenWarning}
-      /> */}
       <AppBody>
         <SwapHeader />
         <Wrapper id="limit-order-page">
@@ -283,14 +289,14 @@ export default function GelatoLimitOrder() {
                 label={
                   independentField === Field.OUTPUT ? "From (at most)" : "From"
                 }
-                value={formattedAmounts[Field.INPUT]}
+                value={formattedAmounts.input}
                 showMaxButton={showMaxButton}
-                currency={currencies[Field.INPUT]}
+                currency={currencies.input}
                 onUserInput={handleTypeInput}
                 onMax={handleMaxInput}
                 fiatValue={fiatValueInput ?? undefined}
                 onCurrencySelect={handleInputSelect}
-                otherCurrency={currencies[Field.OUTPUT]}
+                otherCurrency={currencies.output}
                 showCommonBases={true}
                 id="limit-order-currency-input"
               />
@@ -300,7 +306,7 @@ export default function GelatoLimitOrder() {
                     size="16"
                     onClick={handleRateType}
                     color={
-                      currencies[Field.INPUT] && currencies[Field.OUTPUT]
+                      currencies.input && currencies.output
                         ? theme.text1
                         : theme.text3
                     }
@@ -310,7 +316,7 @@ export default function GelatoLimitOrder() {
                     size="16"
                     onClick={handleRateType}
                     color={
-                      currencies[Field.INPUT] && currencies[Field.OUTPUT]
+                      currencies.input && currencies.output
                         ? theme.text1
                         : theme.text3
                     }
@@ -318,22 +324,22 @@ export default function GelatoLimitOrder() {
                 )}
               </ArrowWrapper>
               <CurrencyInputPanel
-                value={formattedAmounts[Field.PRICE]}
+                value={formattedAmounts.price}
                 currentMarketRate={currentMarketRate}
                 showMaxButton={showMaxButton}
-                currency={currencies[Field.INPUT]}
+                currency={currencies.input}
                 onUserInput={handleTypeDesiredRate}
                 fiatValue={fiatValueDesiredRate ?? undefined}
                 onCurrencySelect={handleInputSelect}
-                otherCurrency={currencies[Field.OUTPUT]}
+                otherCurrency={currencies.output}
                 showCommonBases={true}
                 id="limit-order-currency-rate"
                 showCurrencySelector={false}
                 hideBalance={true}
                 showRate={true}
                 isInvertedRate={rateType === Rate.MUL ? false : true}
-                realExecutionRate={realExecutionRate}
                 gasPrice={gasPrice}
+                realExecutionRate={realExecutionRate}
               />
               <ArrowWrapper clickable>
                 <ArrowDown
@@ -343,14 +349,14 @@ export default function GelatoLimitOrder() {
                     handleSwitchTokens();
                   }}
                   color={
-                    currencies[Field.INPUT] && currencies[Field.OUTPUT]
+                    currencies.input && currencies.output
                       ? theme.text1
                       : theme.text3
                   }
                 />
               </ArrowWrapper>
               <CurrencyInputPanel
-                value={formattedAmounts[Field.OUTPUT]}
+                value={formattedAmounts.output}
                 onUserInput={handleTypeOutput}
                 label={
                   independentField === Field.INPUT ? "To (at least)" : "To"
@@ -359,9 +365,9 @@ export default function GelatoLimitOrder() {
                 hideBalance={false}
                 fiatValue={fiatValueOutput ?? undefined}
                 priceImpact={priceImpact}
-                currency={currencies[Field.OUTPUT]}
+                currency={currencies.output}
                 onCurrencySelect={handleOutputSelect}
-                otherCurrency={currencies[Field.INPUT]}
+                otherCurrency={currencies.input}
                 showCommonBases={true}
                 id="limit-order-currency-output"
               />
@@ -416,7 +422,7 @@ export default function GelatoLimitOrder() {
                 <ButtonLight>Connect Wallet</ButtonLight>
               ) : routeNotFound &&
                 userHasSpecifiedInputOutput &&
-                parsedAmounts[Field.INPUT] ? (
+                parsedAmounts.input ? (
                 <GreyCard style={{ textAlign: "center" }}>
                   <TYPE.main mb="4px">
                     {isLoadingRoute ? (
@@ -462,7 +468,7 @@ export default function GelatoLimitOrder() {
       {!swapIsUnsupported ? null : (
         <UnsupportedCurrencyFooter
           show={swapIsUnsupported}
-          currencies={[currencies.INPUT, currencies.OUTPUT]}
+          currencies={[currencies.input, currencies.output]}
         />
       )}
     </Fragment>

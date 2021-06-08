@@ -259,7 +259,14 @@ export default function CurrencyList({
         return null;
       }
     },
-    [currencies.length]
+    [
+      currencies.length,
+      onCurrencySelect,
+      otherCurrency,
+      selectedCurrency,
+      setImportToken,
+      showImportView,
+    ]
   );
 
   const itemKey = useCallback((index: number, data: typeof itemData) => {

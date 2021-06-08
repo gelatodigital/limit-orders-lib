@@ -68,7 +68,7 @@ export default function ConfirmCancellationModal({
 
   const modalTop = useCallback(() => {
     return null;
-  }, [onConfirm, showAcceptChanges, swapErrorMessage]);
+  }, []);
 
   // text to show while loading
   const pendingText = `Cancelling order...`;
@@ -88,7 +88,7 @@ export default function ConfirmCancellationModal({
           bottomContent={modalBottom}
         />
       ),
-    [onDismiss, modalBottom, swapErrorMessage]
+    [onDismiss, modalBottom, swapErrorMessage, modalTop]
   );
 
   return (
