@@ -12,7 +12,6 @@ import React, { useMemo } from "react";
 import { useGelatoLimitOrders } from "../../hooks/gelato";
 import useTheme from "../../hooks/useTheme";
 import { TYPE } from "../../theme";
-import { Field } from "../../types";
 import { computeRealizedLPFeePercent } from "../../utils/prices";
 import { useWeb3 } from "../../web3";
 import { AutoColumn } from "../Column";
@@ -24,7 +23,10 @@ export interface AdvancedSwapDetailsProps {
   allowedSlippage: Percent;
 }
 
-export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
+export function AdvancedSwapDetails({
+  trade,
+  allowedSlippage,
+}: AdvancedSwapDetailsProps) {
   const theme = useTheme();
   const { chainId } = useWeb3();
   const {
@@ -174,7 +176,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
           </TYPE.black>
         </RowFixed>
         <TYPE.black textAlign="right" fontSize={12} color={theme.text1}>
-          {allowedSlippageGelato}%
+          {allowedSlippageGelato ?? allowedSlippage.toFixed()}%
         </TYPE.black>
       </RowBetween>
 
