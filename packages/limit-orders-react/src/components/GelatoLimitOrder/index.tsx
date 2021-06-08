@@ -449,14 +449,14 @@ export default function GelatoLimitOrder() {
                   }}
                   id="limit-order-button"
                   disabled={!isValid}
-                  error={!isValid}
+                  error={false}
                 >
                   <Text fontSize={20} fontWeight={500}>
                     {inputError ? inputError : `Place order`}
                   </Text>
                 </ButtonError>
               )}
-              {swapErrorMessage ? (
+              {swapErrorMessage && isValid ? (
                 <SwapCallbackError error={swapErrorMessage} />
               ) : null}
             </BottomGrouping>

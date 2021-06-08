@@ -47,16 +47,11 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const { independentField, rateType } = useOrderState();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
-  const inputCurrency = useMemo(() => currencies.input, [currencies.input]);
-
-  const outputCurrency = useMemo(() => currencies.output, [currencies.input]);
+  const inputCurrency = currencies.input;
+  const outputCurrency = currencies.output;
 
   const rawAmounts = useMemo(
     () => ({
@@ -86,11 +81,11 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
   );
 
   const handleLimitOrderSubmission = useCallback(async () => {
-    if (!currencies.input?.wrapped.address) {
+    if (!inputCurrency?.wrapped.address) {
       throw new Error("Invalid input currency");
     }
 
-    if (!currencies.output?.wrapped.address) {
+    if (!outputCurrency?.wrapped.address) {
       throw new Error("Invalid output currency");
     }
 
@@ -115,8 +110,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       : { minReturn: rawAmounts.output };
 
     const tx = await gelatoLimitOrders.submitLimitOrder(
-      currencies.input?.isNative ? NATIVE : currencies.input.wrapped.address,
-      currencies.output?.isNative ? NATIVE : currencies.output.wrapped.address,
+      inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
+      outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
       rawAmounts.input,
       minReturn
     );
@@ -163,13 +158,13 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     if (independentField === Field.PRICE) {
       if (rateType === Rate.MUL) {
         const flipped =
-          parsedAmounts.input && parsedAmounts.output && currencies.output
+          parsedAmounts.input && parsedAmounts.output && outputCurrency
             ? parsedAmounts.input
                 ?.divide(parsedAmounts.output.asFraction)
                 ?.multiply(
                   JSBI.exponentiate(
                     JSBI.BigInt(10),
-                    JSBI.BigInt(currencies.output.decimals)
+                    JSBI.BigInt(outputCurrency.decimals)
                   )
                 )
                 ?.toSignificant(6)
@@ -179,13 +174,13 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
         if (flipped) onUserInput(Field.PRICE, flipped);
       } else {
         const flipped =
-          parsedAmounts.input && parsedAmounts.output && currencies.input
+          parsedAmounts.input && parsedAmounts.output && inputCurrency
             ? parsedAmounts.output
                 ?.divide(parsedAmounts.input.asFraction)
                 ?.multiply(
                   JSBI.exponentiate(
                     JSBI.BigInt(10),
-                    JSBI.BigInt(currencies.input.decimals)
+                    JSBI.BigInt(inputCurrency.decimals)
                   )
                 )
                 ?.toSignificant(6)
