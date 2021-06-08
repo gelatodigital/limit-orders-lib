@@ -31,12 +31,6 @@ const ConfirmedIcon = styled(ColumnCenter)<{ inline?: boolean }>`
   padding: ${({ inline }) => (inline ? "20px 0" : "60px 0;")};
 `;
 
-const StyledLogo = styled.img`
-  height: 16px;
-  width: 16px;
-  margin-left: 6px;
-`;
-
 export function ConfirmationPendingContent({
   onDismiss,
   pendingText,
@@ -89,7 +83,6 @@ export function TransactionSubmittedContent({
   onDismiss,
   chainId,
   hash,
-  currencyToAdd,
   inline,
 }: {
   onDismiss: () => void;

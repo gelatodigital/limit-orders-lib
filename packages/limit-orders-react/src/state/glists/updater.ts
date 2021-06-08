@@ -6,7 +6,6 @@ import {
 } from "@uniswap/token-lists";
 import { useCallback, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { Web3Provider } from "@ethersproject/providers";
 import { useFetchListCallback } from "../../hooks/useFetchListCallback";
 import useInterval from "../../hooks/useInterval";
 import useIsWindowVisible from "../../hooks/useIsWindowVisible";

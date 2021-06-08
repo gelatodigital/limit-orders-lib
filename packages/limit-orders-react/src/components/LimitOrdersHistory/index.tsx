@@ -97,16 +97,13 @@ export default function LimitOrdersHistory() {
 
   const fixedListRef = useRef<FixedSizeList>();
 
-  const Row = useCallback(
-    function OrderRow({ data, index, style }) {
-      return (
-        <div style={style}>
-          <OrderCard key={index} order={data[index]} />
-        </div>
-      );
-    },
-    [open.length, cancelled.length, executed.length]
-  );
+  const Row = useCallback(function OrderRow({ data, index, style }) {
+    return (
+      <div style={style}>
+        <OrderCard key={index} order={data[index]} />
+      </div>
+    );
+  }, []);
 
   const itemKey = useCallback((index: number) => {
     return index;

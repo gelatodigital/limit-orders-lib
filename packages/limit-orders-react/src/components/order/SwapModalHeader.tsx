@@ -59,8 +59,8 @@ export default function SwapModalHeader({
     derivedOrderInfo: { price, parsedAmounts },
   } = useGelatoLimitOrders();
 
-  const inputAmount = parsedAmounts[Field.INPUT];
-  const outputAmount = parsedAmounts[Field.OUTPUT];
+  const inputAmount = parsedAmounts.input;
+  const outputAmount = parsedAmounts.output;
 
   const fiatValueInput = useUSDCValue(inputAmount);
   const fiatValueOutput = useUSDCValue(outputAmount);

@@ -7,7 +7,7 @@ import {
   Price,
   TradeType,
 } from "@uniswap/sdk-core";
-import { Trade as V2Trade } from "@uniswap/v2-sdk";
+import { Trade } from "@uniswap/v2-sdk";
 import { useCallback, useMemo } from "react";
 import { useCurrency } from "../../hooks/Tokens";
 import useSwapSlippageTolerance from "../../hooks/useSwapSlippageTolerance";
@@ -172,13 +172,13 @@ const BAD_RECIPIENT_ADDRESSES: { [address: string]: true } = {
  * @param checksummedAddress address to check in the pairs and tokens
  */
 function involvesAddress(
-  trade: V2Trade<Currency, Currency, TradeType>,
+  trade: Trade<Currency, Currency, TradeType>,
   checksummedAddress: string
 ): boolean {
   const path = trade.route.path;
   return (
     path.some((token) => token.address === checksummedAddress) ||
-    (trade instanceof V2Trade
+    (trade instanceof Trade
       ? trade.route.pairs.some(
           (pair) => pair.liquidityToken.address === checksummedAddress
         )
@@ -187,25 +187,19 @@ function involvesAddress(
 }
 
 export interface DerivedOrderInfo {
-  currencies: { [field in Field]?: Currency };
-  currencyBalances: { [field in Field]?: CurrencyAmount<Currency> };
+  currencies: { input: Currency | undefined; output: Currency | undefined };
+  currencyBalances: {
+    input: CurrencyAmount<Currency> | undefined;
+    output: CurrencyAmount<Currency> | undefined;
+  };
   parsedAmount: CurrencyAmount<Currency> | undefined;
   inputAmount: CurrencyAmount<Currency> | undefined;
   inputError?: string;
-  trade: V2Trade<Currency, Currency, TradeType> | undefined;
-  //v3TradeState: { trade: V3Trade<Currency, Currency, TradeType> | null; state: V3TradeState }
-  allowedSlippage: Percent;
+  trade: Trade<Currency, Currency, TradeType> | undefined;
   parsedAmounts: {
-    [field in Field]: CurrencyAmount<Currency> | undefined;
+    input: CurrencyAmount<Currency> | undefined;
+    output: CurrencyAmount<Currency> | undefined;
   };
-  rawAmounts: {
-    [Field.INPUT]: string | undefined;
-    [Field.OUTPUT]: string | undefined;
-  };
-  formattedAmounts: {
-    [field in Field]: string;
-  };
-  realExecutionRate: string;
   price: Price<Currency, Currency> | undefined;
 }
 
@@ -278,14 +272,14 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
       : trade?.inputAmount;
 
   const currencyBalances = {
-    [Field.INPUT]: relevantTokenBalances[0],
-    [Field.OUTPUT]: relevantTokenBalances[1],
+    input: relevantTokenBalances[0],
+    output: relevantTokenBalances[1],
   };
 
-  const currencies: { [field in Field]?: Currency } = useMemo(
+  const currencies = useMemo(
     () => ({
-      [Field.INPUT]: inputCurrency ?? undefined,
-      [Field.OUTPUT]: outputCurrency ?? undefined,
+      input: inputCurrency ?? undefined,
+      output: outputCurrency ?? undefined,
     }),
     [inputCurrency, outputCurrency]
   );
@@ -299,7 +293,7 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     inputError = inputError ?? "Enter an amount";
   }
 
-  if (!currencies[Field.INPUT] || !currencies[Field.OUTPUT]) {
+  if (!currencies.input || !currencies.output) {
     inputError = inputError ?? "Select a token";
   }
 
@@ -316,192 +310,41 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     }
   }
 
-  const toggledTrade = trade;
-  const allowedSlippage = useSwapSlippageTolerance(toggledTrade ?? undefined);
-
-  const executionRate = useMemo(() => {
-    if (independentField === Field.OUTPUT) {
-      let executionRate;
-      if (rateType === Rate.MUL) {
-        executionRate =
-          inputAmount &&
-          currencies[Field.INPUT] &&
-          parsedAmount?.divide(inputAmount?.asFraction)?.multiply(
-            JSBI.exponentiate(
-              JSBI.BigInt(10),
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              JSBI.BigInt(currencies[Field.INPUT]!.decimals)
-            )
-          );
-      } else {
-        executionRate =
-          parsedAmount &&
-          currencies[Field.OUTPUT] &&
-          inputAmount?.divide(parsedAmount.asFraction)?.multiply(
-            JSBI.exponentiate(
-              JSBI.BigInt(10),
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              JSBI.BigInt(currencies[Field.OUTPUT]!.decimals)
-            )
-          );
-      }
-      return executionRate;
-    } else
-      return rateType === Rate.MUL
-        ? trade?.executionPrice
-        : trade?.executionPrice.invert();
-  }, [
-    rateType,
-    trade,
-    independentField,
-    currencies,
-    inputAmount,
-    parsedAmount,
-  ]);
-
   const parsedAmounts = useMemo(
     () => ({
-      [Field.INPUT]:
-        independentField === Field.INPUT ? parsedAmount : inputAmount,
-      [Field.OUTPUT]:
+      input: independentField === Field.INPUT ? parsedAmount : inputAmount,
+      output:
         independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount,
-      [Field.PRICE]:
-        independentField === Field.PRICE ? parsedAmount : executionRate,
     }),
-    [independentField, parsedAmount, trade, inputAmount, executionRate]
+    [independentField, parsedAmount, trade, inputAmount]
   );
 
-  const gasPrice = useGasPrice();
-  const NativeCurrency = useCurrency("NATIVE");
-
-  const requiredGas = formatUnits(
-    gasPrice
-      ? BigNumber.from(gasPrice).mul(GENERIC_GAS_LIMIT_ORDER_EXECUTION)
-      : "0"
+  const price = useMemo(
+    () =>
+      parsedAmounts.input && parsedAmounts.output
+        ? new Price({
+            baseAmount: parsedAmounts.input,
+            quoteAmount: parsedAmounts.output,
+          })
+        : undefined,
+    [parsedAmounts]
   );
-
-  const requiredGasAsCurrencyAmount = tryParseAmount(
-    requiredGas,
-    NativeCurrency ?? undefined
-  );
-
-  const gasCostInInputTokens = useTradeExactIn(
-    requiredGasAsCurrencyAmount,
-    currencies[Field.INPUT]
-  );
-
-  const realInputAmount =
-    gasCostInInputTokens &&
-    inputAmount &&
-    inputAmount.subtract(gasCostInInputTokens.outputAmount);
-
-  const realExecutionRate =
-    inputCurrency && outputCurrency && trade && realInputAmount
-      ? rateType === Rate.DIV
-        ? realInputAmount
-            .divide(trade.outputAmount.asFraction)
-            ?.multiply(
-              JSBI.exponentiate(
-                JSBI.BigInt(10),
-                JSBI.BigInt(outputCurrency.decimals)
-              )
-            )
-            ?.toSignificant(6)
-        : trade?.outputAmount
-            ?.divide(realInputAmount.asFraction)
-            ?.multiply(
-              JSBI.exponentiate(
-                JSBI.BigInt(10),
-                JSBI.BigInt(inputCurrency.decimals)
-              )
-            )
-            ?.toSignificant(6)
-      : "-";
 
   // compare input to balance
-  const [balanceIn, amountIn] = [
-    currencyBalances[Field.INPUT],
-    parsedAmounts[Field.INPUT],
-  ];
+  const [balanceIn, amountIn] = [currencyBalances.input, parsedAmounts.input];
 
   if (balanceIn && amountIn && balanceIn.lessThan(amountIn)) {
     inputError = "Insufficient " + amountIn.currency.symbol + " balance";
   }
 
-  const dependentField: Field =
-    independentField === Field.INPUT || independentField === Field.PRICE
-      ? Field.OUTPUT
-      : Field.INPUT;
-
-  const formattedAmounts = {
-    [independentField]: typedValue,
-    [dependentField]: parsedAmounts[dependentField]?.toSignificant(6) ?? "",
-    // Overrides independent value when equal to PRICE
-    [Field.PRICE]: parsedAmounts[Field.PRICE]?.toSignificant(6) ?? "",
-  };
-
-  formattedAmounts[Field.PRICE] =
-    independentField === Field.PRICE && formattedAmounts[Field.PRICE] === ""
-      ? typedValue
-      : formattedAmounts[Field.PRICE];
-
-  formattedAmounts[Field.INPUT] =
-    dependentField !== Field.INPUT &&
-    independentField !== Field.INPUT &&
-    inputAmount
-      ? inputAmount.toSignificant(6)
-      : formattedAmounts[Field.INPUT];
-
-  const rawAmounts = {
-    [Field.INPUT]: inputCurrency
-      ? parsedAmounts[Field.INPUT]
-          ?.multiply(
-            JSBI.exponentiate(
-              JSBI.BigInt(10),
-              JSBI.BigInt(inputCurrency.decimals)
-            )
-          )
-          .toExact()
-      : undefined,
-
-    [Field.OUTPUT]: outputCurrency
-      ? parsedAmounts[Field.OUTPUT]
-          ?.multiply(
-            JSBI.exponentiate(
-              JSBI.BigInt(10),
-              JSBI.BigInt(outputCurrency.decimals)
-            )
-          )
-          .toExact()
-      : undefined,
-  };
-
-  const price =
-    parsedAmounts[Field.INPUT] && parsedAmounts[Field.OUTPUT]
-      ? new Price({
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          baseAmount: parsedAmounts[Field.OUTPUT]!,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          quoteAmount: parsedAmounts[Field.INPUT]!,
-        })
-      : undefined;
-
   return {
     currencies,
     currencyBalances,
     parsedAmount,
-    rawAmounts,
     inputError,
     inputAmount,
     trade: trade ?? undefined,
-    parsedAmounts: parsedAmounts as {
-      [field in Field]: CurrencyAmount<Currency> | undefined;
-    },
-    formattedAmounts: formattedAmounts as {
-      [field in Field]: string;
-    },
-    allowedSlippage,
-    realExecutionRate,
+    parsedAmounts: parsedAmounts as any,
     price,
   };
 }
