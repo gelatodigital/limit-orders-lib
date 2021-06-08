@@ -135,7 +135,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
   }, [onSwitchTokens]);
 
   const handleRateType = useCallback(async () => {
-    if (independentField === Field.DESIRED_RATE) {
+    if (independentField === Field.PRICE) {
       if (rateType === Rate.MUL) {
         const flipped =
           parsedAmounts[Field.INPUT] &&
@@ -153,7 +153,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
             : undefined;
 
         onChangeRateType(Rate.DIV);
-        if (flipped) onUserInput(Field.DESIRED_RATE, flipped);
+        if (flipped) onUserInput(Field.PRICE, flipped);
       } else {
         const flipped =
           parsedAmounts[Field.INPUT] &&
@@ -171,7 +171,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
             : undefined;
 
         onChangeRateType(Rate.MUL);
-        if (flipped) onUserInput(Field.DESIRED_RATE, flipped);
+        if (flipped) onUserInput(Field.PRICE, flipped);
       }
     } else {
       onChangeRateType(rateType === Rate.MUL ? Rate.DIV : Rate.MUL);

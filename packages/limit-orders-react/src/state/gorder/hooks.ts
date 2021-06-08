@@ -13,7 +13,7 @@ import { useCurrency } from "../../hooks/Tokens";
 import useSwapSlippageTolerance from "../../hooks/useSwapSlippageTolerance";
 import { useTradeExactIn, useTradeExactOut } from "../../hooks/useTrade";
 import { isAddress } from "../../utils";
-import { useCurrencyBalances } from "../gwallet/hooks";
+import { useCurrencyBalances } from "../../hooks/Balances";
 import {
   Field,
   Rate,
@@ -233,7 +233,7 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
   ]);
 
   const isExactIn: boolean = independentField === Field.INPUT;
-  const isDesiredRateUpdate = independentField === Field.DESIRED_RATE;
+  const isDesiredRateUpdate = independentField === Field.PRICE;
   const desiredRateApplied =
     isDesiredRateUpdate && inputValue && inputCurrency && outputCurrency
       ? applyExchangeRateTo(
@@ -365,8 +365,8 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
         independentField === Field.INPUT ? parsedAmount : inputAmount,
       [Field.OUTPUT]:
         independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount,
-      [Field.DESIRED_RATE]:
-        independentField === Field.DESIRED_RATE ? parsedAmount : executionRate,
+      [Field.PRICE]:
+        independentField === Field.PRICE ? parsedAmount : executionRate,
     }),
     [independentField, parsedAmount, trade, inputAmount, executionRate]
   );
@@ -429,23 +429,21 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
   }
 
   const dependentField: Field =
-    independentField === Field.INPUT || independentField === Field.DESIRED_RATE
+    independentField === Field.INPUT || independentField === Field.PRICE
       ? Field.OUTPUT
       : Field.INPUT;
 
   const formattedAmounts = {
     [independentField]: typedValue,
     [dependentField]: parsedAmounts[dependentField]?.toSignificant(6) ?? "",
-    // Overrides independent value when equal to DESIRED_RATE
-    [Field.DESIRED_RATE]:
-      parsedAmounts[Field.DESIRED_RATE]?.toSignificant(6) ?? "",
+    // Overrides independent value when equal to PRICE
+    [Field.PRICE]: parsedAmounts[Field.PRICE]?.toSignificant(6) ?? "",
   };
 
-  formattedAmounts[Field.DESIRED_RATE] =
-    independentField === Field.DESIRED_RATE &&
-    formattedAmounts[Field.DESIRED_RATE] === ""
+  formattedAmounts[Field.PRICE] =
+    independentField === Field.PRICE && formattedAmounts[Field.PRICE] === ""
       ? typedValue
-      : formattedAmounts[Field.DESIRED_RATE];
+      : formattedAmounts[Field.PRICE];
 
   formattedAmounts[Field.INPUT] =
     dependentField !== Field.INPUT &&

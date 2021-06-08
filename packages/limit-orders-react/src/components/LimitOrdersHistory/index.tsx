@@ -1,20 +1,14 @@
 import React, { useCallback, useRef, useState } from "react";
-import styled, { DefaultTheme } from "styled-components/macro";
+import styled from "styled-components/macro";
 import { darken } from "polished";
 import { TYPE } from "../../theme";
 import { AutoColumn } from "../Column";
 import { Wrapper } from "../order/styleds";
 import AppBody from "../GelatoLimitOrder/AppBody";
-import { ExternalLink } from "../../theme";
-import Row, { RowBetween, RowFixed } from "../Row";
-import { Order } from "@gelatonetwork/limit-orders-lib";
+import Row from "../Row";
 import { useGelatoLimitOrdersHistory } from "../../hooks/gelato";
-import { MouseoverTooltip } from "../Tooltip";
-import HoverInlineText from "../HoverInlineText";
 import useTheme from "../../hooks/useTheme";
 import OrderCard from "./OrderCard/index";
-import { ButtonGray } from "../Button";
-import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
 
 const TopSection = styled(AutoColumn)`

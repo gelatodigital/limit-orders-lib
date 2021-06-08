@@ -27,13 +27,8 @@ import TradePrice from "../order/TradePrice";
 import { useGelatoLimitOrders } from "../../hooks/gelato";
 import { useIsSwapUnsupported } from "../../hooks/useIsSwapUnsupported";
 import { useUSDCValue } from "../../hooks/useUSDCPrice";
-import { useWalletModalToggle } from "../../state/gapplication/hooks";
 import { Field } from "../../state/gorder/actions";
 import { tryParseAmount } from "../../state/gorder/hooks";
-import {
-  useExpertModeManager,
-  useUserSingleHopOnly,
-} from "../../state/guser/hooks";
 import { computeFiatValuePriceImpact } from "../../utils/computeFiatValuePriceImpact";
 import { maxAmountSpend } from "../../utils/maxAmountSpend";
 import { warningSeverity } from "../../utils/prices";
@@ -87,12 +82,6 @@ export default function GelatoLimitOrder() {
     orderState: { independentField, rateType },
   } = useGelatoLimitOrders();
 
-  // toggle wallet when disconnected
-  const toggleWalletModal = useWalletModalToggle();
-
-  // for expert mode
-  const [isExpertMode] = useExpertModeManager();
-
   const fiatValueInput = useUSDCValue(parsedAmounts[Field.INPUT]);
   const fiatValueOutput = useUSDCValue(parsedAmounts[Field.OUTPUT]);
   const desiredRateInCurrencyAmount = tryParseAmount(
@@ -123,7 +112,7 @@ export default function GelatoLimitOrder() {
   );
   const handleTypeDesiredRate = useCallback(
     (value: string) => {
-      handleInput(Field.DESIRED_RATE, value);
+      handleInput(Field.PRICE, value);
     },
     [handleInput]
   );
@@ -163,8 +152,6 @@ export default function GelatoLimitOrder() {
     maxInputAmount?.greaterThan(0) &&
       !parsedAmounts[Field.INPUT]?.equalTo(maxInputAmount)
   );
-
-  const [singleHopOnly] = useUserSingleHopOnly();
 
   const handleSwap = useCallback(() => {
     if (!handleLimitOrderSubmission) {
@@ -265,10 +252,6 @@ export default function GelatoLimitOrder() {
     currencies?.OUTPUT
   );
 
-  const priceImpactTooHigh = priceImpactSeverity > 3 && !isExpertMode;
-
-  const state = useSelector((state) => state);
-
   return (
     <Fragment>
       {/* <TokenWarningModal
@@ -335,7 +318,7 @@ export default function GelatoLimitOrder() {
                 )}
               </ArrowWrapper>
               <CurrencyInputPanel
-                value={formattedAmounts[Field.DESIRED_RATE]}
+                value={formattedAmounts[Field.PRICE]}
                 currentMarketRate={currentMarketRate}
                 showMaxButton={showMaxButton}
                 currency={currencies[Field.INPUT]}
@@ -430,9 +413,7 @@ export default function GelatoLimitOrder() {
                   <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
                 </ButtonPrimary>
               ) : !account ? (
-                <ButtonLight onClick={toggleWalletModal}>
-                  Connect Wallet
-                </ButtonLight>
+                <ButtonLight>Connect Wallet</ButtonLight>
               ) : routeNotFound &&
                 userHasSpecifiedInputOutput &&
                 parsedAmounts[Field.INPUT] ? (
@@ -452,32 +433,24 @@ export default function GelatoLimitOrder() {
               ) : (
                 <ButtonError
                   onClick={() => {
-                    if (isExpertMode) {
-                      handleSwap();
-                    } else {
-                      setSwapState({
-                        tradeToConfirm: trade as any,
-                        attemptingTxn: false,
-                        swapErrorMessage: undefined,
-                        showConfirm: true,
-                        txHash: undefined,
-                      });
-                    }
+                    setSwapState({
+                      tradeToConfirm: trade as any,
+                      attemptingTxn: false,
+                      swapErrorMessage: undefined,
+                      showConfirm: true,
+                      txHash: undefined,
+                    });
                   }}
                   id="limit-order-button"
-                  disabled={!isValid || priceImpactTooHigh}
-                  error={isValid && priceImpactSeverity > 2}
+                  disabled={!isValid}
+                  error={isValid}
                 >
                   <Text fontSize={20} fontWeight={500}>
-                    {inputError
-                      ? inputError
-                      : priceImpactTooHigh
-                      ? `Price Impact Too High`
-                      : `Place order`}
+                    {inputError ? inputError : `Place order`}
                   </Text>
                 </ButtonError>
               )}
-              {isExpertMode && swapErrorMessage ? (
+              {swapErrorMessage ? (
                 <SwapCallbackError error={swapErrorMessage} />
               ) : null}
             </BottomGrouping>

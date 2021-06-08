@@ -1,17 +1,17 @@
 import { Currency, Token, CurrencyAmount, Ether } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 import { useMemo } from "react";
-import { useAllTokens } from "../../hooks/Tokens";
-import { useMulticall2Contract } from "../../hooks/useContract";
-import { isAddress } from "../../utils";
+import { useAllTokens } from "./Tokens";
+import { useMulticall2Contract } from "./useContract";
+import { isAddress } from "../utils";
 import {
   useMultipleContractSingleData,
   useSingleContractMultipleData,
-} from "../gmulticall/hooks";
+} from "../state/gmulticall/hooks";
 import { Interface } from "@ethersproject/abi";
-import ERC20ABI from "../../abis/erc20.json";
-import { Erc20Interface } from "../../abis/types/Erc20";
-import { useWeb3 } from "../../web3";
+import ERC20ABI from "../abis/erc20.json";
+import { Erc20Interface } from "../abis/types/Erc20";
+import { useWeb3 } from "../web3";
 /**
  * Returns a map of the given addresses to their eventually consistent ETH balances.
  */

@@ -1,7 +1,7 @@
 export enum Field {
   INPUT = "INPUT",
   OUTPUT = "OUTPUT",
-  DESIRED_RATE = "DESIRED_RATE",
+  PRICE = "PRICE",
 }
 
 export const NativeCurrency = {
