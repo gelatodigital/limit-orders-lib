@@ -20,9 +20,7 @@
     "plugin:react-hooks/recommended",
     "prettier"
   ],
-  "plugins": [
-    "react-hooks"
-  ],
+  "plugins": ["react-hooks"],
   "rules": {
     "@typescript-eslint/explicit-function-return-type": "off",
     "prettier/prettier": "off",
