@@ -258,8 +258,10 @@ export class GelatoLimitOrders {
     const gelatoFee = BigNumber.from(GelatoLimitOrders.gelatoFeeBPS).div(10000);
 
     const slippage = extraSlippageBPS
-      ? GelatoLimitOrders.slippageBPS + extraSlippageBPS
-      : GelatoLimitOrders.slippageBPS;
+      ? BigNumber.from(GelatoLimitOrders.slippageBPS + extraSlippageBPS).div(
+          10000
+        )
+      : BigNumber.from(GelatoLimitOrders.slippageBPS).div(10000);
 
     const fees = gelatoFee.add(slippage);
 

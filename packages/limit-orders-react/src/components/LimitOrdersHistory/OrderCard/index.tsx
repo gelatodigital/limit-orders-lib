@@ -10,7 +10,10 @@ import { useCurrency } from "../../../hooks/Tokens";
 import CurrencyLogo from "../../CurrencyLogo";
 import { ButtonGray } from "../../Button";
 import JSBI from "jsbi";
-import { useGelatoLimitOrdersHandlers } from "../../../hooks/gelato";
+import {
+  useGelatoLimitOrders,
+  useGelatoLimitOrdersHandlers,
+} from "../../../hooks/gelato";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import ConfirmCancellationModal from "../ConfirmCancellationModal";
 
@@ -160,6 +163,8 @@ export default function OrderCard({ order }: { order: Order }) {
   const theme = useTheme();
 
   const { handleLimitOrderCancellation } = useGelatoLimitOrdersHandlers();
+  const { library: gelatoLibrary } = useGelatoLimitOrders();
+
   const inputToken = useCurrency(order.inputToken);
   const outputToken = useCurrency(order.outputToken);
 
@@ -171,16 +176,24 @@ export default function OrderCard({ order }: { order: Order }) {
     ? CurrencyAmount.fromRawAmount(inputToken, order.inputAmount)
     : undefined;
 
+  // const minReturn =
+  //   outputAmount && inputAmount
+  //     ? outputAmount
+  //         .divide(inputAmount.asFraction)
+  //         .multiply(
+  //           JSBI.exponentiate(
+  //             JSBI.BigInt(10),
+  //             JSBI.BigInt(outputAmount.currency.decimals)
+  //           )
+  //         )
+  //     : undefined;
+
   const executionRate =
-    outputAmount && inputAmount
-      ? outputAmount
-          .divide(inputAmount.asFraction)
-          .multiply(
-            JSBI.exponentiate(
-              JSBI.BigInt(10),
-              JSBI.BigInt(outputAmount.currency.decimals)
-            )
-          )
+    outputToken && gelatoLibrary
+      ? CurrencyAmount.fromRawAmount(
+          outputToken,
+          gelatoLibrary.getExecutionPriceFromMinReturn(order.minReturn)
+        )
       : undefined;
 
   // modal and loading

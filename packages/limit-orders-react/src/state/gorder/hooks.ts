@@ -10,7 +10,6 @@ import {
 import { Trade } from "@uniswap/v2-sdk";
 import { useCallback, useMemo } from "react";
 import { useCurrency } from "../../hooks/Tokens";
-import useSwapSlippageTolerance from "../../hooks/useSwapSlippageTolerance";
 import { useTradeExactIn, useTradeExactOut } from "../../hooks/useTrade";
 import { isAddress } from "../../utils";
 import { useCurrencyBalances } from "../../hooks/Balances";
@@ -25,10 +24,6 @@ import {
 } from "./actions";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "..";
-import useGasPrice from "../../hooks/useGasPrice";
-import { BigNumber } from "@ethersproject/bignumber";
-import { formatUnits } from "ethers/lib/utils";
-import { GENERIC_GAS_LIMIT_ORDER_EXECUTION } from "../../constants/misc";
 import { useWeb3 } from "../../web3";
 
 export function applyExchangeRateTo(
@@ -192,13 +187,16 @@ export interface DerivedOrderInfo {
     input: CurrencyAmount<Currency> | undefined;
     output: CurrencyAmount<Currency> | undefined;
   };
-  parsedAmount: CurrencyAmount<Currency> | undefined;
-  inputAmount: CurrencyAmount<Currency> | undefined;
   inputError?: string;
   trade: Trade<Currency, Currency, TradeType> | undefined;
   parsedAmounts: {
     input: CurrencyAmount<Currency> | undefined;
     output: CurrencyAmount<Currency> | undefined;
+  };
+  formattedAmounts: {
+    input: string;
+    output: string;
+    price: string;
   };
   price: Price<Currency, Currency> | undefined;
 }
@@ -337,12 +335,26 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     inputError = "Insufficient " + amountIn.currency.symbol + " balance";
   }
 
+  const formattedAmounts = {
+    input:
+      independentField === Field.INPUT
+        ? typedValue
+        : inputAmount?.toSignificant(6) ?? "",
+    output:
+      independentField === Field.OUTPUT
+        ? typedValue
+        : parsedAmounts.output?.toSignificant(6) ?? "",
+    price:
+      independentField === Field.PRICE
+        ? typedValue
+        : price?.toSignificant(6) ?? "",
+  };
+
   return {
     currencies,
     currencyBalances,
-    parsedAmount,
     inputError,
-    inputAmount,
+    formattedAmounts,
     trade: trade ?? undefined,
     parsedAmounts,
     price,
