@@ -113,6 +113,8 @@ export default function LimitOrdersHistory() {
     setOrderTab(tab);
   };
 
+  const itemSize = 156;
+
   return (
     <>
       <AppBody>
@@ -156,7 +158,7 @@ export default function LimitOrdersHistory() {
                 width="100%"
                 itemData={open}
                 itemCount={open.length}
-                itemSize={146}
+                itemSize={itemSize}
                 itemKey={itemKey}
               >
                 {Row}
@@ -183,7 +185,7 @@ export default function LimitOrdersHistory() {
                 width="100%"
                 itemData={executed}
                 itemCount={executed.length}
-                itemSize={146}
+                itemSize={itemSize}
                 itemKey={itemKey}
               >
                 {Row}
@@ -210,7 +212,7 @@ export default function LimitOrdersHistory() {
                 width="100%"
                 itemData={cancelled}
                 itemCount={cancelled.length}
-                itemSize={146}
+                itemSize={itemSize}
                 itemKey={itemKey}
               >
                 {Row}

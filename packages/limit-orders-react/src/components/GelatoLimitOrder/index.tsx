@@ -42,9 +42,9 @@ import { useWeb3 } from "../../web3";
 import useTheme from "../../hooks/useTheme";
 import LimitOrdersHistory from "../LimitOrdersHistory";
 import useGasOverhead from "../../hooks/useGasOverhead";
-import PoweredByGelato from "../../assets/svg/poweredbygelato.svg";
-import PoweredByGelatoBlack from "../../assets/svg/poweredbygelato_black.svg";
-import PoweredByGelatoWhite from "../../assets/svg/poweredbygelato_white.svg";
+// import PoweredByGelato from "../../assets/svg/poweredbygelato.svg";
+// import PoweredByGelatoBlack from "../../assets/svg/poweredbygelato_black.svg";
+// import PoweredByGelatoWhite from "../../assets/svg/poweredbygelato_white.svg";
 
 const StyledInfo = styled(Info)`
   opacity: 0.4;
@@ -61,32 +61,32 @@ enum Rate {
   MUL = "MUL",
 }
 
-const StyledPoweredByGelato = styled(PoweredByGelato)`
-  margin: 0 0.25rem 0 0.35rem;
-  height: 35%;
-  path {
-    stroke-width: 1.5px;
-  }
-`;
+// const StyledPoweredByGelato = styled(PoweredByGelato)`
+//   margin: 0 0.25rem 0 0.35rem;
+//   height: 35%;
+//   path {
+//     stroke-width: 1.5px;
+//   }
+// `;
 
-const StyledPoweredByGelatoBlack = styled(PoweredByGelatoBlack)`
-  margin: 0 0.25rem 0 0.35rem;
-  height: 35%;
-  path {
-    stroke-width: 1.5px;
-  }
-`;
+// const StyledPoweredByGelatoBlack = styled(PoweredByGelatoBlack)`
+//   margin: 0 0.25rem 0 0.35rem;
+//   height: 35%;
+//   path {
+//     stroke-width: 1.5px;
+//   }
+// `;
 
-const StyledPoweredByGelatoWhite = styled(PoweredByGelatoWhite)`
-  margin: 0 0.25rem 0 0.35rem;
-  height: 5%;
-  border-radius: 3px;
-  width: 80px;
-  path {
-    stroke-width: 1.5px;
-    border-radius: 3px;
-  }
-`;
+// const StyledPoweredByGelatoWhite = styled(PoweredByGelatoWhite)`
+//   margin: 0 0.25rem 0 0.35rem;
+//   height: 5%;
+//   border-radius: 3px;
+//   width: 80px;
+//   path {
+//     stroke-width: 1.5px;
+//     border-radius: 3px;
+//   }
+// `;
 
 export default function GelatoLimitOrder() {
   const { account } = useWeb3();
@@ -109,9 +109,9 @@ export default function GelatoLimitOrder() {
       currencyBalances,
       trade,
       inputError,
-      formattedAmounts,
+      price,
     },
-    orderState: { independentField, rateType },
+    orderState: { independentField, rateType, typedValue },
   } = useGelatoLimitOrders();
 
   const fiatValueInput = useUSDCValue(parsedAmounts.input);
@@ -167,7 +167,7 @@ export default function GelatoLimitOrder() {
     txHash: undefined,
   });
 
-  const allowedSlippage = new Percent(50, 10_000);
+  const allowedSlippage = new Percent(40, 10_000);
   const userHasSpecifiedInputOutput = Boolean(
     (independentField === Field.INPUT || independentField === Field.OUTPUT) &&
       currencies.input &&
@@ -278,6 +278,21 @@ export default function GelatoLimitOrder() {
     parsedAmounts.output,
     rateType
   );
+
+  const formattedAmounts = {
+    input:
+      independentField === Field.INPUT
+        ? typedValue
+        : parsedAmounts.input?.toSignificant(6) ?? "",
+    output:
+      independentField === Field.OUTPUT
+        ? typedValue
+        : parsedAmounts.output?.toSignificant(6) ?? "",
+    price:
+      independentField === Field.PRICE
+        ? typedValue
+        : price?.toSignificant(6) ?? "",
+  };
 
   return (
     <Fragment>
@@ -392,9 +407,7 @@ export default function GelatoLimitOrder() {
               style={{ justifyContent: !trade ? "center" : "space-between" }}
             >
               <RowFixed>
-                <StyledPoweredByGelatoWhite />
-
-                {/* <ButtonGray
+                <ButtonGray
                   width="fit-content"
                   padding="0.1rem 0.5rem"
                   disabled
@@ -407,10 +420,7 @@ export default function GelatoLimitOrder() {
                   }}
                 >
                   <TYPE.black fontSize={12}>Powered by Gelato🍦</TYPE.black>
-                </ButtonGray> */}
-                {/* <StyledPoweredByGelato />
-                <StyledPoweredByGelatoBlack /> */}
-                {/* <StyledPoweredByGelatoWhite /> */}
+                </ButtonGray>
               </RowFixed>
               {trade ? (
                 <RowFixed>
