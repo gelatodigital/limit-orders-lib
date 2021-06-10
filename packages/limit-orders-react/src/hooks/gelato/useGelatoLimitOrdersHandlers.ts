@@ -47,8 +47,12 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const { independentField, rateType } = useOrderState();
 
-  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
-    useOrderActionHandlers();
+  const {
+    onSwitchTokens,
+    onCurrencySelection,
+    onUserInput,
+    onChangeRateType,
+  } = useOrderActionHandlers();
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
@@ -189,7 +193,6 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
   }, [
     onUserInput,
     onChangeRateType,
-    independentField,
     rateType,
     parsedAmounts,
     inputCurrency,

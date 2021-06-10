@@ -81,6 +81,7 @@ const StyledPoweredByGelatoWhite = styled(PoweredByGelatoWhite)`
   margin: 0 0.25rem 0 0.35rem;
   height: 5%;
   border-radius: 3px;
+  width: 80px;
   path {
     stroke-width: 1.5px;
     border-radius: 3px;
@@ -108,26 +109,10 @@ export default function GelatoLimitOrder() {
       currencyBalances,
       trade,
       inputError,
-      price,
-      inputAmount,
+      formattedAmounts,
     },
-    orderState: { independentField, rateType, typedValue },
+    orderState: { independentField, rateType },
   } = useGelatoLimitOrders();
-
-  const formattedAmounts = {
-    input:
-      independentField === Field.INPUT
-        ? typedValue
-        : inputAmount?.toSignificant(6) ?? "",
-    output:
-      independentField === Field.OUTPUT
-        ? typedValue
-        : parsedAmounts.output?.toSignificant(6) ?? "",
-    price:
-      independentField === Field.PRICE
-        ? typedValue
-        : price?.toSignificant(6) ?? "",
-  };
 
   const fiatValueInput = useUSDCValue(parsedAmounts.input);
   const fiatValueOutput = useUSDCValue(parsedAmounts.output);
