@@ -4,12 +4,10 @@ import { darken } from "polished";
 import { ArrowRight } from "react-feather";
 import { TYPE } from "../../../theme";
 import { RowBetween } from "../../Row";
-import { GelatoLimitOrders, Order } from "@gelatonetwork/limit-orders-lib";
+import { Order } from "@gelatonetwork/limit-orders-lib";
 import useTheme from "../../../hooks/useTheme";
 import { useCurrency } from "../../../hooks/Tokens";
 import CurrencyLogo from "../../CurrencyLogo";
-import { ButtonGray } from "../../Button";
-import JSBI from "jsbi";
 import {
   useGelatoLimitOrders,
   useGelatoLimitOrdersHandlers,
@@ -18,7 +16,9 @@ import { CurrencyAmount } from "@uniswap/sdk-core";
 import ConfirmCancellationModal from "../ConfirmCancellationModal";
 import { useTradeExactIn } from "../../../hooks/useTrade";
 import { Dots } from "../../order/styleds";
-import { BigNumber, BigNumberish } from "ethers";
+import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
+import { useWeb3 } from "../../../web3";
+import { ButtonGray } from "../../Button";
 
 const handleColorType = (status: string, theme: DefaultTheme) => {
   switch (status) {
@@ -166,6 +166,8 @@ const Spacer = styled.div`
 export default function OrderCard({ order }: { order: Order }) {
   const theme = useTheme();
 
+  const { chainId } = useWeb3();
+
   const { handleLimitOrderCancellation } = useGelatoLimitOrdersHandlers();
 
   const { library: gelatoLibrary } = useGelatoLimitOrders();
@@ -182,8 +184,10 @@ export default function OrderCard({ order }: { order: Order }) {
     : undefined;
 
   const rawMinReturn =
-    outputToken && gelatoLibrary && inputToken
-      ? gelatoLibrary.getRawMinReturn(order.minReturn)
+    outputToken && gelatoLibrary && inputToken && chainId
+      ? isEthereumChain(chainId)
+        ? order.minReturn
+        : gelatoLibrary.getRawMinReturn(order.minReturn)
       : undefined;
 
   const rawMinReturnAmount =

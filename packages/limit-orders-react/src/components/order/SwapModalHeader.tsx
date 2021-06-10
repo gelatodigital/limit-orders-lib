@@ -20,7 +20,6 @@ import { DarkGreyCard } from "../Card";
 import TradePrice from "../order/TradePrice";
 import useTheme from "../../hooks/useTheme";
 import { useGelatoLimitOrders } from "../../hooks/gelato";
-import { Field } from "../../types";
 
 export const ArrowWrapper = styled.div`
   padding: 4px;

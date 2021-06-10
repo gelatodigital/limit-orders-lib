@@ -5,7 +5,7 @@ import { getExplorerLink, ExplorerDataType } from "../../utils/getExplorerLink";
 import Modal from "../Modal";
 import { ExternalLink } from "../../theme";
 import { Text } from "rebass";
-import { CloseIcon, CustomLightSpinner } from "../../theme/components";
+import { CloseIcon } from "../../theme/components";
 import { RowBetween } from "../Row";
 import { AlertTriangle, ArrowUpCircle } from "react-feather";
 import { ButtonPrimary } from "../Button";

@@ -21,11 +21,11 @@ const extensions = [".ts", ".js", ".tsx", "jsx"];
 export default {
   input: "./src/index.tsx",
   output: [
-    {
-      file: packageJson.main,
-      format: "cjs",
-      sourcemap: true,
-    },
+    // {
+    //   file: packageJson.main,
+    //   format: "cjs",
+    //   sourcemap: true,
+    // },
     {
       file: packageJson.module,
       format: "esm",
