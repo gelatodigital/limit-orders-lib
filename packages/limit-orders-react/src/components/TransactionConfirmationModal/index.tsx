@@ -12,7 +12,7 @@ import { ButtonPrimary } from "../Button";
 import { AutoColumn, ColumnCenter } from "../Column";
 import { useWeb3 } from "../../web3";
 import useTheme from "../../hooks/useTheme";
-import Circle from "../../assets/images/blue-loader.svg";
+import Loader from "../Loader";
 
 const Wrapper = styled.div`
   width: 100%;
@@ -50,11 +50,12 @@ export function ConfirmationPendingContent({
           </RowBetween>
         )}
         <ConfirmedIcon inline={inline}>
-          <CustomLightSpinner
+          {/* <CustomLightSpinner
             src={Circle}
             alt="loader"
             size={inline ? "40px" : "90px"}
-          />
+          /> */}
+          <Loader size="56px" />
         </ConfirmedIcon>
         <AutoColumn gap="12px" justify={"center"}>
           <Text fontWeight={500} fontSize={20} textAlign="center">

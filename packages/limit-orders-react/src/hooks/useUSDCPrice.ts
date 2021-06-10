@@ -79,6 +79,8 @@ export function useUSDCValue(
   const price = useUSDCPrice(currencyAmount?.currency);
 
   return useMemo(() => {
+    if (!price && currencyAmount?.currency.symbol === "USDC")
+      return currencyAmount as CurrencyAmount<Token>;
     if (!price || !currencyAmount) return null;
     try {
       return price.quote(currencyAmount);

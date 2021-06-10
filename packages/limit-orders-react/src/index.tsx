@@ -1,5 +1,5 @@
 import React from "react";
-import { gelatoReducers } from "./state";
+import store, { gelatoReducers } from "./state";
 import ApplicationUpdater from "./state/gapplication/updater";
 import ListsUpdater from "./state/glists/updater";
 import MulticallUpdater from "./state/gmulticall/updater";
@@ -39,4 +39,5 @@ export {
   useGelatoLimitOrdersHistory,
   GelatoLimitOrder as GelatoLimitOrderPanel,
   gelatoReducers,
+  store,
 };

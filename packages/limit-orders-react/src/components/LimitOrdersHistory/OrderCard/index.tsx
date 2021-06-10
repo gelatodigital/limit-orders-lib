@@ -181,39 +181,26 @@ export default function OrderCard({ order }: { order: Order }) {
     ? CurrencyAmount.fromRawAmount(inputToken, order.inputAmount)
     : undefined;
 
-  const getExecutionPrice = (
-    inputAmount: BigNumberish,
-    outputAmount: BigNumberish,
-    isInverted = false
-  ): string => {
-    const factor = BigNumber.from(10).pow(BigNumber.from(18));
+  const rawMinReturn =
+    outputToken && gelatoLibrary && inputToken
+      ? gelatoLibrary.getRawMinReturn(order.minReturn)
+      : undefined;
 
-    if (isInverted) {
-      return BigNumber.from(inputAmount)
-        .mul(factor)
-        .div(outputAmount)
-        .toString();
-    } else {
-      return BigNumber.from(outputAmount)
-        .mul(factor)
-        .div(inputAmount)
-        .toString();
-    }
-  };
-  console.log(
-    order.inputAmount,
-    inputToken?.decimals,
-    gelatoLibrary?.getRawMinReturn(order.minReturn),
-    outputToken?.decimals
-  );
-
-  const rawMinReturn = gelatoLibrary?.getRawMinReturn(order.minReturn);
+  const rawMinReturnAmount =
+    outputToken && gelatoLibrary && inputToken && rawMinReturn
+      ? CurrencyAmount.fromRawAmount(outputToken, rawMinReturn)
+      : undefined;
 
   const executionRate =
     outputToken && gelatoLibrary && inputToken && rawMinReturn
       ? CurrencyAmount.fromRawAmount(
           outputToken,
-          getExecutionPrice(order.inputAmount, rawMinReturn)
+          gelatoLibrary.getExecutionPrice(
+            order.inputAmount,
+            inputToken.decimals,
+            rawMinReturn,
+            outputToken.decimals
+          )
         )
       : undefined;
 
@@ -361,9 +348,9 @@ export default function OrderCard({ order }: { order: Order }) {
               >
                 {`Sell ${inputAmount ? inputAmount.toSignificant(4) : "-"} ${
                   inputAmount?.currency.symbol ?? ""
-                } for ${outputAmount ? rawMinReturn : "-"} ${
-                  outputAmount?.currency.symbol ?? ""
-                }`}
+                } for ${
+                  rawMinReturnAmount ? rawMinReturnAmount.toSignificant(4) : "-"
+                } ${outputAmount?.currency.symbol ?? ""}`}
               </TYPE.main>
             </RowBetween>
           </OrderRow>
