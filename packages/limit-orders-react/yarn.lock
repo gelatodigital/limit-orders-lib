@@ -1751,10 +1751,10 @@
     "@ethersproject/properties" "^5.3.0"
     "@ethersproject/strings" "^5.3.0"
 
-"@gelatonetwork/limit-orders-lib@^1.0.0-3":
-  version "1.0.0-3"
-  resolved "https://registry.yarnpkg.com/@gelatonetwork/limit-orders-lib/-/limit-orders-lib-1.0.0-3.tgz#33d0589501a3b556c4429312c5f3e91d24f92759"
-  integrity sha512-ZiROI3ckxzQXehFo1zLB618ktf3BoRfDhJNxLof7R2jeyHkkSMqoy+Xkg/5xpoSoWhqejwH4qJwBl0d2eqE/hw==
+"@gelatonetwork/limit-orders-lib@^1.0.0-4":
+  version "1.0.0-4"
+  resolved "https://registry.yarnpkg.com/@gelatonetwork/limit-orders-lib/-/limit-orders-lib-1.0.0-4.tgz#9a51a30d14b5145dc28a668a6914c71f368ded79"
+  integrity sha512-TZ3Mu4qSt801iL7UaPpZU5pCpy6RtE7YenkgGcpIYlBTbhEtpUQ3/UOxUW8zezcaIXkH2whtCyz1br8iYMzW+Q==
   dependencies:
     ethers "5.2.0"
     graphql "15.5.0"
