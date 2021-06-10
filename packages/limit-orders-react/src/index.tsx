@@ -3,7 +3,6 @@ import { gelatoReducers } from "./state";
 import ApplicationUpdater from "./state/gapplication/updater";
 import ListsUpdater from "./state/glists/updater";
 import MulticallUpdater from "./state/gmulticall/updater";
-import { ThemeProvider, DefaultTheme } from "styled-components";
 import {
   useGelatoLimitOrders,
   useGelatoLimitOrdersHandlers,
@@ -17,24 +16,20 @@ export function GelatoProvider({
   chainId,
   library,
   children,
-  theme,
   account,
 }: {
   chainId: number | undefined;
   library: any | undefined;
   account: string | undefined;
-  theme: DefaultTheme;
   children?: React.ReactNode;
 }) {
   return (
-    <ThemeProvider theme={theme}>
-      <Web3Provider chainId={chainId} library={library} account={account}>
-        <ListsUpdater />
-        <ApplicationUpdater />
-        <MulticallUpdater />
-        {children}
-      </Web3Provider>
-    </ThemeProvider>
+    <Web3Provider chainId={chainId} library={library} account={account}>
+      <ListsUpdater />
+      <ApplicationUpdater />
+      <MulticallUpdater />
+      {children}
+    </Web3Provider>
   );
 }
 

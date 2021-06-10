@@ -344,7 +344,7 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     inputError,
     inputAmount,
     trade: trade ?? undefined,
-    parsedAmounts: parsedAmounts as any,
+    parsedAmounts,
     price,
   };
 }
