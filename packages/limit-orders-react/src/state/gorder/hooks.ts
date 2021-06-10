@@ -289,6 +289,10 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     inputError = inputError ?? "Select a token";
   }
 
+  if (currencies.input?.wrapped === currencies.output?.wrapped) {
+    inputError = inputError ?? "Order not allowed";
+  }
+
   const formattedTo = isAddress(to);
   if (!to || !formattedTo) {
     inputError = inputError ?? "Enter a recipient";
