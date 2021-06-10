@@ -20,7 +20,7 @@ export function getExplorerLink(
 
   if (chainId === 1) prefix = `https://etherscan.io`;
   else if (chainId === 3) prefix = `https://ropsten.etherscan.io`;
-  else if (chainId === 37) prefix = `https://polygonscan.com`;
+  else if (chainId === 137) prefix = `https://polygonscan.com`;
 
   switch (type) {
     case ExplorerDataType.TRANSACTION: {

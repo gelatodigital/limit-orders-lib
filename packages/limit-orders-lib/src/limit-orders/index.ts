@@ -249,27 +249,42 @@ export class GelatoLimitOrders {
   }
 
   public getExecutionPriceFromMinReturn(
+    inputAmount: BigNumberish,
     minReturn: BigNumberish,
     extraSlippageBPS?: number
   ): string {
     if (isEthereumChain(this._chainId))
       throw new Error("Method not available for current chain.");
 
-    const gelatoFee = BigNumber.from(GelatoLimitOrders.gelatoFeeBPS).div(10000);
+    const rawMinReturn = this.getRawMinReturn(minReturn, extraSlippageBPS);
 
-    const slippage = extraSlippageBPS
-      ? BigNumber.from(GelatoLimitOrders.slippageBPS + extraSlippageBPS).div(
-          10000
-        )
-      : BigNumber.from(GelatoLimitOrders.slippageBPS).div(10000);
-
-    const fees = gelatoFee.add(slippage);
-
-    const executionPrice = BigNumber.from(minReturn).div(
-      BigNumber.from(1).sub(fees)
+    const executionPrice = BigNumber.from(rawMinReturn).div(
+      BigNumber.from(inputAmount)
     );
 
     return executionPrice.toString();
+  }
+
+  public getRawMinReturn(
+    minReturn: BigNumberish,
+    extraSlippageBPS?: number
+  ): string {
+    if (isEthereumChain(this._chainId))
+      throw new Error("Method not available for current chain.");
+
+    const gelatoFee = BigNumber.from(GelatoLimitOrders.gelatoFeeBPS);
+
+    const slippage = extraSlippageBPS
+      ? BigNumber.from(GelatoLimitOrders.slippageBPS + extraSlippageBPS)
+      : BigNumber.from(GelatoLimitOrders.slippageBPS);
+
+    const fees = gelatoFee.add(slippage);
+
+    const rawMinReturn = BigNumber.from(minReturn)
+      .div(BigNumber.from(10000).sub(fees))
+      .mul(10000);
+
+    return rawMinReturn.toString();
   }
 
   public async getOrders(owner: string): Promise<Order[]> {

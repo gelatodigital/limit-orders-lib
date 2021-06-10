@@ -4,7 +4,7 @@ import { darken } from "polished";
 import { ArrowRight } from "react-feather";
 import { TYPE } from "../../../theme";
 import { RowBetween } from "../../Row";
-import { Order } from "@gelatonetwork/limit-orders-lib";
+import { GelatoLimitOrders, Order } from "@gelatonetwork/limit-orders-lib";
 import useTheme from "../../../hooks/useTheme";
 import { useCurrency } from "../../../hooks/Tokens";
 import CurrencyLogo from "../../CurrencyLogo";
@@ -16,6 +16,9 @@ import {
 } from "../../../hooks/gelato";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import ConfirmCancellationModal from "../ConfirmCancellationModal";
+import { useTradeExactIn } from "../../../hooks/useTrade";
+import { Dots } from "../../order/styleds";
+import { BigNumber, BigNumberish } from "ethers";
 
 const handleColorType = (status: string, theme: DefaultTheme) => {
   switch (status) {
@@ -82,6 +85,7 @@ const StyledTokenName = styled.span<{ active?: boolean }>`
 
 const OrderRow = styled(LabelRow)`
   justify-content: flex-end;
+  margin-top: -8px;
 `;
 
 const OrderStatus = styled.span<{ status: string; clickable: boolean }>`
@@ -159,10 +163,34 @@ const Spacer = styled.div`
   flex: 1 1 auto;
 `;
 
+const getExecutionPriceFromMinReturn = (
+  minReturn: BigNumberish,
+  extraSlippageBPS?: number
+): string => {
+  const gelatoFee = BigNumber.from(GelatoLimitOrders.gelatoFeeBPS);
+
+  const slippage = extraSlippageBPS
+    ? BigNumber.from(GelatoLimitOrders.slippageBPS + extraSlippageBPS)
+    : BigNumber.from(GelatoLimitOrders.slippageBPS);
+
+  const fees = gelatoFee.add(slippage);
+
+  console.log("fees", fees.toString());
+  console.log("minr", minReturn.toString());
+
+  const executionPrice = BigNumber.from(minReturn)
+    .div(BigNumber.from(10000).sub(fees))
+    .mul(10000);
+
+  console.log("exec", executionPrice.toString());
+  return executionPrice.toString();
+};
+
 export default function OrderCard({ order }: { order: Order }) {
   const theme = useTheme();
 
   const { handleLimitOrderCancellation } = useGelatoLimitOrdersHandlers();
+
   const { library: gelatoLibrary } = useGelatoLimitOrders();
 
   const inputToken = useCurrency(order.inputToken);
@@ -176,25 +204,29 @@ export default function OrderCard({ order }: { order: Order }) {
     ? CurrencyAmount.fromRawAmount(inputToken, order.inputAmount)
     : undefined;
 
-  // const minReturn =
-  //   outputAmount && inputAmount
-  //     ? outputAmount
-  //         .divide(inputAmount.asFraction)
-  //         .multiply(
-  //           JSBI.exponentiate(
-  //             JSBI.BigInt(10),
-  //             JSBI.BigInt(outputAmount.currency.decimals)
-  //           )
-  //         )
-  //     : undefined;
+  const minReturn =
+    outputAmount && inputAmount
+      ? outputAmount
+          .divide(inputAmount.asFraction)
+          .multiply(
+            JSBI.exponentiate(
+              JSBI.BigInt(10),
+              JSBI.BigInt(outputAmount.currency.decimals * 2)
+            )
+          )
+      : undefined;
+
+  console.log("rder.minReturn", order.minReturn);
 
   const executionRate =
-    outputToken && gelatoLibrary
+    outputToken && gelatoLibrary && minReturn
       ? CurrencyAmount.fromRawAmount(
           outputToken,
-          gelatoLibrary.getExecutionPriceFromMinReturn(order.minReturn)
+          getExecutionPriceFromMinReturn(order.minReturn)
         )
       : undefined;
+
+  const trade = useTradeExactIn(inputAmount, outputToken ?? undefined);
 
   // modal and loading
   const [
@@ -280,9 +312,7 @@ export default function OrderCard({ order }: { order: Order }) {
           <CurrencySelect selected={true}>
             <Aligner>
               <CurrencyLogo currency={inputToken ?? undefined} size={"18px"} />
-              <StyledTokenName>
-                {inputToken?.name ?? "Loading..."}
-              </StyledTokenName>
+              <StyledTokenName>{inputToken?.name ?? <Dots />}</StyledTokenName>
             </Aligner>
           </CurrencySelect>
           <ArrowWrapper>
@@ -291,9 +321,7 @@ export default function OrderCard({ order }: { order: Order }) {
           <CurrencySelect selected={true}>
             <Aligner>
               <CurrencyLogo currency={outputToken ?? undefined} size={"18px"} />
-              <StyledTokenName>
-                {outputToken?.name ?? "Loading..."}
-              </StyledTokenName>
+              <StyledTokenName>{outputToken?.name ?? <Dots />}</StyledTokenName>
             </Aligner>
           </CurrencySelect>
           <Spacer />
@@ -329,6 +357,28 @@ export default function OrderCard({ order }: { order: Order }) {
                   outputAmount?.currency.symbol ?? ""
                 }`}
               </TYPE.main>
+            </RowBetween>
+          </OrderRow>
+        </Aligner>
+        <Aligner>
+          <OrderRow>
+            <RowBetween>
+              <TYPE.body
+                color={theme.text2}
+                fontWeight={400}
+                fontSize={14}
+                style={{ display: "inline", cursor: "pointer" }}
+              >
+                Current rate:{" "}
+                {trade && inputToken && outputToken ? (
+                  `1 ${inputToken.symbol}` +
+                  " = " +
+                  trade.executionPrice.toSignificant(4) +
+                  ` ${outputToken.symbol}`
+                ) : (
+                  <Dots />
+                )}
+              </TYPE.body>
             </RowBetween>
           </OrderRow>
         </Aligner>
