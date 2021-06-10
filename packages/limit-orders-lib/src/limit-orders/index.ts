@@ -248,23 +248,6 @@ export class GelatoLimitOrders {
     };
   }
 
-  public getExecutionPriceFromMinReturn(
-    inputAmount: BigNumberish,
-    minReturn: BigNumberish,
-    extraSlippageBPS?: number
-  ): string {
-    if (isEthereumChain(this._chainId))
-      throw new Error("Method not available for current chain.");
-
-    const rawMinReturn = this.getRawMinReturn(minReturn, extraSlippageBPS);
-
-    const executionPrice = BigNumber.from(rawMinReturn).div(
-      BigNumber.from(inputAmount)
-    );
-
-    return executionPrice.toString();
-  }
-
   public getRawMinReturn(
     minReturn: BigNumberish,
     extraSlippageBPS?: number
@@ -285,6 +268,32 @@ export class GelatoLimitOrders {
       .mul(10000);
 
     return rawMinReturn.toString();
+  }
+
+  public getExecutionPrice(
+    inputAmount: BigNumberish,
+    inputDecimals: number,
+    outputAmount: BigNumberish,
+    outputDecimals: number,
+    isInverted = false
+  ): string {
+    const factor = BigNumber.from(10).pow(BigNumber.from(18));
+
+    if (isInverted) {
+      return BigNumber.from(inputAmount)
+        .mul(factor)
+        .div(outputAmount)
+        .mul(BigNumber.from(10).pow(BigNumber.from(outputDecimals)))
+        .div(BigNumber.from(10).pow(BigNumber.from(inputDecimals)))
+        .toString();
+    } else {
+      return BigNumber.from(outputAmount)
+        .mul(factor)
+        .div(inputAmount)
+        .mul(BigNumber.from(10).pow(BigNumber.from(inputDecimals)))
+        .div(BigNumber.from(10).pow(BigNumber.from(outputDecimals)))
+        .toString();
+    }
   }
 
   public async getOrders(owner: string): Promise<Order[]> {

@@ -163,29 +163,6 @@ const Spacer = styled.div`
   flex: 1 1 auto;
 `;
 
-const getExecutionPriceFromMinReturn = (
-  minReturn: BigNumberish,
-  extraSlippageBPS?: number
-): string => {
-  const gelatoFee = BigNumber.from(GelatoLimitOrders.gelatoFeeBPS);
-
-  const slippage = extraSlippageBPS
-    ? BigNumber.from(GelatoLimitOrders.slippageBPS + extraSlippageBPS)
-    : BigNumber.from(GelatoLimitOrders.slippageBPS);
-
-  const fees = gelatoFee.add(slippage);
-
-  console.log("fees", fees.toString());
-  console.log("minr", minReturn.toString());
-
-  const executionPrice = BigNumber.from(minReturn)
-    .div(BigNumber.from(10000).sub(fees))
-    .mul(10000);
-
-  console.log("exec", executionPrice.toString());
-  return executionPrice.toString();
-};
-
 export default function OrderCard({ order }: { order: Order }) {
   const theme = useTheme();
 
@@ -204,25 +181,26 @@ export default function OrderCard({ order }: { order: Order }) {
     ? CurrencyAmount.fromRawAmount(inputToken, order.inputAmount)
     : undefined;
 
-  const minReturn =
-    outputAmount && inputAmount
-      ? outputAmount
-          .divide(inputAmount.asFraction)
-          .multiply(
-            JSBI.exponentiate(
-              JSBI.BigInt(10),
-              JSBI.BigInt(outputAmount.currency.decimals * 2)
-            )
-          )
-      : undefined;
+  console.log("order.inputAmount", order.inputAmount);
 
-  console.log("rder.minReturn", order.minReturn);
+  console.log("  order.minReturn", order.minReturn);
+
+  console.log(
+    "exec rate",
+    gelatoLibrary?.getExecutionPriceFromMinReturn(
+      order.inputAmount,
+      order.minReturn
+    )
+  );
 
   const executionRate =
-    outputToken && gelatoLibrary && minReturn
+    outputToken && gelatoLibrary
       ? CurrencyAmount.fromRawAmount(
           outputToken,
-          getExecutionPriceFromMinReturn(order.minReturn)
+          gelatoLibrary.getExecutionPriceFromMinReturn(
+            order.inputAmount,
+            order.minReturn
+          )
         )
       : undefined;
 
@@ -309,23 +287,40 @@ export default function OrderCard({ order }: { order: Order }) {
       />
       <Container hideInput={true}>
         <RowBetween padding="10px">
-          <CurrencySelect selected={true}>
-            <Aligner>
-              <CurrencyLogo currency={inputToken ?? undefined} size={"18px"} />
-              <StyledTokenName>{inputToken?.name ?? <Dots />}</StyledTokenName>
-            </Aligner>
-          </CurrencySelect>
+          {inputToken ? (
+            <CurrencySelect selected={true}>
+              <Aligner>
+                <CurrencyLogo
+                  currency={inputToken ?? undefined}
+                  size={"18px"}
+                />
+                <StyledTokenName>
+                  {inputToken?.name ?? <Dots />}
+                </StyledTokenName>
+              </Aligner>
+            </CurrencySelect>
+          ) : (
+            <Dots />
+          )}
           <ArrowWrapper>
             <ArrowRight size="16" color={theme.text1} />
           </ArrowWrapper>
-          <CurrencySelect selected={true}>
-            <Aligner>
-              <CurrencyLogo currency={outputToken ?? undefined} size={"18px"} />
-              <StyledTokenName>{outputToken?.name ?? <Dots />}</StyledTokenName>
-            </Aligner>
-          </CurrencySelect>
+          {outputToken ? (
+            <CurrencySelect selected={true}>
+              <Aligner>
+                <CurrencyLogo
+                  currency={outputToken ?? undefined}
+                  size={"18px"}
+                />
+                <StyledTokenName>
+                  {outputToken.name ?? <Dots />}
+                </StyledTokenName>
+              </Aligner>
+            </CurrencySelect>
+          ) : (
+            <Dots />
+          )}
           <Spacer />
-
           <OrderStatus
             clickable={order.status === "open" ? true : false}
             onClick={() =>
