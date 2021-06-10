@@ -19,7 +19,7 @@ export default function useGasOverhead(
   const { chainId } = useWeb3();
 
   const gasPrice = useGasPrice();
-  const NativeCurrency = useCurrency("NATIVE");
+  const nativeCurrency = useCurrency("NATIVE");
 
   const requiredGas = formatUnits(
     gasPrice
@@ -29,7 +29,7 @@ export default function useGasOverhead(
 
   const requiredGasAsCurrencyAmount = tryParseAmount(
     requiredGas,
-    NativeCurrency ?? undefined
+    nativeCurrency ?? undefined
   );
 
   const gasCostInInputTokens = useTradeExactIn(
@@ -45,31 +45,44 @@ export default function useGasOverhead(
     [gasCostInInputTokens, inputAmount]
   );
 
-  const realExecutionRate = useMemo(
-    () =>
-      realInputAmount && outputAmount && inputAmount
-        ? rateType === Rate.DIV
-          ? realInputAmount
-              .divide(outputAmount.asFraction)
-              ?.multiply(
-                JSBI.exponentiate(
-                  JSBI.BigInt(10),
-                  JSBI.BigInt(outputAmount.currency.decimals)
-                )
+  const realExecutionRate = useMemo(() => {
+    if (
+      !inputAmount ||
+      !gasCostInInputTokens ||
+      !realInputAmount ||
+      !outputAmount
+    )
+      return "-";
+
+    if (gasCostInInputTokens.outputAmount.greaterThan(inputAmount.asFraction))
+      return "never executes";
+    else
+      return rateType === Rate.DIV
+        ? realInputAmount
+            .divide(outputAmount.asFraction)
+            ?.multiply(
+              JSBI.exponentiate(
+                JSBI.BigInt(10),
+                JSBI.BigInt(outputAmount.currency.decimals)
               )
-              ?.toSignificant(6)
-          : outputAmount
-              ?.divide(realInputAmount.asFraction)
-              ?.multiply(
-                JSBI.exponentiate(
-                  JSBI.BigInt(10),
-                  JSBI.BigInt(inputAmount.currency.decimals)
-                )
+            )
+            ?.toSignificant(6)
+        : outputAmount
+            ?.divide(realInputAmount.asFraction)
+            ?.multiply(
+              JSBI.exponentiate(
+                JSBI.BigInt(10),
+                JSBI.BigInt(inputAmount.currency.decimals)
               )
-              ?.toSignificant(6)
-        : "-",
-    [rateType, realInputAmount, outputAmount, inputAmount]
-  );
+            )
+            ?.toSignificant(6);
+  }, [
+    rateType,
+    realInputAmount,
+    outputAmount,
+    inputAmount,
+    gasCostInInputTokens,
+  ]);
 
   return chainId === 1
     ? { realExecutionRate, gasPrice }

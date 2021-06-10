@@ -43,16 +43,12 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     [chainId, library]
   );
 
-  const { currencies, parsedAmounts, price } = useDerivedOrderInfo();
+  const { currencies, parsedAmounts } = useDerivedOrderInfo();
 
-  const { independentField, rateType } = useOrderState();
+  const { rateType } = useOrderState();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
@@ -120,7 +116,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       minReturn
     );
     return tx?.hash;
-  }, [gelatoLimitOrders, rawAmounts, currencies, chainId]);
+  }, [gelatoLimitOrders, rawAmounts, chainId, inputCurrency, outputCurrency]);
 
   const handleLimitOrderCancellation = useCallback(
     async (

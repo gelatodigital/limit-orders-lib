@@ -1,12 +1,6 @@
 import JSBI from "jsbi";
 import { parseUnits } from "@ethersproject/units";
-import {
-  Currency,
-  CurrencyAmount,
-  Percent,
-  Price,
-  TradeType,
-} from "@uniswap/sdk-core";
+import { Currency, CurrencyAmount, Price, TradeType } from "@uniswap/sdk-core";
 import { Trade } from "@uniswap/v2-sdk";
 import { useCallback, useMemo } from "react";
 import { useCurrency } from "../../hooks/Tokens";

@@ -22,10 +22,7 @@ export interface AdvancedSwapDetailsProps {
   allowedSlippage: Percent;
 }
 
-export function AdvancedSwapDetails({
-  trade,
-  allowedSlippage,
-}: AdvancedSwapDetailsProps) {
+export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
   const theme = useTheme();
   const { chainId } = useWeb3();
   const {
@@ -77,7 +74,7 @@ export function AdvancedSwapDetails({
       slippagePercentage,
       gelatoFeePercentage,
     };
-  }, [trade, outputAmount, chainId, library, parsedAmounts, rawOutputAmount]);
+  }, [trade, outputAmount, chainId, library, rawOutputAmount]);
 
   return !trade ? null : (
     <AutoColumn gap="8px">
