@@ -181,26 +181,39 @@ export default function OrderCard({ order }: { order: Order }) {
     ? CurrencyAmount.fromRawAmount(inputToken, order.inputAmount)
     : undefined;
 
-  console.log("order.inputAmount", order.inputAmount);
+  const getExecutionPrice = (
+    inputAmount: BigNumberish,
+    outputAmount: BigNumberish,
+    isInverted = false
+  ): string => {
+    const factor = BigNumber.from(10).pow(BigNumber.from(18));
 
-  console.log("  order.minReturn", order.minReturn);
-
+    if (isInverted) {
+      return BigNumber.from(inputAmount)
+        .mul(factor)
+        .div(outputAmount)
+        .toString();
+    } else {
+      return BigNumber.from(outputAmount)
+        .mul(factor)
+        .div(inputAmount)
+        .toString();
+    }
+  };
   console.log(
-    "exec rate",
-    gelatoLibrary?.getExecutionPriceFromMinReturn(
-      order.inputAmount,
-      order.minReturn
-    )
+    order.inputAmount,
+    inputToken?.decimals,
+    gelatoLibrary?.getRawMinReturn(order.minReturn),
+    outputToken?.decimals
   );
 
+  const rawMinReturn = gelatoLibrary?.getRawMinReturn(order.minReturn);
+
   const executionRate =
-    outputToken && gelatoLibrary
+    outputToken && gelatoLibrary && inputToken && rawMinReturn
       ? CurrencyAmount.fromRawAmount(
           outputToken,
-          gelatoLibrary.getExecutionPriceFromMinReturn(
-            order.inputAmount,
-            order.minReturn
-          )
+          getExecutionPrice(order.inputAmount, rawMinReturn)
         )
       : undefined;
 
@@ -348,7 +361,7 @@ export default function OrderCard({ order }: { order: Order }) {
               >
                 {`Sell ${inputAmount ? inputAmount.toSignificant(4) : "-"} ${
                   inputAmount?.currency.symbol ?? ""
-                } for ${outputAmount ? outputAmount.toSignificant(4) : "-"} ${
+                } for ${outputAmount ? rawMinReturn : "-"} ${
                   outputAmount?.currency.symbol ?? ""
                 }`}
               </TYPE.main>

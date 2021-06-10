@@ -277,21 +277,19 @@ export class GelatoLimitOrders {
     outputDecimals: number,
     isInverted = false
   ): string {
-    const factor = BigNumber.from(10).pow(BigNumber.from(18));
+    const factor = BigNumber.from(10).pow(
+      BigNumber.from(isInverted ? outputDecimals : inputDecimals)
+    );
 
     if (isInverted) {
       return BigNumber.from(inputAmount)
         .mul(factor)
         .div(outputAmount)
-        .mul(BigNumber.from(10).pow(BigNumber.from(outputDecimals)))
-        .div(BigNumber.from(10).pow(BigNumber.from(inputDecimals)))
         .toString();
     } else {
       return BigNumber.from(outputAmount)
         .mul(factor)
         .div(inputAmount)
-        .mul(BigNumber.from(10).pow(BigNumber.from(inputDecimals)))
-        .div(BigNumber.from(10).pow(BigNumber.from(outputDecimals)))
         .toString();
     }
   }
