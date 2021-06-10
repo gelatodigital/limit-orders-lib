@@ -494,7 +494,8 @@ export default function GelatoLimitOrder() {
         </Wrapper>
       </AppBody>
 
-      <LimitOrdersHistory />
+      {!account ? null : <LimitOrdersHistory />}
+
       {!swapIsUnsupported ? null : (
         <UnsupportedCurrencyFooter
           show={swapIsUnsupported}
