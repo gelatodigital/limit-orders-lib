@@ -1,7 +1,6 @@
 export const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
-export const MAX_SLIPPAGE_BPS = 20; // 0.2%
-export const TWENTY_BPS_LP_FEE = 20; // 0.2%
+export const SLIPPAGE_BPS = 40; // 0.4%
 export const TWO_BPS_GELATO_FEE = 2; // 0.02%
 
 export const CHAIN_ID = {

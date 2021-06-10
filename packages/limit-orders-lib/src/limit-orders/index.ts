@@ -11,9 +11,8 @@ import {
   ETH_ADDRESS,
   GELATO_LIMIT_ORDERS_ADDRESS,
   GELATO_LIMIT_ORDERS_MODULE_ADDRESS,
-  MAX_SLIPPAGE_BPS,
+  SLIPPAGE_BPS,
   SUBGRAPH_URL,
-  TWENTY_BPS_LP_FEE,
   TWO_BPS_GELATO_FEE,
 } from "../constants";
 import {
@@ -36,6 +35,9 @@ export class GelatoLimitOrders {
   private _gelatoLimitOrders: GelatoLimitOrdersContract;
   private _moduleAddress: string;
   private _subgraphUrl: string;
+
+  public static slippageBPS = SLIPPAGE_BPS;
+  public static gelatoFeeBPS = TWO_BPS_GELATO_FEE;
 
   get chainId(): number {
     return this._chainId;
@@ -208,60 +210,64 @@ export class GelatoLimitOrders {
 
   public getFeeAndSlippageAdjustedMinReturn(
     outputAmount: BigNumberish,
-    extraSlippageBPS?: number,
-    customLPFeeBPS?: BigNumberish
+    extraSlippageBPS?: number
   ): {
     minReturn: string;
     slippage: string;
-    slippageBPS: string;
-    lpFee: string;
-    lpFeeBPS: string;
     gelatoFee: string;
-    gelatoFeeBPS: string;
   } {
     if (isEthereumChain(this._chainId))
       throw new Error("Method not available for current chain.");
 
     if (extraSlippageBPS) {
-      if (extraSlippageBPS < 0)
-        throw new Error("Extra Slippage BPS must gte 0");
       if (!Number.isInteger(extraSlippageBPS))
         throw new Error("Extra Slippage BPS must an unsigned integer");
     }
 
-    const gelatoFeeBPS = TWO_BPS_GELATO_FEE;
     const gelatoFee = BigNumber.from(outputAmount)
-      .mul(gelatoFeeBPS)
+      .mul(GelatoLimitOrders.gelatoFeeBPS)
       .div(10000)
       .gte(1)
-      ? BigNumber.from(outputAmount).mul(gelatoFeeBPS).div(10000)
+      ? BigNumber.from(outputAmount)
+          .mul(GelatoLimitOrders.gelatoFeeBPS)
+          .div(10000)
       : BigNumber.from(1);
 
-    const lpFeeBPS = customLPFeeBPS
-      ? BigNumber.from(customLPFeeBPS)
-      : TWENTY_BPS_LP_FEE;
-    const lpFee = BigNumber.from(outputAmount).mul(lpFeeBPS).div(10000);
-
     const slippageBPS = extraSlippageBPS
-      ? MAX_SLIPPAGE_BPS + extraSlippageBPS
-      : MAX_SLIPPAGE_BPS;
+      ? GelatoLimitOrders.slippageBPS + extraSlippageBPS
+      : GelatoLimitOrders.slippageBPS;
 
     const slippage = BigNumber.from(outputAmount).mul(slippageBPS).div(10000);
 
-    const minReturn = BigNumber.from(outputAmount)
-      .sub(gelatoFee)
-      .sub(lpFee)
-      .sub(slippage);
+    const minReturn = BigNumber.from(outputAmount).sub(gelatoFee).sub(slippage);
 
     return {
       minReturn: minReturn.toString(),
       slippage: slippage.toString(),
-      slippageBPS: slippageBPS.toString(),
       gelatoFee: gelatoFee.toString(),
-      gelatoFeeBPS: gelatoFeeBPS.toString(),
-      lpFee: lpFee.toString(),
-      lpFeeBPS: lpFeeBPS.toString(),
     };
+  }
+
+  public getExecutionPriceFromMinReturn(
+    minReturn: BigNumberish,
+    extraSlippageBPS?: number
+  ): string {
+    if (isEthereumChain(this._chainId))
+      throw new Error("Method not available for current chain.");
+
+    const gelatoFee = BigNumber.from(GelatoLimitOrders.gelatoFeeBPS).div(10000);
+
+    const slippage = extraSlippageBPS
+      ? GelatoLimitOrders.slippageBPS + extraSlippageBPS
+      : GelatoLimitOrders.slippageBPS;
+
+    const fees = gelatoFee.add(slippage);
+
+    const executionPrice = BigNumber.from(minReturn).div(
+      BigNumber.from(1).sub(fees)
+    );
+
+    return executionPrice.toString();
   }
 
   public async getOrders(owner: string): Promise<Order[]> {

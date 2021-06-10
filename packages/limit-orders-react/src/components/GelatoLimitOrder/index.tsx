@@ -42,6 +42,9 @@ import { useWeb3 } from "../../web3";
 import useTheme from "../../hooks/useTheme";
 import LimitOrdersHistory from "../LimitOrdersHistory";
 import useGasOverhead from "../../hooks/useGasOverhead";
+import PoweredByGelato from "../../assets/svg/poweredbygelato.svg";
+import PoweredByGelatoBlack from "../../assets/svg/poweredbygelato_black.svg";
+import PoweredByGelatoWhite from "../../assets/svg/poweredbygelato_white.svg";
 
 const StyledInfo = styled(Info)`
   opacity: 0.4;
@@ -58,8 +61,35 @@ enum Rate {
   MUL = "MUL",
 }
 
+const StyledPoweredByGelato = styled(PoweredByGelato)`
+  margin: 0 0.25rem 0 0.35rem;
+  height: 35%;
+  path {
+    stroke-width: 1.5px;
+  }
+`;
+
+const StyledPoweredByGelatoBlack = styled(PoweredByGelatoBlack)`
+  margin: 0 0.25rem 0 0.35rem;
+  height: 35%;
+  path {
+    stroke-width: 1.5px;
+  }
+`;
+
+const StyledPoweredByGelatoWhite = styled(PoweredByGelatoWhite)`
+  margin: 0 0.25rem 0 0.35rem;
+  height: 5%;
+  border-radius: 3px;
+  path {
+    stroke-width: 1.5px;
+    border-radius: 3px;
+  }
+`;
+
 export default function GelatoLimitOrder() {
   const { account } = useWeb3();
+
   const theme = useTheme();
 
   const recipient = account ?? null;
@@ -377,7 +407,9 @@ export default function GelatoLimitOrder() {
               style={{ justifyContent: !trade ? "center" : "space-between" }}
             >
               <RowFixed>
-                <ButtonGray
+                <StyledPoweredByGelatoWhite />
+
+                {/* <ButtonGray
                   width="fit-content"
                   padding="0.1rem 0.5rem"
                   disabled
@@ -390,7 +422,10 @@ export default function GelatoLimitOrder() {
                   }}
                 >
                   <TYPE.black fontSize={12}>Powered by Gelato🍦</TYPE.black>
-                </ButtonGray>
+                </ButtonGray> */}
+                {/* <StyledPoweredByGelato />
+                <StyledPoweredByGelatoBlack /> */}
+                {/* <StyledPoweredByGelatoWhite /> */}
               </RowFixed>
               {trade ? (
                 <RowFixed>

@@ -43,7 +43,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     [chainId, library]
   );
 
-  const { currencies, parsedAmounts } = useDerivedOrderInfo();
+  const { currencies, parsedAmounts, price } = useDerivedOrderInfo();
 
   const { independentField, rateType } = useOrderState();
 
@@ -155,50 +155,45 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
   }, [onSwitchTokens]);
 
   const handleRateType = useCallback(async () => {
-    if (independentField === Field.PRICE) {
-      if (rateType === Rate.MUL) {
-        const flipped =
-          parsedAmounts.input && parsedAmounts.output && outputCurrency
-            ? parsedAmounts.input
-                ?.divide(parsedAmounts.output.asFraction)
-                ?.multiply(
-                  JSBI.exponentiate(
-                    JSBI.BigInt(10),
-                    JSBI.BigInt(outputCurrency.decimals)
-                  )
+    if (rateType === Rate.MUL) {
+      const flipped =
+        parsedAmounts.input && parsedAmounts.output && outputCurrency
+          ? parsedAmounts.input
+              ?.divide(parsedAmounts.output.asFraction)
+              ?.multiply(
+                JSBI.exponentiate(
+                  JSBI.BigInt(10),
+                  JSBI.BigInt(outputCurrency.decimals)
                 )
-                ?.toSignificant(6)
-            : undefined;
-
-        onChangeRateType(Rate.DIV);
-        if (flipped) onUserInput(Field.PRICE, flipped);
-      } else {
-        const flipped =
-          parsedAmounts.input && parsedAmounts.output && inputCurrency
-            ? parsedAmounts.output
-                ?.divide(parsedAmounts.input.asFraction)
-                ?.multiply(
-                  JSBI.exponentiate(
-                    JSBI.BigInt(10),
-                    JSBI.BigInt(inputCurrency.decimals)
-                  )
-                )
-                ?.toSignificant(6)
-            : undefined;
-
-        onChangeRateType(Rate.MUL);
-        if (flipped) onUserInput(Field.PRICE, flipped);
-      }
+              )
+              ?.toSignificant(6)
+          : undefined;
+      onChangeRateType(Rate.DIV);
+      if (flipped) onUserInput(Field.PRICE, flipped);
     } else {
-      onChangeRateType(rateType === Rate.MUL ? Rate.DIV : Rate.MUL);
+      const flipped =
+        parsedAmounts.input && parsedAmounts.output && inputCurrency
+          ? parsedAmounts.output
+              ?.divide(parsedAmounts.input.asFraction)
+              ?.multiply(
+                JSBI.exponentiate(
+                  JSBI.BigInt(10),
+                  JSBI.BigInt(inputCurrency.decimals)
+                )
+              )
+              ?.toSignificant(6)
+          : undefined;
+      onChangeRateType(Rate.MUL);
+      if (flipped) onUserInput(Field.PRICE, flipped);
     }
   }, [
-    rateType,
     onUserInput,
-    independentField,
-    currencies,
-    parsedAmounts,
     onChangeRateType,
+    independentField,
+    rateType,
+    parsedAmounts,
+    inputCurrency,
+    outputCurrency,
   ]);
 
   return {

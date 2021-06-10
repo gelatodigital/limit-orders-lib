@@ -16,10 +16,11 @@ export function getExplorerLink(
   data: string,
   type: ExplorerDataType
 ): string {
-  let prefix = `https://etherscan.io`;
+  let prefix;
 
-  if (chainId === 3) prefix = `https://ropsten.etherscan.io`;
-  else if (chainId === 37) prefix = `https://explorer-mainnet.maticvigil.com`;
+  if (chainId === 1) prefix = `https://etherscan.io`;
+  else if (chainId === 3) prefix = `https://ropsten.etherscan.io`;
+  else if (chainId === 37) prefix = `https://polygonscan.com`;
 
   switch (type) {
     case ExplorerDataType.TRANSACTION: {
