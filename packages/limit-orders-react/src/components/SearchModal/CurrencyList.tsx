@@ -259,14 +259,8 @@ export default function CurrencyList({
         return null;
       }
     },
-    [
-      currencies.length,
-      onCurrencySelect,
-      otherCurrency,
-      selectedCurrency,
-      setImportToken,
-      showImportView,
-    ]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currencies.length]
   );
 
   const itemKey = useCallback((index: number, data: typeof itemData) => {

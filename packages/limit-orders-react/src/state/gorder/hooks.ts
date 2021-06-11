@@ -187,11 +187,11 @@ export interface DerivedOrderInfo {
     input: CurrencyAmount<Currency> | undefined;
     output: CurrencyAmount<Currency> | undefined;
   };
-  // formattedAmounts: {
-  //   input: string;
-  //   output: string;
-  //   price: string;
-  // };
+  formattedAmounts: {
+    input: string;
+    output: string;
+    price: string;
+  };
   price: Price<Currency, Currency> | undefined;
 }
 
@@ -330,29 +330,30 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
   const [balanceIn, amountIn] = [currencyBalances.input, parsedAmounts.input];
 
   if (balanceIn && amountIn && balanceIn.lessThan(amountIn)) {
-    inputError = "Insufficient " + amountIn.currency.symbol + " balance";
+    inputError =
+      inputError ?? "Insufficient " + amountIn.currency.symbol + " balance";
   }
 
-  // const formattedAmounts = {
-  //   input:
-  //     independentField === Field.INPUT
-  //       ? typedValue
-  //       : inputAmount?.toSignificant(6) ?? "",
-  //   output:
-  //     independentField === Field.OUTPUT
-  //       ? typedValue
-  //       : parsedAmounts.output?.toSignificant(6) ?? "",
-  //   price:
-  //     independentField === Field.PRICE
-  //       ? typedValue
-  //       : price?.toSignificant(6) ?? "",
-  // };
+  const formattedAmounts = {
+    input:
+      independentField === Field.INPUT
+        ? typedValue
+        : inputAmount?.toSignificant(6) ?? "",
+    output:
+      independentField === Field.OUTPUT
+        ? typedValue
+        : parsedAmounts.output?.toSignificant(6) ?? "",
+    price:
+      independentField === Field.PRICE
+        ? typedValue
+        : price?.toSignificant(6) ?? "",
+  };
 
   return {
     currencies,
     currencyBalances,
     inputError,
-    // formattedAmounts,
+    formattedAmounts,
     trade: trade ?? undefined,
     parsedAmounts,
     price,
