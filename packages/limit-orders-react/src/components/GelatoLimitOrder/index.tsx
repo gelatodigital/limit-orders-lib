@@ -108,6 +108,7 @@ export default function GelatoLimitOrder() {
       currencies,
       currencyBalances,
       trade,
+      formattedAmounts,
       inputError,
       price,
     },
@@ -176,7 +177,13 @@ export default function GelatoLimitOrder() {
     // parsedAmounts[independentField]?.greaterThan(JSBI.BigInt(0))
   );
   const routeNotFound = !trade?.route;
-  const isLoadingRoute = parsedAmounts.input && !trade; //V3TradeState.LOADING === v3TradeState
+  const isLoadingRoute =
+    (parsedAmounts.input && !trade) ||
+    (typedValue && currencies.input && currencies.output && !trade) ||
+    ((parsedAmounts.input || parsedAmounts.output) &&
+      currencies.input &&
+      currencies.output &&
+      !trade);
 
   const maxInputAmount: CurrencyAmount<Currency> | undefined = maxAmountSpend(
     currencyBalances.input
@@ -279,20 +286,20 @@ export default function GelatoLimitOrder() {
     rateType
   );
 
-  const formattedAmounts = {
-    input:
-      independentField === Field.INPUT
-        ? typedValue
-        : parsedAmounts.input?.toSignificant(6) ?? "",
-    output:
-      independentField === Field.OUTPUT
-        ? typedValue
-        : parsedAmounts.output?.toSignificant(6) ?? "",
-    price:
-      independentField === Field.PRICE
-        ? typedValue
-        : price?.toSignificant(6) ?? "",
-  };
+  // const formattedAmounts = {
+  //   input:
+  //     independentField === Field.INPUT
+  //       ? typedValue
+  //       : parsedAmounts.input?.toSignificant(6) ?? "",
+  //   output:
+  //     independentField === Field.OUTPUT
+  //       ? typedValue
+  //       : parsedAmounts.output?.toSignificant(6) ?? "",
+  //   price:
+  //     independentField === Field.PRICE
+  //       ? typedValue
+  //       : price?.toSignificant(6) ?? "",
+  // };
 
   return (
     <Fragment>

@@ -9,7 +9,9 @@ import Row from "../Row";
 import { useGelatoLimitOrdersHistory } from "../../hooks/gelato";
 import useTheme from "../../hooks/useTheme";
 import OrderCard from "./OrderCard/index";
+import TxCard from "./OrderCard/index";
 import { FixedSizeList } from "react-window";
+import { useAllTransactions } from "../../state/gtransactions/hooks";
 
 const TopSection = styled(AutoColumn)`
   max-width: 640px;
@@ -87,11 +89,14 @@ const LimitOrdersHistoryHeader = ({
   </StyledLimitOrderHistoryHeader>
 );
 
-type Tab = "open" | "cancelled" | "executed";
+type Tab = "open" | "cancelled" | "executed" | "txs";
+
 export default function LimitOrdersHistory() {
   const [orderTab, setOrderTab] = useState<Tab>("open");
 
   const theme = useTheme();
+
+  const txs = useAllTransactions();
 
   const { open, cancelled, executed } = useGelatoLimitOrdersHistory();
 
@@ -101,6 +106,14 @@ export default function LimitOrdersHistory() {
     return (
       <div style={style}>
         <OrderCard key={index} order={data[index]} />
+      </div>
+    );
+  }, []);
+
+  const TxsRow = useCallback(function OrderRow({ data, index, style }) {
+    return (
+      <div style={style}>
+        <TxCard key={index} order={data[index]} />
       </div>
     );
   }, []);
@@ -133,6 +146,12 @@ export default function LimitOrdersHistory() {
             title={"Executed"}
             active={orderTab === "executed"}
             onClick={() => handleActiveHeader("executed")}
+          />
+
+          <LimitOrdersHistoryHeader
+            title={"All Txs"}
+            active={orderTab === "txs"}
+            onClick={() => handleActiveHeader("txs")}
           />
         </HeaderTitles>
 
@@ -216,6 +235,33 @@ export default function LimitOrdersHistory() {
                 itemKey={itemKey}
               >
                 {Row}
+              </FixedSizeList>
+            ) : null}
+
+            {orderTab === "txs" && !txs.length ? (
+              <TYPE.body
+                color={theme.text3}
+                style={{
+                  paddingTop: "20px",
+                  paddingBottom: "20px",
+                  textAlign: "center",
+                }}
+                fontWeight={400}
+                fontSize={16}
+              >
+                {"No transactions"}
+              </TYPE.body>
+            ) : orderTab === "txs" ? (
+              <FixedSizeList
+                height={438}
+                ref={fixedListRef as any}
+                width="100%"
+                itemData={Object.values(txs)}
+                itemCount={Object.values(txs).length}
+                itemSize={itemSize}
+                itemKey={itemKey}
+              >
+                {TxsRow}
               </FixedSizeList>
             ) : null}
           </TopSection>

@@ -3,6 +3,7 @@ import store, { gelatoReducers } from "./state";
 import ApplicationUpdater from "./state/gapplication/updater";
 import ListsUpdater from "./state/glists/updater";
 import MulticallUpdater from "./state/gmulticall/updater";
+import TransactionUpdater from "./state/gtransactions/updater";
 import {
   useGelatoLimitOrders,
   useGelatoLimitOrdersHandlers,
@@ -28,6 +29,7 @@ export function GelatoProvider({
       <ListsUpdater />
       <ApplicationUpdater />
       <MulticallUpdater />
+      <TransactionUpdater />
       {children}
     </Web3Provider>
   );

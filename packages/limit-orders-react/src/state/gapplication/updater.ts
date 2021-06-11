@@ -1,16 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { useCallback, useEffect, useState } from "react";
+import { useWeb3 } from "../../web3";
 import useDebounce from "../../hooks/useDebounce";
 import useIsWindowVisible from "../../hooks/useIsWindowVisible";
 import { updateBlockNumber } from "./actions";
 import { useDispatch } from "react-redux";
-import { useWeb3 } from "../../web3";
 
 export default function Updater(): null {
+  const { library, chainId } = useWeb3();
   const dispatch = useDispatch();
-
-  const { chainId, library } = useWeb3();
 
   const windowVisible = useIsWindowVisible();
 

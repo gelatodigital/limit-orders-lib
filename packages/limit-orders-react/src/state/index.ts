@@ -3,6 +3,7 @@ import guser from "./guser/reducer";
 import gorder from "./gorder/reducer";
 import glists from "./glists/reducer";
 import gmulticall from "./gmulticall/reducer";
+import gtransactions from "./gtransactions/reducer";
 import { configureStore } from "@reduxjs/toolkit";
 
 export const gelatoReducers = {
@@ -11,6 +12,7 @@ export const gelatoReducers = {
   gorder,
   gmulticall,
   glists,
+  gtransactions,
 };
 
 const store = configureStore({

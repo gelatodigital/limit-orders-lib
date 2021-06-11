@@ -12,6 +12,7 @@ import { Rate } from "../../state/gorder/actions";
 import JSBI from "jsbi";
 import { NATIVE } from "../../constants/addresses";
 import { useWeb3 } from "../../web3";
+import { useTransactionAdder } from "../../state/gtransactions/hooks";
 
 export enum ChainId {
   MAINNET = 1,
@@ -43,7 +44,9 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     [chainId, library]
   );
 
-  const { currencies, parsedAmounts } = useDerivedOrderInfo();
+  const { currencies, parsedAmounts, formattedAmounts } = useDerivedOrderInfo();
+
+  const addTransaction = useTransactionAdder();
 
   const { rateType } = useOrderState();
 
@@ -115,8 +118,29 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       rawAmounts.input,
       minReturn
     );
+
+    addTransaction(tx, {
+      summary: `Swap ${formattedAmounts.input} ${inputCurrency.symbol} for ${
+        formattedAmounts.output
+      } ${outputCurrency.symbol} when 1 ${
+        rateType === Rate.MUL ? inputCurrency.symbol : outputCurrency.symbol
+      } = ${formattedAmounts.price} ${
+        rateType === Rate.MUL ? outputCurrency.symbol : inputCurrency.symbol
+      }`,
+      type: "submission",
+    });
+
     return tx?.hash;
-  }, [gelatoLimitOrders, rawAmounts, chainId, inputCurrency, outputCurrency]);
+  }, [
+    inputCurrency,
+    outputCurrency,
+    rawAmounts,
+    gelatoLimitOrders,
+    chainId,
+    addTransaction,
+    formattedAmounts,
+    rateType,
+  ]);
 
   const handleLimitOrderCancellation = useCallback(
     async (
@@ -125,15 +149,25 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       amount: string,
       witness: string
     ) => {
-      const tx = await gelatoLimitOrders?.cancelLimitOrder(
+      if (!gelatoLimitOrders) {
+        throw new Error("Could not reach Gelato Limit Orders library");
+      }
+
+      const tx = await gelatoLimitOrders.cancelLimitOrder(
         fromCurrency,
         toCurrency,
         amount,
         witness
       );
+
+      addTransaction(tx, {
+        summary: `Order cancellation`,
+        type: "cancellation",
+      });
+
       return tx?.hash;
     },
-    [gelatoLimitOrders]
+    [gelatoLimitOrders, addTransaction]
   );
 
   const handleInput = useCallback(
