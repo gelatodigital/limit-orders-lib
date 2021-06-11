@@ -89,6 +89,10 @@ const LimitOrdersHistoryHeader = ({
   </StyledLimitOrderHistoryHeader>
 );
 
+const Spacer = styled.div`
+  flex: 1 1 auto;
+`;
+
 type Tab = "open" | "cancelled" | "executed" | "txs";
 
 export default function LimitOrdersHistory() {
@@ -147,12 +151,12 @@ export default function LimitOrdersHistory() {
             active={orderTab === "executed"}
             onClick={() => handleActiveHeader("executed")}
           />
-
+          {/* <Spacer />
           <LimitOrdersHistoryHeader
             title={"All Txs"}
             active={orderTab === "txs"}
             onClick={() => handleActiveHeader("txs")}
-          />
+          /> */}
         </HeaderTitles>
 
         <Wrapper id="limit-order-history">
