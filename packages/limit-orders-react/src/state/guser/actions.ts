@@ -13,24 +13,6 @@ export interface SerializedPair {
   token1: SerializedToken;
 }
 
-export const updateMatchesDarkMode = createAction<{ matchesDarkMode: boolean }>(
-  "guser/updateMatchesDarkMode"
-);
-export const updateUserDarkMode = createAction<{ userDarkMode: boolean }>(
-  "guser/updateUserDarkMode"
-);
-export const updateUserExpertMode = createAction<{ userExpertMode: boolean }>(
-  "guser/updateUserExpertMode"
-);
-export const updateUserSingleHopOnly = createAction<{
-  userSingleHopOnly: boolean;
-}>("guser/updateUserSingleHopOnly");
-export const updateUserSlippageTolerance = createAction<{
-  userSlippageTolerance: number | "auto";
-}>("guser/updateUserSlippageTolerance");
-export const updateUserDeadline = createAction<{ userDeadline: number }>(
-  "guser/updateUserDeadline"
-);
 export const addSerializedToken = createAction<{
   serializedToken: SerializedToken;
 }>("guser/addSerializedToken");

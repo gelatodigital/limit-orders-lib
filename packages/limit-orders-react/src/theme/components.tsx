@@ -1,5 +1,4 @@
 import React, { HTMLProps, useCallback } from "react";
-import { Link } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
 import { darken } from "polished";
 import {
@@ -100,27 +99,6 @@ export const LinkStyledButton = styled.button<{ disabled?: boolean }>`
   :focus {
     outline: none;
     text-decoration: ${({ disabled }) => (disabled ? null : "underline")};
-  }
-
-  :active {
-    text-decoration: none;
-  }
-`;
-
-// An internal link from the react-router-dom library that is correctly styled
-export const StyledInternalLink = styled(Link)`
-  text-decoration: none;
-  cursor: pointer;
-  color: ${({ theme }) => theme.primary1};
-  font-weight: 500;
-
-  :hover {
-    text-decoration: underline;
-  }
-
-  :focus {
-    outline: none;
-    text-decoration: underline;
   }
 
   :active {
@@ -286,17 +264,6 @@ export const Spinner = styled.img`
   width: 16px;
   height: 16px;
 `;
-
-const BackArrowLink = styled(StyledInternalLink)`
-  color: ${({ theme }) => theme.text1};
-`;
-export function BackArrow({ to }: { to: string }) {
-  return (
-    <BackArrowLink to={to}>
-      <ArrowLeft />
-    </BackArrowLink>
-  );
-}
 
 export const CustomLightSpinner = styled(Spinner)<{ size: string }>`
   height: ${({ size }) => size};

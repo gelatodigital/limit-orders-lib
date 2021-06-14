@@ -1,9 +1,8 @@
-import { Percent, Token } from "@uniswap/sdk-core";
+import { Token } from "@uniswap/sdk-core";
 import { Pair } from "@uniswap/v2-sdk";
-import JSBI from "jsbi";
 import flatMap from "lodash.flatmap";
 import { useCallback, useMemo } from "react";
-import { shallowEqual, useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   BASES_TO_TRACK_LIQUIDITY_FOR,
   PINNED_PAIRS,
@@ -18,11 +17,6 @@ import {
   removeSerializedToken,
   SerializedPair,
   SerializedToken,
-  updateUserDarkMode,
-  updateUserDeadline,
-  updateUserExpertMode,
-  updateUserSingleHopOnly,
-  updateUserSlippageTolerance,
 } from "./actions";
 
 function serializeToken(token: Token): SerializedToken {
@@ -43,151 +37,6 @@ function deserializeToken(serializedToken: SerializedToken): Token {
     serializedToken.symbol,
     serializedToken.name
   );
-}
-
-export function useIsDarkMode(): boolean {
-  const { userDarkMode, matchesDarkMode } = useSelector<
-    AppState,
-    { userDarkMode: boolean | null; matchesDarkMode: boolean }
-  >(
-    ({ guser: { matchesDarkMode, userDarkMode } }) => ({
-      userDarkMode,
-      matchesDarkMode,
-    }),
-    shallowEqual
-  );
-
-  return userDarkMode === null ? matchesDarkMode : userDarkMode;
-}
-
-export function useDarkModeManager(): [boolean, () => void] {
-  const dispatch = useDispatch<AppDispatch>();
-  const darkMode = useIsDarkMode();
-
-  const toggleSetDarkMode = useCallback(() => {
-    dispatch(updateUserDarkMode({ userDarkMode: !darkMode }));
-  }, [darkMode, dispatch]);
-
-  return [darkMode, toggleSetDarkMode];
-}
-
-export function useIsExpertMode(): boolean {
-  return useSelector<AppState, AppState["guser"]["userExpertMode"]>(
-    (state) => state.guser.userExpertMode
-  );
-}
-
-export function useExpertModeManager(): [boolean, () => void] {
-  const dispatch = useDispatch<AppDispatch>();
-  const expertMode = useIsExpertMode();
-
-  const toggleSetExpertMode = useCallback(() => {
-    dispatch(updateUserExpertMode({ userExpertMode: !expertMode }));
-  }, [expertMode, dispatch]);
-
-  return [expertMode, toggleSetExpertMode];
-}
-
-export function useUserSingleHopOnly(): [
-  boolean,
-  (newSingleHopOnly: boolean) => void
-] {
-  const dispatch = useDispatch<AppDispatch>();
-
-  const singleHopOnly = useSelector<
-    AppState,
-    AppState["guser"]["userSingleHopOnly"]
-  >((state) => state.guser.userSingleHopOnly);
-
-  const setSingleHopOnly = useCallback(
-    (newSingleHopOnly: boolean) => {
-      dispatch(
-        updateUserSingleHopOnly({ userSingleHopOnly: newSingleHopOnly })
-      );
-    },
-    [dispatch]
-  );
-
-  return [singleHopOnly, setSingleHopOnly];
-}
-
-export function useSetUserSlippageTolerance(): (
-  slippageTolerance: Percent | "auto"
-) => void {
-  const dispatch = useDispatch<AppDispatch>();
-
-  return useCallback(
-    (userSlippageTolerance: Percent | "auto") => {
-      let value: "auto" | number;
-      try {
-        value =
-          userSlippageTolerance === "auto"
-            ? "auto"
-            : JSBI.toNumber(userSlippageTolerance.multiply(10_000).quotient);
-      } catch (error) {
-        value = "auto";
-      }
-      dispatch(
-        updateUserSlippageTolerance({
-          userSlippageTolerance: value,
-        })
-      );
-    },
-    [dispatch]
-  );
-}
-
-/**
- * Return the user's slippage tolerance, from the redux store, and a function to update the slippage tolerance
- */
-export function useUserSlippageTolerance(): Percent | "auto" {
-  const userSlippageTolerance = useSelector<
-    AppState,
-    AppState["guser"]["userSlippageTolerance"]
-  >((state) => {
-    return state.guser.userSlippageTolerance;
-  });
-
-  return useMemo(
-    () =>
-      userSlippageTolerance === "auto"
-        ? "auto"
-        : new Percent(userSlippageTolerance, 10_000),
-    [userSlippageTolerance]
-  );
-}
-
-/**
- * Same as above but replaces the auto with a default value
- * @param defaultSlippageTolerance the default value to replace auto with
- */
-export function useUserSlippageToleranceWithDefault(
-  defaultSlippageTolerance: Percent
-): Percent {
-  const allowedSlippage = useUserSlippageTolerance();
-  return useMemo(
-    () =>
-      allowedSlippage === "auto" ? defaultSlippageTolerance : allowedSlippage,
-    [allowedSlippage, defaultSlippageTolerance]
-  );
-}
-
-export function useUserTransactionTTL(): [number, (slippage: number) => void] {
-  const dispatch = useDispatch<AppDispatch>();
-  const userDeadline = useSelector<AppState, AppState["guser"]["userDeadline"]>(
-    (state) => {
-      return state.guser.userDeadline;
-    }
-  );
-
-  const setUserDeadline = useCallback(
-    (userDeadline: number) => {
-      dispatch(updateUserDeadline({ userDeadline }));
-    },
-    [dispatch]
-  );
-
-  return [userDeadline, setUserDeadline];
 }
 
 export function useAddUserToken(): (token: Token) => void {
