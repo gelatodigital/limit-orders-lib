@@ -16,6 +16,7 @@ export const GET_ALL_ORDERS_BY_OWNER = gql`
       minReturn
       status
       createdTxHash
+      createdAt
       updatedAt
       secret
       witness
@@ -42,6 +43,7 @@ export const GET_ALL_OPEN_ORDERS_BY_OWNER = gql`
       minReturn
       status
       createdTxHash
+      createdAt
       updatedAt
       secret
       witness
@@ -65,6 +67,7 @@ export const GET_ALL_PAST_ORDERS_BY_OWNER = gql`
       minReturn
       status
       createdTxHash
+      createdAt
       updatedAt
       secret
       witness
@@ -91,6 +94,7 @@ export const GET_ALL_EXECUTED_ORDERS_BY_OWNER = gql`
       minReturn
       status
       createdTxHash
+      createdAt
       updatedAt
       secret
       witness
@@ -116,6 +120,7 @@ export const GET_ALL_CANCELLED_ORDERS_BY_OWNER = gql`
       minReturn
       status
       createdTxHash
+      createdAt
       updatedAt
       secret
       witness

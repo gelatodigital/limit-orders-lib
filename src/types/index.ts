@@ -26,6 +26,7 @@ export interface Order {
   minReturn: string;
   status: string;
   createdTxHash: BytesLike;
+  createdAt: string;
   updatedAt: string;
   witness: string;
   secret: string;
