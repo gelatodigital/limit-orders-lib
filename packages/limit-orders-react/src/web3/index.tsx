@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { FC, ReactNode } from "react";
 import { Web3Provider as Web3ProviderEthers } from "@ethersproject/providers";
+import { Venue } from "@gelatonetwork/limit-orders-lib";
 
 interface Web3State {
   library: Web3ProviderEthers | undefined;
   account: string | undefined | null;
   chainId: number | undefined;
+  venue?: Venue;
 }
 
 interface Web3ProviderProps {
@@ -13,12 +15,14 @@ interface Web3ProviderProps {
   library: Web3ProviderEthers | undefined;
   account: string | undefined | null;
   chainId: number | undefined;
+  venue?: Venue;
 }
 
 const initialWeb3State: Web3State = {
   library: undefined,
   chainId: undefined,
   account: undefined,
+  venue: undefined,
 };
 
 const Web3Context = createContext<Web3State>({} as Web3State);
@@ -30,12 +34,13 @@ export const Web3Provider: FC<Web3ProviderProps> = ({
   library,
   chainId,
   account,
+  venue,
 }: Web3ProviderProps) => {
   const [state, setState] = useState<Web3State>(initialWeb3State);
 
   useEffect(() => {
-    setState({ library, chainId, account });
-  }, [library, chainId, account]);
+    setState({ library, chainId, account, venue });
+  }, [library, chainId, account, venue]);
 
   return (
     <Web3Context.Provider

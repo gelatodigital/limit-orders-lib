@@ -18,7 +18,10 @@ export enum PairState {
 const getPairAddress = (tokenA: Token, tokenB: Token): string | undefined => {
   if (tokenA.chainId === 137 && tokenB.chainId === 137) {
     return QuickswapPair.getAddress(tokenA as any, tokenB as any);
-  } else if (tokenA.chainId !== 137 && tokenB.chainId !== 137) {
+  } else if (
+    (tokenA.chainId === 1 && tokenB.chainId === 1) ||
+    (tokenA.chainId === 3 && tokenB.chainId === 3)
+  ) {
     return Pair.getAddress(tokenA, tokenB);
   } else return undefined;
 };

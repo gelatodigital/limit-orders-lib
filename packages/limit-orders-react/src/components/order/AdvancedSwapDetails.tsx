@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { GelatoLimitOrders, utils } from "@gelatonetwork/limit-orders-lib";
+import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 import {
   Percent,
   Currency,
@@ -10,7 +11,9 @@ import { Trade } from "@uniswap/v2-sdk";
 import JSBI from "jsbi";
 import React, { useMemo } from "react";
 import { useGelatoLimitOrders } from "../../hooks/gelato";
+import useGasOverhead from "../../hooks/useGasOverhead";
 import useTheme from "../../hooks/useTheme";
+import { Rate } from "../../state/gorder/actions";
 import { TYPE } from "../../theme";
 import { useWeb3 } from "../../web3";
 import { AutoColumn } from "../Column";
@@ -28,7 +31,31 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
   const {
     library,
     derivedOrderInfo: { parsedAmounts },
+    orderState: { rateType },
   } = useGelatoLimitOrders();
+
+  const { gasPrice, realExecutionRate } = useGasOverhead(
+    parsedAmounts.input,
+    parsedAmounts.output,
+    rateType
+  );
+
+  const isInvertedRate = rateType === Rate.DIV;
+
+  const realExecutionRateWithSymbols =
+    parsedAmounts.input?.currency &&
+    parsedAmounts.output?.currency &&
+    realExecutionRate
+      ? `1 ${
+          isInvertedRate
+            ? parsedAmounts.output.currency.symbol
+            : parsedAmounts.input.currency.symbol
+        } = ${realExecutionRate} ${
+          isInvertedRate
+            ? parsedAmounts.input.currency.symbol
+            : parsedAmounts.output.currency.symbol
+        }`
+      : undefined;
 
   const outputAmount = parsedAmounts.output;
   const rawOutputAmount = outputAmount
@@ -76,29 +103,63 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
     };
   }, [trade, outputAmount, chainId, library, rawOutputAmount]);
 
-  return !trade ? null : (
+  return !trade || !chainId ? null : (
     <AutoColumn gap="8px">
-      <RowBetween>
-        <RowFixed>
-          <TYPE.black fontSize={12} fontWeight={400} color={theme.text2}>
-            Gelato Fee
-          </TYPE.black>
-        </RowFixed>
-        <TYPE.black textAlign="right" fontSize={12} color={theme.text1}>
-          {gelatoFeePercentage ? `${gelatoFeePercentage}` : "-"}%
-        </TYPE.black>
-      </RowBetween>
+      {!isEthereumChain(chainId) ? (
+        <>
+          <RowBetween>
+            <RowFixed>
+              <TYPE.black fontSize={12} fontWeight={400} color={theme.text2}>
+                Gelato Fee
+              </TYPE.black>
+            </RowFixed>
+            <TYPE.black textAlign="right" fontSize={12} color={theme.text1}>
+              {gelatoFeePercentage ? `${gelatoFeePercentage}` : "-"}%
+            </TYPE.black>
+          </RowBetween>
 
-      <RowBetween>
-        <RowFixed>
-          <TYPE.black fontSize={12} fontWeight={400} color={theme.text2}>
-            Slippage
-          </TYPE.black>
-        </RowFixed>
-        <TYPE.black textAlign="right" fontSize={12} color={theme.text1}>
-          {slippagePercentage ? `${slippagePercentage}` : "-"}%
-        </TYPE.black>
-      </RowBetween>
+          <RowBetween>
+            <RowFixed>
+              <TYPE.black fontSize={12} fontWeight={400} color={theme.text2}>
+                Slippage
+              </TYPE.black>
+            </RowFixed>
+            <TYPE.black textAlign="right" fontSize={12} color={theme.text1}>
+              {slippagePercentage ? `${slippagePercentage}` : "-"}%
+            </TYPE.black>
+          </RowBetween>
+        </>
+      ) : (
+        <>
+          <RowBetween>
+            <RowFixed>
+              <TYPE.black fontSize={12} fontWeight={400} color={theme.text2}>
+                Gas Price
+              </TYPE.black>
+            </RowFixed>
+            <TYPE.black textAlign="right" fontSize={12} color={theme.text1}>
+              {gasPrice ? `${gasPrice} GWEI` : "-"}%
+            </TYPE.black>
+          </RowBetween>
+          <RowBetween>
+            <RowFixed>
+              <MouseoverTooltip
+                text={`The price at which your order will be triggered to guarantee that your desired limit price is respected after gas fees.`}
+              >
+                <TYPE.black fontSize={12} fontWeight={400} color={theme.text2}>
+                  Real Execution Price
+                </TYPE.black>{" "}
+              </MouseoverTooltip>
+            </RowFixed>
+            <TYPE.black textAlign="right" fontSize={12} color={theme.text1}>
+              {realExecutionRateWithSymbols
+                ? `${realExecutionRateWithSymbols}`
+                : "-"}
+              %
+            </TYPE.black>
+          </RowBetween>
+        </>
+      )}
 
       <RowBetween>
         <RowFixed>

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { GelatoLimitOrders } from "@gelatonetwork/limit-orders-lib";
+import { ChainId, GelatoLimitOrders } from "@gelatonetwork/limit-orders-lib";
 import useGasPrice from "../useGasPrice";
 import useGelatoLimitOrdersHandlers, {
   GelatoLimitOrdersHandlers,
@@ -29,13 +29,16 @@ export default function useGelatoLimitOrders(): {
 
   const gasPrice = useGasPrice();
 
-  const library = useMemo(
-    () =>
-      chainId && provider
-        ? new GelatoLimitOrders(chainId, provider?.getSigner())
-        : undefined,
-    [chainId, provider]
-  );
+  const library = useMemo(() => {
+    try {
+      return chainId && provider
+        ? new GelatoLimitOrders(chainId as ChainId, provider?.getSigner())
+        : undefined;
+    } catch (error) {
+      console.error("Could not instantiate GelatoLimitOrders");
+      return undefined;
+    }
+  }, [chainId, provider]);
 
   const history = useGelatoLimitOrdersHistory();
 

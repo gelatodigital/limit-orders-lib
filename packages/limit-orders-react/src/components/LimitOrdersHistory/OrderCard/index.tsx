@@ -324,40 +324,35 @@ export default function OrderCard({ order }: { order: Order }) {
           )}
           <Spacer />
           <OrderStatus
-            clickable={
-              order.status === "open" ||
-              isSubmissionPending ||
-              isCancellationPending
-                ? true
-                : false
-            }
+            clickable={true}
             onClick={() => {
               if (!chainId) return;
 
-              return isSubmissionPending
-                ? window.open(
-                    getExplorerLink(
-                      chainId,
-                      order.createdTxHash,
-                      ExplorerDataType.TRANSACTION
-                    ),
-                    "_blank"
-                  )
-                : isSubmissionPending
-                ? window.open(
-                    getExplorerLink(
-                      chainId,
-                      order.cancelledTxHash,
-                      ExplorerDataType.TRANSACTION
-                    ),
-                    "_blank"
-                  )
-                : setCancellationState({
-                    attemptingTxn: false,
-                    cancellationErrorMessage: undefined,
-                    showConfirm: true,
-                    txHash: undefined,
-                  });
+              if (order.status === "open")
+                setCancellationState({
+                  attemptingTxn: false,
+                  cancellationErrorMessage: undefined,
+                  showConfirm: true,
+                  txHash: undefined,
+                });
+              else if (order.status === "cancelled")
+                window.open(
+                  getExplorerLink(
+                    chainId,
+                    order.cancelledTxHash,
+                    ExplorerDataType.TRANSACTION
+                  ),
+                  "_blank"
+                );
+              else if (order.status === "executed")
+                window.open(
+                  getExplorerLink(
+                    chainId,
+                    order.executedTxHash,
+                    ExplorerDataType.TRANSACTION
+                  ),
+                  "_blank"
+                );
             }}
             status={
               isCancellationPending || isSubmissionPending
