@@ -6,11 +6,13 @@ import {
   Signer,
   ContractTransaction,
   BigNumberish,
+  Contract,
 } from "ethers";
 import {
   ETH_ADDRESS,
   GELATO_LIMIT_ORDERS_ADDRESS,
   GELATO_LIMIT_ORDERS_MODULE_ADDRESS,
+  NETWORK_AMMS,
   SLIPPAGE_BPS,
   SUBGRAPH_URL,
   TWO_BPS_GELATO_FEE,
@@ -35,6 +37,9 @@ import {
 } from "../types";
 import { isEthereumChain, isNetworkGasToken } from "../utils";
 
+const isValidChainIdAndAMM = (chainId: ChainId, amm: AMM) => {
+  return amm in NETWORK_AMMS[chainId];
+};
 export class GelatoLimitOrders {
   private _chainId: ChainId;
   private _signer: Signer | undefined;
@@ -71,6 +76,9 @@ export class GelatoLimitOrders {
   }
 
   constructor(chainId: ChainId, signer?: Signer, amm?: AMM) {
+    if (amm && !isValidChainIdAndAMM(chainId, amm)) {
+      throw new Error("Invalid chainId and AMM");
+    }
     this._chainId = chainId;
     this._subgraphUrl = SUBGRAPH_URL[chainId];
     this._signer = signer;
@@ -79,7 +87,10 @@ export class GelatoLimitOrders {
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           this._signer
         )
-      : undefined;
+      : (new Contract(
+          GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
+          GelatoLimitOrders__factory.createInterface()
+        ) as GelatoLimitOrdersContract);
     this._moduleAddress = GELATO_LIMIT_ORDERS_MODULE_ADDRESS[this._chainId];
     this._amm = amm;
   }

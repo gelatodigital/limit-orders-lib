@@ -16,6 +16,14 @@ export const NETWORK_NAME = {
   [CHAIN_ID.MATIC]: "Polygon (Matic)",
   [CHAIN_ID.FANTOM]: "FANTOM",
 };
+
+export const NETWORK_AMMS = {
+  [CHAIN_ID.MAINNET]: ["uniswap"],
+  [CHAIN_ID.ROPSTEN]: ["uniswap"],
+  [CHAIN_ID.MATIC]: ["quickswap"],
+  [CHAIN_ID.FANTOM]: ["spiritswap", "spookyswap"],
+};
+
 export const SUBGRAPH_URL = {
   [CHAIN_ID.MAINNET]:
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders",
