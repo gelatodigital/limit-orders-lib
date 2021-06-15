@@ -312,8 +312,8 @@ export class GelatoLimitOrders {
     const fees = gelatoFee.add(slippage);
 
     const rawMinReturn = BigNumber.from(minReturn)
-      .div(BigNumber.from(10000).sub(fees))
-      .mul(10000);
+      .mul(10000)
+      .div(BigNumber.from(10000).sub(fees));
 
     return rawMinReturn.toString();
   }
