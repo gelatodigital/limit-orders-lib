@@ -76,7 +76,7 @@ export class GelatoLimitOrders {
   }
 
   constructor(chainId: ChainId, signer?: Signer, venue?: Venue) {
-    if (venue && !isValidChainIdAndAMM(chainId, venue)) {
+    if (venue && !isValidChainIdAndVenue(chainId, venue)) {
       throw new Error("Invalid chainId and venue");
     }
     this._chainId = chainId;
