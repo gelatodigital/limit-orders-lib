@@ -59,12 +59,8 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
         .then(async (res) => {
           const { data } = await res.json();
 
-          const openOrdersLS = getLSOrders(chainId, account).filter(
-            (order) => order.status === "open"
-          );
-
           data.orders.forEach((order: Order) => {
-            const orderExists = openOrdersLS.find(
+            const orderExists = getLSOrders(chainId, account).find(
               (confOrder) =>
                 confOrder.createdTxHash.toLowerCase() ===
                 order.createdTxHash.toLowerCase()
@@ -78,12 +74,20 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
             }
           });
 
+          const openOrdersLS = getLSOrders(chainId, account).filter(
+            (order) => order.status === "open"
+          );
+
           const pendingOrdersLS = getLSOrders(chainId, account, true);
 
           setOpenOrders({
             confirmed: openOrdersLS.filter((order: Order) => {
               const orderCancelled = pendingOrdersLS
-                .filter((pendingOrder) => pendingOrder.status === "cancelled")
+                .filter(
+                  (pendingOrder) =>
+                    pendingOrder.status === "cancelled" ||
+                    pendingOrder.status === "pending"
+                )
                 .find(
                   (pendingOrder) =>
                     pendingOrder.createdTxHash.toLowerCase() ===
@@ -114,12 +118,8 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
         .then(async (res) => {
           const { data } = await res.json();
 
-          const cancelledOrdersLS = getLSOrders(chainId, account).filter(
-            (order) => order.status === "cancelled"
-          );
-
           data.orders.forEach((order: Order) => {
-            const orderExists = cancelledOrdersLS.find(
+            const orderExists = getLSOrders(chainId, account).find(
               (confOrder) =>
                 confOrder.createdTxHash.toLowerCase() ===
                 order.createdTxHash.toLowerCase()
@@ -131,6 +131,10 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
               saveOrder(chainId, account, order);
             }
           });
+
+          const cancelledOrdersLS = getLSOrders(chainId, account).filter(
+            (order) => order.status === "cancelled"
+          );
 
           const pendingCancelledOrdersLS = getLSOrders(
             chainId,
@@ -161,12 +165,8 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
         .then(async (res) => {
           const { data } = await res.json();
 
-          const executedOrdersLS = getLSOrders(chainId, account).filter(
-            (order) => order.status === "executed"
-          );
-
           data.orders.forEach((order: Order) => {
-            const orderExists = executedOrdersLS.find(
+            const orderExists = getLSOrders(chainId, account).find(
               (confOrder) =>
                 confOrder.createdTxHash.toLowerCase() ===
                 order.createdTxHash.toLowerCase()
@@ -179,24 +179,26 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
             }
           });
 
+          const executedOrdersLS = getLSOrders(chainId, account).filter(
+            (order) => order.status === "executed"
+          );
+
           setExecutedOrders(executedOrdersLS);
         })
         .catch(() => console.error("Error executing open orders"));
   }, [gelatoLimitOrders, account, chainId]);
 
-  // useEffect(() => {
-  //   fetchOpenOrders();
-  //   fetchCancelledOrders();
-  //   fetchExecutedOrders();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
   useEffect(() => {
-    if (Object.values(transactions).length > transactionsValues) {
+    if (
+      Object.keys(transactions).length + Object.values(transactions).length !==
+      transactionsValues
+    ) {
       fetchOpenOrders();
       fetchCancelledOrders();
       fetchExecutedOrders();
-      setTransactionsValues(Object.values(transactions).length);
+      setTransactionsValues(
+        Object.keys(transactions).length + Object.values(transactions).length
+      );
     }
   }, [
     fetchCancelledOrders,
