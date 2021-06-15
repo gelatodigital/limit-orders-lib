@@ -8,7 +8,6 @@ import {
   switchCurrencies,
   setRecipient,
   setRateType,
-  replaceOrderState,
 } from "./actions";
 
 export interface OrderState {
@@ -43,37 +42,6 @@ export const initialState: OrderState = {
 
 export default createReducer<OrderState>(initialState, (builder) =>
   builder
-    .addCase(
-      replaceOrderState,
-      (
-        state,
-        {
-          payload: {
-            typedValue,
-            recipient,
-            field,
-            inputCurrencyId,
-            outputCurrencyId,
-          },
-        }
-      ) => {
-        return {
-          ...state,
-          [Field.INPUT]: {
-            currencyId: inputCurrencyId,
-          },
-          [Field.OUTPUT]: {
-            currencyId: outputCurrencyId,
-          },
-          [Field.PRICE]: {
-            currencyId: outputCurrencyId,
-          },
-          independentField: field,
-          typedValue: typedValue,
-          recipient,
-        };
-      }
-    )
     .addCase(selectCurrency, (state, { payload: { currencyId, field } }) => {
       const otherField = field === Field.INPUT ? Field.OUTPUT : Field.INPUT;
       if (field === Field.PRICE)

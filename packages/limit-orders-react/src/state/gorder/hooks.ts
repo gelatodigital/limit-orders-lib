@@ -326,6 +326,11 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     [parsedAmounts]
   );
 
+  if (price && trade && price.lessThan(trade.executionPrice.asFraction)) {
+    inputError =
+      inputError ?? "Only possible to place orders above market rate";
+  }
+
   // compare input to balance
   const [balanceIn, amountIn] = [currencyBalances.input, parsedAmounts.input];
 

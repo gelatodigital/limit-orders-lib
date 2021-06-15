@@ -19,13 +19,6 @@ export const switchCurrencies = createAction<void>("gorder/switchCurrencies");
 export const typeInput = createAction<{ field: Field; typedValue: string }>(
   "gorder/typeInput"
 );
-export const replaceOrderState = createAction<{
-  field: Field;
-  typedValue: string;
-  inputCurrencyId?: string;
-  outputCurrencyId?: string;
-  recipient: string | null;
-}>("gorder/replaceSwapState");
 export const setRecipient = createAction<{ recipient: string | null }>(
   "gorder/setRecipient"
 );

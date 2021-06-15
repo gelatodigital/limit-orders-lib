@@ -22,6 +22,7 @@ export function GelatoProvider({
   chainId: number | undefined;
   library: any | undefined;
   account: string | undefined;
+  venue?: Venue;
   children?: React.ReactNode;
 }) {
   return (

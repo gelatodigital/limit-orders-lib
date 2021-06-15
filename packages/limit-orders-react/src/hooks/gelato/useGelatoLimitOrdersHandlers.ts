@@ -49,12 +49,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const { rateType } = useOrderState();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
@@ -128,15 +124,14 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
     const now = Math.round(Date.now() / 1000);
 
-    const {
-      witness,
-    } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-      inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
-      outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
-      rawAmounts.input,
-      minReturn,
-      account
-    );
+    const { witness } =
+      await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+        inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
+        outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
+        rawAmounts.input,
+        minReturn,
+        account
+      );
 
     addTransaction(tx, {
       summary: `Swap ${formattedAmounts.input} ${inputCurrency.symbol} for ${
@@ -237,7 +232,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
                   JSBI.BigInt(outputCurrency.decimals)
                 )
               )
-              ?.toExact()
+              ?.toSignificant(12)
           : undefined;
       onChangeRateType(Rate.DIV);
       if (flipped) onUserInput(Field.PRICE, flipped);
@@ -252,7 +247,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
                   JSBI.BigInt(inputCurrency.decimals)
                 )
               )
-              ?.toExact()
+              ?.toSignificant(12)
           : undefined;
       onChangeRateType(Rate.MUL);
       if (flipped) onUserInput(Field.PRICE, flipped);

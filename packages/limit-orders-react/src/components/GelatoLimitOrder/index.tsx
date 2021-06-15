@@ -13,7 +13,7 @@ import React, { useCallback, useState, Fragment } from "react";
 import { ArrowDown, Info, Divide, X } from "react-feather";
 import { Text } from "rebass";
 import styled from "styled-components";
-import { ButtonError, ButtonGray, ButtonLight, ButtonPrimary } from "../Button";
+import { ButtonError, ButtonLight, ButtonPrimary } from "../Button";
 import { GreyCard } from "../Card";
 import { AutoColumn } from "../Column";
 import CurrencyInputPanel from "../CurrencyInputPanel";
@@ -42,9 +42,7 @@ import { useWeb3 } from "../../web3";
 import useTheme from "../../hooks/useTheme";
 import LimitOrdersHistory from "../LimitOrdersHistory";
 import useGasOverhead from "../../hooks/useGasOverhead";
-// import PoweredByGelato from "../../assets/svg/poweredbygelato.svg";
-// import PoweredByGelatoBlack from "../../assets/svg/poweredbygelato_black.svg";
-// import PoweredByGelatoWhite from "../../assets/svg/poweredbygelato_white.svg";
+import PoweredByGelato from "../../assets/svg/poweredbygelato_transparent.svg";
 
 const StyledInfo = styled(Info)`
   opacity: 0.4;
@@ -61,32 +59,18 @@ enum Rate {
   MUL = "MUL",
 }
 
-// const StyledPoweredByGelato = styled(PoweredByGelato)`
-//   margin: 0 0.25rem 0 0.35rem;
-//   height: 35%;
-//   path {
-//     stroke-width: 1.5px;
-//   }
-// `;
-
-// const StyledPoweredByGelatoBlack = styled(PoweredByGelatoBlack)`
-//   margin: 0 0.25rem 0 0.35rem;
-//   height: 35%;
-//   path {
-//     stroke-width: 1.5px;
-//   }
-// `;
-
-// const StyledPoweredByGelatoWhite = styled(PoweredByGelatoWhite)`
-//   margin: 0 0.25rem 0 0.35rem;
-//   height: 5%;
-//   border-radius: 3px;
-//   width: 80px;
-//   path {
-//     stroke-width: 1.5px;
-//     border-radius: 3px;
-//   }
-// `;
+const PoweredByWrapper = styled(PoweredByGelato)<{ size: number }>`
+  ${({ theme }) => theme.flexColumnNoWrap};
+  height: ${() => "26px"};
+  width: ${({ size }) => (size ? size + "px" : "32px")};
+  background-color: ${({ theme }) => theme.bg1};
+  & > img,
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    align-items: flex-end;
+  `};
+  border-radius: 0.5rem;       
+  margin-left: 0.25rem;
+`;
 
 export default function GelatoLimitOrder() {
   const { account } = useWeb3();
@@ -172,8 +156,6 @@ export default function GelatoLimitOrder() {
     (independentField === Field.INPUT || independentField === Field.OUTPUT) &&
       currencies.input &&
       currencies.output
-    // &&
-    // parsedAmounts[independentField]?.greaterThan(JSBI.BigInt(0))
   );
   const routeNotFound = !trade?.route;
   const isLoadingRoute =
@@ -231,7 +213,7 @@ export default function GelatoLimitOrder() {
   }, [priceImpact, handleLimitOrderSubmission, tradeToConfirm, showConfirm]);
 
   // errors
-  const [showInverted, setShowInverted] = useState<boolean>(false);
+  const [showInverted, setShowInverted] = useState<boolean>(true);
 
   const handleConfirmDismiss = useCallback(() => {
     setSwapState({
@@ -284,21 +266,6 @@ export default function GelatoLimitOrder() {
     parsedAmounts.output,
     rateType
   );
-
-  // const formattedAmounts = {
-  //   input:
-  //     independentField === Field.INPUT
-  //       ? typedValue
-  //       : parsedAmounts.input?.toSignificant(6) ?? "",
-  //   output:
-  //     independentField === Field.OUTPUT
-  //       ? typedValue
-  //       : parsedAmounts.output?.toSignificant(6) ?? "",
-  //   price:
-  //     independentField === Field.PRICE
-  //       ? typedValue
-  //       : price?.toSignificant(6) ?? "",
-  // };
 
   return (
     <Fragment>
@@ -415,23 +382,11 @@ export default function GelatoLimitOrder() {
               style={{ justifyContent: !trade ? "center" : "space-between" }}
             >
               <RowFixed>
-                <ButtonGray
-                  width="fit-content"
-                  padding="0.1rem 0.5rem"
-                  disabled
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    height: "24px",
-                    opacity: 0.4,
-                    marginLeft: "0.25rem",
-                  }}
-                >
-                  <TYPE.black fontSize={12}>Powered by Gelato🍦</TYPE.black>
-                </ButtonGray>
+                <PoweredByWrapper size={126} />
               </RowFixed>
               {trade ? (
                 <RowFixed>
+                  {/* Current market rate */}
                   <TradePrice
                     price={trade.executionPrice as any}
                     showInverted={showInverted}
@@ -470,11 +425,12 @@ export default function GelatoLimitOrder() {
                     )}
                   </TYPE.main>
                 </GreyCard>
-              ) : priceImpact?.greaterThan("0") ? (
-                <GreyCard style={{ textAlign: "center" }}>
-                  <TYPE.main mb="4px">{`Only possible to place orders above market rate`}</TYPE.main>
-                </GreyCard>
               ) : (
+                // priceImpact?.greaterThan("0") ? (
+                //   <GreyCard style={{ textAlign: "center" }}>
+                //     <TYPE.main mb="4px">{`Only possible to place orders above market rate`}</TYPE.main>
+                //   </GreyCard>
+                // ) :
                 <ButtonError
                   onClick={() => {
                     setSwapState({
