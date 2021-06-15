@@ -37,7 +37,7 @@ import {
 } from "../types";
 import { isEthereumChain, isNetworkGasToken } from "../utils";
 
-const isValidChainIdAndAMM = (chainId: ChainId, venue: Venue) => {
+const isValidChainIdAndVenue = (chainId: ChainId, venue: Venue) => {
   return venue in NETWORK_VENUES[chainId];
 };
 export class GelatoLimitOrders {
@@ -63,7 +63,7 @@ export class GelatoLimitOrders {
     return this._subgraphUrl;
   }
 
-  get amm(): Venue | undefined {
+  get venue(): Venue | undefined {
     return this._venue;
   }
 
