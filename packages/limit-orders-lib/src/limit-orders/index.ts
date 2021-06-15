@@ -12,7 +12,7 @@ import {
   ETH_ADDRESS,
   GELATO_LIMIT_ORDERS_ADDRESS,
   GELATO_LIMIT_ORDERS_MODULE_ADDRESS,
-  NETWORK_AMMS,
+  NETWORK_VENUES,
   SLIPPAGE_BPS,
   SUBGRAPH_URL,
   TWO_BPS_GELATO_FEE,
@@ -29,7 +29,7 @@ import {
   queryPastOrders,
 } from "../utils/queries";
 import {
-  AMM,
+  Venue,
   ChainId,
   Order,
   TransactionData,
@@ -37,16 +37,16 @@ import {
 } from "../types";
 import { isEthereumChain, isNetworkGasToken } from "../utils";
 
-const isValidChainIdAndAMM = (chainId: ChainId, amm: AMM) => {
-  return amm in NETWORK_AMMS[chainId];
+const isValidChainIdAndAMM = (chainId: ChainId, venue: Venue) => {
+  return venue in NETWORK_VENUES[chainId];
 };
 export class GelatoLimitOrders {
   private _chainId: ChainId;
   private _signer: Signer | undefined;
-  private _gelatoLimitOrders: GelatoLimitOrdersContract | undefined;
+  private _gelatoLimitOrders: GelatoLimitOrdersContract;
   private _moduleAddress: string;
   private _subgraphUrl: string;
-  private _amm?: AMM;
+  private _venue?: Venue;
 
   public static slippageBPS = SLIPPAGE_BPS;
   public static gelatoFeeBPS = TWO_BPS_GELATO_FEE;
@@ -63,21 +63,21 @@ export class GelatoLimitOrders {
     return this._subgraphUrl;
   }
 
-  get amm(): AMM | undefined {
-    return this._amm;
+  get amm(): Venue | undefined {
+    return this._venue;
   }
 
   get moduleAddress(): string {
     return this._moduleAddress;
   }
 
-  get contract(): GelatoLimitOrdersContract | undefined {
+  get contract(): GelatoLimitOrdersContract {
     return this._gelatoLimitOrders;
   }
 
-  constructor(chainId: ChainId, signer?: Signer, amm?: AMM) {
-    if (amm && !isValidChainIdAndAMM(chainId, amm)) {
-      throw new Error("Invalid chainId and AMM");
+  constructor(chainId: ChainId, signer?: Signer, venue?: Venue) {
+    if (venue && !isValidChainIdAndAMM(chainId, venue)) {
+      throw new Error("Invalid chainId and venue");
     }
     this._chainId = chainId;
     this._subgraphUrl = SUBGRAPH_URL[chainId];
@@ -92,7 +92,7 @@ export class GelatoLimitOrders {
           GelatoLimitOrders__factory.createInterface()
         ) as GelatoLimitOrdersContract);
     this._moduleAddress = GELATO_LIMIT_ORDERS_MODULE_ADDRESS[this._chainId];
-    this._amm = amm;
+    this._venue = venue;
   }
 
   public async encodeLimitOrderSubmission(
@@ -367,16 +367,14 @@ export class GelatoLimitOrders {
     privateKey: string
   ): Promise<TransactionData> {
     if (!this._signer) throw new Error("No signer");
-    if (!this._gelatoLimitOrders)
-      throw new Error("No gelato limit orders contract");
 
     if (fromCurrency.toLowerCase() === toCurrency.toLowerCase())
       throw new Error("Input token and output token can not be equal");
 
-    const encodedData = this._amm
+    const encodedData = this._venue
       ? new utils.AbiCoder().encode(
           ["address", "uint256", "string"],
-          [toCurrency, minimumReturn, this._amm]
+          [toCurrency, minimumReturn, this._venue]
         )
       : new utils.AbiCoder().encode(
           ["address", "uint256"],

@@ -3,7 +3,7 @@ import { BigNumberish, BytesLike } from "ethers";
 // mainnet | ropsten | matic | fantom
 export type ChainId = 1 | 3 | 137 | 250;
 
-export type AMM = "spookyswap" | "uniswap" | "quickswap" | "spiritswap";
+export type Venue = "spookyswap" | "uniswap" | "quickswap" | "spiritswap";
 
 export interface TransactionData {
   to: string;
