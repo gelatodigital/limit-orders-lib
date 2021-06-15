@@ -1,4 +1,3 @@
-import { DEFAULT_DEADLINE_FROM_NOW } from "../../constants/misc";
 import { createReducer } from "@reduxjs/toolkit";
 import {
   addSerializedPair,

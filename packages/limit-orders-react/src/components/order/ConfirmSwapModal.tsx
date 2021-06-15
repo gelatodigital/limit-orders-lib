@@ -26,7 +26,6 @@ export default function ConfirmSwapModal({
   txHash,
   inputAmount,
   outputAmount,
-  realExecutionRate,
 }: {
   isOpen: boolean;
   trade: Trade<Currency, Currency, TradeType> | undefined;
@@ -41,7 +40,6 @@ export default function ConfirmSwapModal({
   onDismiss: () => void;
   inputAmount: CurrencyAmount<Currency> | undefined;
   outputAmount: CurrencyAmount<Currency> | undefined;
-  realExecutionRate?: string;
 }) {
   // const showAcceptChanges = useMemo(
   //   () =>
