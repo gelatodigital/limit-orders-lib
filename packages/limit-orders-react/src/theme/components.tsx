@@ -1,12 +1,7 @@
 import React, { HTMLProps, useCallback } from "react";
 import styled, { keyframes } from "styled-components";
 import { darken } from "polished";
-import {
-  ArrowLeft,
-  X,
-  ExternalLink as LinkIconFeather,
-  Trash,
-} from "react-feather";
+import { X, ExternalLink as LinkIconFeather, Trash } from "react-feather";
 
 export const ButtonText = styled.button`
   outline: none;

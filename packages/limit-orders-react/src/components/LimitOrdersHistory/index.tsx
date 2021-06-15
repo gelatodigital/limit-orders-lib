@@ -10,7 +10,6 @@ import { useGelatoLimitOrdersHistory } from "../../hooks/gelato";
 import useTheme from "../../hooks/useTheme";
 import OrderCard from "./OrderCard/index";
 import { FixedSizeList } from "react-window";
-import { useAllTransactions } from "../../state/gtransactions/hooks";
 
 const TopSection = styled(AutoColumn)`
   max-width: 640px;
