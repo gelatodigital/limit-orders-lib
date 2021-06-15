@@ -1,4 +1,9 @@
-import { Currency, Percent, TradeType } from "@uniswap/sdk-core";
+import {
+  Currency,
+  CurrencyAmount,
+  Percent,
+  TradeType,
+} from "@uniswap/sdk-core";
 import { Trade } from "@uniswap/v2-sdk";
 import React, { useCallback } from "react";
 import TransactionConfirmationModal, {
@@ -19,6 +24,9 @@ export default function ConfirmSwapModal({
   isOpen,
   attemptingTxn,
   txHash,
+  inputAmount,
+  outputAmount,
+  realExecutionRate,
 }: {
   isOpen: boolean;
   trade: Trade<Currency, Currency, TradeType> | undefined;
@@ -31,6 +39,9 @@ export default function ConfirmSwapModal({
   onConfirm: () => void;
   swapErrorMessage: string | undefined;
   onDismiss: () => void;
+  inputAmount: CurrencyAmount<Currency> | undefined;
+  outputAmount: CurrencyAmount<Currency> | undefined;
+  realExecutionRate?: string;
 }) {
   // const showAcceptChanges = useMemo(
   //   () =>
@@ -67,10 +78,10 @@ export default function ConfirmSwapModal({
   }, [onConfirm, showAcceptChanges, swapErrorMessage, trade]);
 
   // text to show while loading
-  const pendingText = `Swapping ${trade?.inputAmount?.toSignificant(6)} ${
-    trade?.inputAmount?.currency?.symbol
-  } for ${trade?.outputAmount?.toSignificant(6)} ${
-    trade?.outputAmount?.currency?.symbol
+  const pendingText = `Submitting order to swap ${inputAmount?.toSignificant(
+    6
+  )} ${inputAmount?.currency?.symbol} for ${outputAmount?.toSignificant(6)} ${
+    outputAmount?.currency?.symbol
   }`;
 
   const confirmationContent = useCallback(

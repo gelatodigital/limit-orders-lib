@@ -110,7 +110,6 @@ export default function GelatoLimitOrder() {
       trade,
       formattedAmounts,
       inputError,
-      price,
     },
     orderState: { independentField, rateType, typedValue },
   } = useGelatoLimitOrders();
@@ -318,6 +317,8 @@ export default function GelatoLimitOrder() {
             onConfirm={handleSwap}
             swapErrorMessage={swapErrorMessage}
             onDismiss={handleConfirmDismiss}
+            inputAmount={parsedAmounts.input}
+            outputAmount={parsedAmounts.output}
           />
 
           <AutoColumn gap={"md"}>

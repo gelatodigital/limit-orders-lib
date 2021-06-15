@@ -3,7 +3,7 @@ import { get, set } from "local-storage";
 
 const LS_ORDERS = "gorders_";
 
-function lsKey(key: string, account: string, chainId: number) {
+export function lsKey(key: string, account: string, chainId: number) {
   return key + account.toString() + chainId.toString();
 }
 
@@ -13,7 +13,7 @@ export function getLSOrders(chainId: number, account: string, pending = false) {
     : lsKey(LS_ORDERS, account, chainId);
 
   const orders = get<Order[]>(key);
-  if (pending) console.log("orders inside getLSOrders", orders);
+
   return orders ?? [];
 }
 
@@ -29,34 +29,14 @@ export function saveOrder(
 
   const prev = get<Order[]>(key);
 
-  console.log("saving order", pending, order);
-
   if (prev === null) {
-    console.log("key, [order]", key, [order]);
     set(key, [order]);
   } else {
-    console.log("else");
-    const orderExists = prev.find(
-      (orderInLS) => orderInLS.createdTxHash === order.createdTxHash
-    );
+    const orders = removeOrder(chainId, account, order, pending);
 
-    if (
-      !orderExists ||
-      (orderExists && orderExists.updatedAt < order.updatedAt)
-    ) {
-      prev.push(order);
-      set(key, prev);
-    }
+    orders.push(order);
+    set(key, orders);
   }
-  console.log(
-    "lsKey(LS_ORDERS + pending_, account, chainId)",
-    lsKey(LS_ORDERS + "pending_", account, chainId)
-  );
-
-  console.log(
-    "lsKey(LS_ORDERS + pending_, account, chainId)",
-    getLSOrders(chainId, account)
-  );
 }
 
 export function removeOrder(
@@ -72,10 +52,14 @@ export function removeOrder(
   const prev = get<Order[]>(key);
 
   const orders = prev.filter(
-    (orderInLS) => orderInLS.createdTxHash !== order.createdTxHash
+    (orderInLS) =>
+      orderInLS.createdTxHash.toLowerCase() !==
+      order.createdTxHash.toLowerCase()
   );
 
   set(key, orders);
+
+  return orders;
 }
 
 export function confirmOrderCancellation(
@@ -84,50 +68,66 @@ export function confirmOrderCancellation(
   cancellationHash: string,
   success = true
 ) {
+  const cancelHash = cancellationHash.toLowerCase();
   const pendingKey = lsKey(LS_ORDERS + "pending_", account, chainId);
   const pendingOrders = get<Order[]>(pendingKey);
   const confirmedOrder = pendingOrders.find(
-    (order) => order.cancelledTxHash === cancellationHash
+    (order) => order.cancelledTxHash?.toLowerCase() === cancelHash
   );
 
-  console.log(
-    "confirmedOrder.cancelledTxHash",
-    confirmedOrder?.cancelledTxHash
-  );
-  console.log("ancellationHash", cancellationHash);
-  set(
-    pendingKey,
-    pendingOrders.filter((order) => order.cancelledTxHash !== cancellationHash)
-  );
+  if (confirmedOrder) removeOrder(chainId, account, confirmedOrder, true);
 
   if (success && confirmedOrder) {
     const ordersKey = lsKey(LS_ORDERS, account, chainId);
     const orders = get<Order[]>(ordersKey);
-    orders.push({ ...confirmedOrder, cancelledTxHash: cancellationHash });
-    set(pendingKey, orders);
+    if (orders) {
+      const ordersToSave = removeOrder(
+        chainId,
+        account,
+        { ...confirmedOrder, cancelledTxHash: cancelHash },
+        true
+      );
+
+      ordersToSave.push({ ...confirmedOrder, cancelledTxHash: cancelHash });
+
+      set(ordersKey, ordersToSave);
+    } else {
+      set(ordersKey, [{ ...confirmedOrder, cancelledTxHash: cancelHash }]);
+    }
   }
 }
 
 export function confirmOrderSubmission(
   chainId: number,
   account: string,
-  creationHash: string,
+  submissionHash: string,
   success = true
 ) {
+  const creationHash = submissionHash.toLowerCase();
   const pendingKey = lsKey(LS_ORDERS + "pending_", account, chainId);
   const pendingOrders = get<Order[]>(pendingKey);
   const confirmedOrder = pendingOrders.find(
-    (order) => order.createdTxHash === creationHash
+    (order) => order.createdTxHash?.toLowerCase() === creationHash
   );
-  set(
-    pendingKey,
-    pendingOrders.filter((order) => order.createdTxHash !== creationHash)
-  );
+
+  if (confirmedOrder) removeOrder(chainId, account, confirmedOrder, true);
 
   if (success && confirmedOrder) {
     const ordersKey = lsKey(LS_ORDERS, account, chainId);
     const orders = get<Order[]>(ordersKey);
-    orders.push({ ...confirmedOrder, createdTxHash: creationHash });
-    set(pendingKey, orders);
+    if (orders) {
+      const ordersToSave = removeOrder(
+        chainId,
+        account,
+        { ...confirmedOrder, createdTxHash: creationHash },
+        true
+      );
+
+      ordersToSave.push({ ...confirmedOrder, createdTxHash: creationHash });
+
+      set(ordersKey, ordersToSave);
+    } else {
+      set(ordersKey, [{ ...confirmedOrder, createdTxHash: creationHash }]);
+    }
   }
 }
