@@ -26,24 +26,31 @@ import {
   queryOrders,
   queryPastOrders,
 } from "../utils/queries";
-import { Order, TransactionData, TransactionDataWithSecret } from "../types";
+import {
+  AMM,
+  ChainId,
+  Order,
+  TransactionData,
+  TransactionDataWithSecret,
+} from "../types";
 import { isEthereumChain, isNetworkGasToken } from "../utils";
 
 export class GelatoLimitOrders {
-  private _chainId: number;
-  private _signer: Signer;
-  private _gelatoLimitOrders: GelatoLimitOrdersContract;
+  private _chainId: ChainId;
+  private _signer: Signer | undefined;
+  private _gelatoLimitOrders: GelatoLimitOrdersContract | undefined;
   private _moduleAddress: string;
   private _subgraphUrl: string;
+  private _amm?: AMM;
 
   public static slippageBPS = SLIPPAGE_BPS;
   public static gelatoFeeBPS = TWO_BPS_GELATO_FEE;
 
-  get chainId(): number {
+  get chainId(): ChainId {
     return this._chainId;
   }
 
-  get provider(): Signer {
+  get signer(): Signer | undefined {
     return this._signer;
   }
 
@@ -51,15 +58,30 @@ export class GelatoLimitOrders {
     return this._subgraphUrl;
   }
 
-  constructor(chainId: number, signer: Signer) {
+  get amm(): AMM | undefined {
+    return this._amm;
+  }
+
+  get moduleAddress(): string {
+    return this._moduleAddress;
+  }
+
+  get contract(): GelatoLimitOrdersContract | undefined {
+    return this._gelatoLimitOrders;
+  }
+
+  constructor(chainId: ChainId, signer?: Signer, amm?: AMM) {
     this._chainId = chainId;
     this._subgraphUrl = SUBGRAPH_URL[chainId];
     this._signer = signer;
-    this._gelatoLimitOrders = GelatoLimitOrders__factory.connect(
-      GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
-      this._signer
-    );
+    this._gelatoLimitOrders = this._signer
+      ? GelatoLimitOrders__factory.connect(
+          GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
+          this._signer
+        )
+      : undefined;
     this._moduleAddress = GELATO_LIMIT_ORDERS_MODULE_ADDRESS[this._chainId];
+    this._amm = amm;
   }
 
   public async encodeLimitOrderSubmission(
@@ -118,6 +140,8 @@ export class GelatoLimitOrders {
     amount: BigNumberish,
     minimumReturn: BigNumberish
   ): Promise<ContractTransaction> {
+    if (!this._signer) throw new Error("No signer");
+
     const owner = await this._signer.getAddress();
 
     const txData = await this.encodeLimitOrderSubmission(
@@ -142,6 +166,10 @@ export class GelatoLimitOrders {
     witness: string,
     owner: string
   ): TransactionData {
+    if (!this._signer) throw new Error("No signer");
+    if (!this._gelatoLimitOrders)
+      throw new Error("No gelato limit orders contract");
+
     const data = this._gelatoLimitOrders.interface.encodeFunctionData(
       "cancelOrder",
       [
@@ -169,6 +197,10 @@ export class GelatoLimitOrders {
     minReturn: BigNumberish,
     witness: string
   ): Promise<ContractTransaction> {
+    if (!this._signer) throw new Error("No signer");
+    if (!this._gelatoLimitOrders)
+      throw new Error("No gelato limit orders contract");
+
     const owner = await this._signer.getAddress();
     return this._gelatoLimitOrders.cancelOrder(
       this._moduleAddress,
@@ -323,13 +355,22 @@ export class GelatoLimitOrders {
     minimumReturn: BigNumberish,
     privateKey: string
   ): Promise<TransactionData> {
-    if (fromCurrency === toCurrency)
-      throw new Error("fromCurrency === toCurrency");
+    if (!this._signer) throw new Error("No signer");
+    if (!this._gelatoLimitOrders)
+      throw new Error("No gelato limit orders contract");
 
-    const encodedData = new utils.AbiCoder().encode(
-      ["address", "uint256"],
-      [toCurrency, minimumReturn]
-    );
+    if (fromCurrency.toLowerCase() === toCurrency.toLowerCase())
+      throw new Error("Input token and output token can not be equal");
+
+    const encodedData = this._amm
+      ? new utils.AbiCoder().encode(
+          ["address", "uint256", "string"],
+          [toCurrency, minimumReturn, this._amm]
+        )
+      : new utils.AbiCoder().encode(
+          ["address", "uint256"],
+          [toCurrency, minimumReturn]
+        );
 
     let data, value, to;
     if (isNetworkGasToken(fromCurrency)) {
