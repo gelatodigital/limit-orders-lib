@@ -1,6 +1,9 @@
 import { BigNumberish, BytesLike } from "ethers";
 
-//export type ChainId = 1 | 3 | 137;
+// mainnet | ropsten | matic | fantom
+export type ChainId = 1 | 3 | 137 | 250;
+
+export type Venue = "spookyswap" | "uniswap" | "quickswap" | "spiritswap";
 
 export interface TransactionData {
   to: string;

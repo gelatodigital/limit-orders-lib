@@ -1,6 +1,5 @@
 import { request } from "graphql-request";
 import { SUBGRAPH_URL } from "../../constants";
-import { SubgraphRequestError } from "../../errors";
 import { Order } from "../../types";
 import {
   GET_ALL_CANCELLED_ORDERS_BY_OWNER,
@@ -21,7 +20,7 @@ export const queryOrders = async (
 
     return data.orders;
   } catch (error) {
-    throw new SubgraphRequestError();
+    throw new Error("Could not query subgraph for all orders");
   }
 };
 
@@ -30,9 +29,6 @@ export const queryOpenOrders = async (
   chainID: number
 ): Promise<Order[]> => {
   try {
-    console.log("owner", owner);
-    console.log("SUBGRAPH_URL[chainID]", SUBGRAPH_URL[chainID]);
-
     const data = await request(
       SUBGRAPH_URL[chainID],
       GET_ALL_OPEN_ORDERS_BY_OWNER,
@@ -44,7 +40,7 @@ export const queryOpenOrders = async (
     return data.orders;
   } catch (error) {
     console.log(error);
-    throw new SubgraphRequestError();
+    throw new Error("Could not query subgraph for open orders");
   }
 };
 
@@ -62,7 +58,7 @@ export const queryPastOrders = async (
     );
     return data.orders;
   } catch (error) {
-    throw new SubgraphRequestError();
+    throw new Error("Could not query subgraph for past orders");
   }
 };
 
@@ -80,7 +76,7 @@ export const queryExecutedOrders = async (
     );
     return data.orders;
   } catch (error) {
-    throw new SubgraphRequestError();
+    throw new Error("Could not query subgraph for executed orders");
   }
 };
 
@@ -98,6 +94,6 @@ export const queryCancelledOrders = async (
     );
     return data.orders;
   } catch (error) {
-    throw new SubgraphRequestError();
+    throw new Error("Could not query subgraph for cancelled orders");
   }
 };
