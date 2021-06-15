@@ -149,7 +149,8 @@ export class GelatoLimitOrders {
     fromCurrency: string,
     toCurrency: string,
     amount: BigNumberish,
-    minimumReturn: BigNumberish
+    minimumReturn: BigNumberish,
+    gasPrice?: BigNumberish
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
 
@@ -167,6 +168,7 @@ export class GelatoLimitOrders {
       to: txData.to,
       data: txData.data,
       value: BigNumber.from(txData.value),
+      gasPrice,
     });
   }
 
@@ -206,13 +208,15 @@ export class GelatoLimitOrders {
     fromCurrency: string,
     toCurrency: string,
     minReturn: BigNumberish,
-    witness: string
+    witness: string,
+    gasPrice?: BigNumberish
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
     if (!this._gelatoLimitOrders)
       throw new Error("No gelato limit orders contract");
 
     const owner = await this._signer.getAddress();
+
     return this._gelatoLimitOrders.cancelOrder(
       this._moduleAddress,
       fromCurrency,
@@ -221,7 +225,8 @@ export class GelatoLimitOrders {
       new utils.AbiCoder().encode(
         ["address", "uint256"],
         [toCurrency, minReturn]
-      )
+      ),
+      { gasPrice }
     );
   }
 

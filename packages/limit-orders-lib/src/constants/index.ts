@@ -17,7 +17,7 @@ export const NETWORK_NAME = {
   [CHAIN_ID.FANTOM]: "FANTOM",
 };
 
-export const NETWORK_AMMS = {
+export const NETWORK_VENUES = {
   [CHAIN_ID.MAINNET]: ["uniswap"],
   [CHAIN_ID.ROPSTEN]: ["uniswap"],
   [CHAIN_ID.MATIC]: ["quickswap"],

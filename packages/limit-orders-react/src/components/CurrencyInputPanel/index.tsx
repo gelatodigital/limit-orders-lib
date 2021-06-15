@@ -233,14 +233,14 @@ export default function CurrencyInputPanel({
         }`
       : undefined;
 
-  const currentMarketRateExplainer =
-    currency && otherCurrency && currentMarketRate
-      ? `1 ${
-          isInvertedRate ? otherCurrency?.symbol : currency?.symbol
-        }= ${currentMarketRate} ${
-          isInvertedRate ? currency?.symbol : otherCurrency?.symbol
-        }`
-      : undefined;
+  // const currentMarketRateExplainer =
+  //   currency && otherCurrency && currentMarketRate
+  //     ? `1 ${
+  //         isInvertedRate ? otherCurrency?.symbol : currency?.symbol
+  //       } = ~${currentMarketRate} ${
+  //         isInvertedRate ? currency?.symbol : otherCurrency?.symbol
+  //       }`
+  //     : undefined;
 
   const realExecutionRateExplainer =
     currency && otherCurrency && realExecutionRate
@@ -328,9 +328,11 @@ export default function CurrencyInputPanel({
           {showRate && (
             <RowFixed style={{ height: "17px" }}>
               <MouseoverTooltip
-                text={`Price at which you want your order to be executed. Defines the minimum amount you will receive. ${
-                  rate ? rate + "." : ""
-                }`}
+                text={`Price at which you want your order to be executed. ${
+                  chainId === 1
+                    ? "It does not account execution gas costs."
+                    : ""
+                } ${rate ? rate + "." : ""}`}
               >
                 <TYPE.main>{"Price"}</TYPE.main>
               </MouseoverTooltip>
@@ -384,7 +386,7 @@ export default function CurrencyInputPanel({
               <RowBetween>
                 {currency && otherCurrency ? (
                   <MouseoverTooltip
-                    text={`The actual execution rate. Takes into account the gas necessary to execute your order and guarantees that your desired rate is fulfilled. It fluctuates according to gas price. ${
+                    text={`The actual execution rate. Takes into account the gas necessary to execute your order and guarantees that your desired rate is fulfilled. It fluctuates according to gas prices. ${
                       rate
                         ? "Will execute when " +
                           realExecutionRateExplainer +
@@ -406,24 +408,22 @@ export default function CurrencyInputPanel({
                   "-"
                 )}
 
-                <MouseoverTooltip
-                  text={
-                    realExecutionRateExplainer ? realExecutionRateExplainer : ""
-                  }
+                <TYPE.body
+                  fontSize={14}
+                  color={realExecutionRateExplainer ? theme.text2 : theme.text4}
                 >
-                  <TYPE.body
-                    fontSize={14}
-                    color={realExecutionRate ? theme.text2 : theme.text4}
-                  >
-                    {realExecutionRate ? "~" : ""}
-                    <HoverInlineText
-                      text={realExecutionRate ? realExecutionRate : "-"}
-                    />
-                  </TYPE.body>
-                </MouseoverTooltip>
+                  {/* {realExecutionRateExplainer ? "~" : ""} */}
+                  <HoverInlineText
+                    text={
+                      realExecutionRateExplainer
+                        ? realExecutionRateExplainer
+                        : "-"
+                    }
+                  />
+                </TYPE.body>
               </RowBetween>
             </FiatRow>
-            <FiatRow>
+            {/* <FiatRow>
               <RowBetween>
                 {currency && otherCurrency ? (
                   <TYPE.body
@@ -454,7 +454,7 @@ export default function CurrencyInputPanel({
                   </TYPE.body>
                 </MouseoverTooltip>
               </RowBetween>
-            </FiatRow>
+            </FiatRow> */}
             <FiatRow>
               <RowBetween>
                 {currency && otherCurrency ? (
