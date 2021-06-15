@@ -388,7 +388,7 @@ export default function CurrencyInputPanel({
                   <MouseoverTooltip
                     text={`The actual execution rate. Takes into account the gas necessary to execute your order and guarantees that your desired rate is fulfilled. It fluctuates according to gas prices. ${
                       rate
-                        ? "Will execute when " +
+                        ? "Assuming current gas prices it will execute when " +
                           realExecutionRateExplainer +
                           "."
                         : ""
@@ -455,7 +455,7 @@ export default function CurrencyInputPanel({
                 </MouseoverTooltip>
               </RowBetween>
             </FiatRow> */}
-            <FiatRow>
+            {/* <FiatRow>
               <RowBetween>
                 {currency && otherCurrency ? (
                   <TYPE.body
@@ -477,14 +477,15 @@ export default function CurrencyInputPanel({
                   <HoverInlineText
                     text={
                       gasPrice
-                        ? parseFloat(formatUnits(gasPrice, "gwei")).toFixed(0)
+                        ? parseFloat(formatUnits(gasPrice, "gwei")).toFixed(0) +
+                          " GWEI"
                         : "-"
                     }
                   />
                   {" GWEI"}
                 </TYPE.body>
               </RowBetween>
-            </FiatRow>
+            </FiatRow> */}
           </Fragment>
         )}
       </Container>

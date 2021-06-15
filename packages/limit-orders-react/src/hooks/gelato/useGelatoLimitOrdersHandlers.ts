@@ -17,6 +17,7 @@ import JSBI from "jsbi";
 import { NATIVE } from "../../constants/addresses";
 import { useWeb3 } from "../../web3";
 import { useTransactionAdder } from "../../state/gtransactions/hooks";
+import useGasPrice from "../useGasPrice";
 
 export enum ChainId {
   MAINNET = 1,
@@ -33,21 +34,26 @@ export interface GelatoLimitOrdersHandlers {
 }
 
 export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandlers {
-  const { chainId, library, account } = useWeb3();
+  const { chainId, library, account, venue } = useWeb3();
 
-  const gelatoLimitOrders = useMemo(
-    () =>
-      chainId && library
-        ? new GelatoLimitOrders(chainId, library?.getSigner())
-        : undefined,
-    [chainId, library]
-  );
+  const gelatoLimitOrders = useMemo(() => {
+    try {
+      return chainId && library
+        ? new GelatoLimitOrders(chainId as ChainId, library?.getSigner(), venue)
+        : undefined;
+    } catch (error) {
+      console.error("Could not instantiate GelatoLimitOrders");
+      return undefined;
+    }
+  }, [chainId, library, venue]);
 
   const { currencies, parsedAmounts, formattedAmounts } = useDerivedOrderInfo();
 
   const addTransaction = useTransactionAdder();
 
   const { rateType } = useOrderState();
+
+  const gasPrice = useGasPrice();
 
   const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
     useOrderActionHandlers();
@@ -119,7 +125,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
       outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
       rawAmounts.input,
-      minReturn
+      minReturn,
+      gasPrice
     );
 
     const now = Math.round(Date.now() / 1000);
@@ -170,6 +177,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     formattedAmounts,
     rateType,
     account,
+    gasPrice,
   ]);
 
   const handleLimitOrderCancellation = useCallback(
@@ -182,7 +190,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
         orderToCancel.inputToken,
         orderToCancel.outputToken,
         orderToCancel.minReturn,
-        orderToCancel.witness
+        orderToCancel.witness,
+        gasPrice
       );
 
       const now = Math.round(Date.now() / 1000);
@@ -199,7 +208,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
       return tx?.hash;
     },
-    [gelatoLimitOrders, addTransaction]
+    [gelatoLimitOrders, addTransaction, gasPrice]
   );
 
   const handleInput = useCallback(

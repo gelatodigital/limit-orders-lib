@@ -1,5 +1,5 @@
 import React from "react";
-import store, { gelatoReducers } from "./state";
+import { gelatoReducers } from "./state";
 import ApplicationUpdater from "./state/gapplication/updater";
 import ListsUpdater from "./state/glists/updater";
 import MulticallUpdater from "./state/gmulticall/updater";
@@ -11,6 +11,7 @@ import {
 import useGelatoLimitOrdersHistory from "./hooks/gelato/useGelatoLimitOrdersHistory";
 import GelatoLimitOrder from "./components/GelatoLimitOrder";
 import { Web3Provider } from "./web3";
+import { Venue } from "@gelatonetwork/limit-orders-lib";
 export * from "@gelatonetwork/limit-orders-lib";
 
 export function GelatoProvider({
@@ -18,6 +19,7 @@ export function GelatoProvider({
   library,
   children,
   account,
+  venue,
 }: {
   chainId: number | undefined;
   library: any | undefined;
@@ -26,7 +28,12 @@ export function GelatoProvider({
   children?: React.ReactNode;
 }) {
   return (
-    <Web3Provider chainId={chainId} library={library} account={account}>
+    <Web3Provider
+      chainId={chainId}
+      library={library}
+      account={account}
+      venue={venue}
+    >
       <ListsUpdater />
       <ApplicationUpdater />
       <MulticallUpdater />
@@ -42,5 +49,4 @@ export {
   useGelatoLimitOrdersHistory,
   GelatoLimitOrder as GelatoLimitOrderPanel,
   gelatoReducers,
-  store,
 };

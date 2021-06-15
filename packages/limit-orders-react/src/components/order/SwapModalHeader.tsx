@@ -144,7 +144,7 @@ export default function SwapModalHeader({
       </DarkGreyCard>
       <RowBetween style={{ marginTop: "0.25rem", padding: "0 1rem" }}>
         <TYPE.body color={theme.text2} fontWeight={500} fontSize={14}>
-          {"Price:"}
+          {"Limit Price:"}
         </TYPE.body>
         <TradePrice
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
