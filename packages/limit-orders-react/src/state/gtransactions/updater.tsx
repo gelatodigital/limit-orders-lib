@@ -1,5 +1,7 @@
+import { get } from "local-storage";
 import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { lsKey } from "../../utils/localStorageOrders";
 import { useWeb3 } from "../../web3";
 import { useBlockNumber } from "../gapplication/hooks";
 import { AppDispatch, AppState } from "../index";
@@ -44,8 +46,16 @@ export default function Updater(): null {
     state,
   ]);
 
+  // useEffect(() => {
+  //   if (!chainId || !account) return;
+  //   const gtransactions = get(lsKey("gtransactions_", account, chainId));
+
+  // }, [chainId, account]);
+
   useEffect(() => {
     if (!chainId || !library || !lastBlockNumber) return;
+
+    if (!Object.keys(transactions).length) return;
 
     Object.keys(transactions)
       .filter((hash) => shouldCheck(lastBlockNumber, transactions[hash]))

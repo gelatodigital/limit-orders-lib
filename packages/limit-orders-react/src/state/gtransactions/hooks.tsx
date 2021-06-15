@@ -1,4 +1,5 @@
 import { TransactionResponse } from "@ethersproject/providers";
+import { Order } from "@gelatonetwork/limit-orders-lib";
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -12,6 +13,7 @@ export function useTransactionAdder(): (
   response: TransactionResponse,
   customData?: {
     summary?: string;
+    order?: Order;
     type: TransactionType;
   }
 ) => void {
@@ -24,13 +26,16 @@ export function useTransactionAdder(): (
       {
         summary,
         type,
+        order,
       }: {
         summary?: string;
+        order?: Order;
         type: TransactionType;
       } = { type: "submission" }
     ) => {
       if (!account) return;
       if (!chainId) return;
+      if (!order) return;
 
       const { hash } = response;
       if (!hash) {
@@ -40,6 +45,7 @@ export function useTransactionAdder(): (
         addTransaction({
           hash,
           from: account,
+          order,
           chainId,
           type,
           summary,

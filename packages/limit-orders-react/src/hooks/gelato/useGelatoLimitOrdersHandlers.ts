@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { useCallback, useMemo } from "react";
-import { GelatoLimitOrders, utils } from "@gelatonetwork/limit-orders-lib";
+import {
+  GelatoLimitOrders,
+  Order,
+  utils,
+} from "@gelatonetwork/limit-orders-lib";
 import {
   useDerivedOrderInfo,
   useOrderActionHandlers,
@@ -21,12 +25,7 @@ export enum ChainId {
 
 export interface GelatoLimitOrdersHandlers {
   handleLimitOrderSubmission: () => Promise<string | undefined>;
-  handleLimitOrderCancellation: (
-    fromCurrency: string,
-    toCurrency: string,
-    amount: string,
-    witness: string
-  ) => Promise<string | undefined>;
+  handleLimitOrderCancellation: (order: Order) => Promise<string | undefined>;
   handleInput: (field: Field, value: string) => void;
   handleCurrencySelection: (field: Field, currency: Currency) => void;
   handleSwitchTokens: () => void;
@@ -34,7 +33,7 @@ export interface GelatoLimitOrdersHandlers {
 }
 
 export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandlers {
-  const { chainId, library } = useWeb3();
+  const { chainId, library, account } = useWeb3();
 
   const gelatoLimitOrders = useMemo(
     () =>
@@ -108,6 +107,10 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       throw new Error("No chainId");
     }
 
+    if (!account) {
+      throw new Error("No account");
+    }
+
     const { minReturn } = !utils.isEthereumChain(chainId)
       ? gelatoLimitOrders.getFeeAndSlippageAdjustedMinReturn(rawAmounts.output)
       : { minReturn: rawAmounts.output };
@@ -119,6 +122,17 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       minReturn
     );
 
+    const now = Math.round(Date.now() / 1000);
+
+    const { witness } =
+      await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+        inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
+        outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
+        rawAmounts.input,
+        minReturn,
+        account
+      );
+
     addTransaction(tx, {
       summary: `Swap ${formattedAmounts.input} ${inputCurrency.symbol} for ${
         formattedAmounts.output
@@ -128,6 +142,21 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
         rateType === Rate.MUL ? outputCurrency.symbol : inputCurrency.symbol
       }`,
       type: "submission",
+      order: {
+        createdTxHash: tx?.hash.toLowerCase(),
+        inputToken: inputCurrency?.isNative
+          ? NATIVE.toLowerCase()
+          : inputCurrency.wrapped.address.toLowerCase(),
+        outputToken: outputCurrency?.isNative
+          ? NATIVE.toLowerCase()
+          : outputCurrency.wrapped.address.toLowerCase(),
+        inputAmount: rawAmounts.input,
+        minReturn,
+        status: "open",
+        witness: witness.toLowerCase(),
+        updatedAt: now.toString(),
+        owner: account.toLowerCase(),
+      } as Order,
     });
 
     return tx?.hash;
@@ -140,29 +169,32 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     addTransaction,
     formattedAmounts,
     rateType,
+    account,
   ]);
 
   const handleLimitOrderCancellation = useCallback(
-    async (
-      fromCurrency: string,
-      toCurrency: string,
-      amount: string,
-      witness: string
-    ) => {
+    async (orderToCancel: Order) => {
       if (!gelatoLimitOrders) {
         throw new Error("Could not reach Gelato Limit Orders library");
       }
 
       const tx = await gelatoLimitOrders.cancelLimitOrder(
-        fromCurrency,
-        toCurrency,
-        amount,
-        witness
+        orderToCancel.inputToken,
+        orderToCancel.outputToken,
+        orderToCancel.minReturn,
+        orderToCancel.witness
       );
 
+      const now = Math.round(Date.now() / 1000);
       addTransaction(tx, {
         summary: `Order cancellation`,
         type: "cancellation",
+        order: {
+          ...orderToCancel,
+          updatedAt: now.toString(),
+          status: "cancelled",
+          cancelledTxHash: tx?.hash.toLowerCase(),
+        },
       });
 
       return tx?.hash;
@@ -200,7 +232,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
                   JSBI.BigInt(outputCurrency.decimals)
                 )
               )
-              ?.toSignificant(6)
+              ?.toExact()
           : undefined;
       onChangeRateType(Rate.DIV);
       if (flipped) onUserInput(Field.PRICE, flipped);
@@ -215,7 +247,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
                   JSBI.BigInt(inputCurrency.decimals)
                 )
               )
-              ?.toSignificant(6)
+              ?.toExact()
           : undefined;
       onChangeRateType(Rate.MUL);
       if (flipped) onUserInput(Field.PRICE, flipped);

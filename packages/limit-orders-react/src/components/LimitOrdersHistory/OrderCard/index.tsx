@@ -19,6 +19,11 @@ import { Dots } from "../../order/styleds";
 import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 import { useWeb3 } from "../../../web3";
 import { ButtonGray } from "../../Button";
+import { useIsTransactionPending } from "../../../state/gtransactions/hooks";
+import {
+  ExplorerDataType,
+  getExplorerLink,
+} from "../../../utils/getExplorerLink";
 
 const handleColorType = (status: string, theme: DefaultTheme) => {
   switch (status) {
@@ -28,6 +33,9 @@ const handleColorType = (status: string, theme: DefaultTheme) => {
       return theme.green1;
     case "cancelled":
       return theme.red1;
+
+    case "pending":
+      return theme.blue2;
 
     default:
       return theme.text3;
@@ -210,6 +218,9 @@ export default function OrderCard({ order }: { order: Order }) {
 
   const trade = useTradeExactIn(inputAmount, outputToken ?? undefined);
 
+  const isSubmissionPending = useIsTransactionPending(order.createdTxHash);
+  const isCancellationPending = useIsTransactionPending(order.cancelledTxHash);
+
   // modal and loading
   const [
     { showConfirm, cancellationErrorMessage, attemptingTxn, txHash },
@@ -247,12 +258,7 @@ export default function OrderCard({ order }: { order: Order }) {
       txHash: undefined,
     });
 
-    handleLimitOrderCancellation(
-      order.inputToken,
-      order.outputToken,
-      order.minReturn,
-      order.witness
-    )
+    handleLimitOrderCancellation(order)
       .then((hash) => {
         setCancellationState({
           attemptingTxn: false,
@@ -269,15 +275,7 @@ export default function OrderCard({ order }: { order: Order }) {
           txHash: undefined,
         });
       });
-  }, [
-    setCancellationState,
-    handleLimitOrderCancellation,
-    showConfirm,
-    order.inputToken,
-    order.outputToken,
-    order.minReturn,
-    order.witness,
-  ]);
+  }, [setCancellationState, handleLimitOrderCancellation, showConfirm, order]);
 
   return (
     <OrderPanel>
@@ -326,18 +324,53 @@ export default function OrderCard({ order }: { order: Order }) {
           )}
           <Spacer />
           <OrderStatus
-            clickable={order.status === "open" ? true : false}
-            onClick={() =>
-              setCancellationState({
-                attemptingTxn: false,
-                cancellationErrorMessage: undefined,
-                showConfirm: true,
-                txHash: undefined,
-              })
+            clickable={
+              order.status === "open" ||
+              isSubmissionPending ||
+              isCancellationPending
+                ? true
+                : false
             }
-            status={order.status}
+            onClick={() => {
+              if (!chainId) return;
+
+              return isSubmissionPending
+                ? window.open(
+                    getExplorerLink(
+                      chainId,
+                      order.createdTxHash,
+                      ExplorerDataType.TRANSACTION
+                    ),
+                    "_blank"
+                  )
+                : isSubmissionPending
+                ? window.open(
+                    getExplorerLink(
+                      chainId,
+                      order.cancelledTxHash,
+                      ExplorerDataType.TRANSACTION
+                    ),
+                    "_blank"
+                  )
+                : setCancellationState({
+                    attemptingTxn: false,
+                    cancellationErrorMessage: undefined,
+                    showConfirm: true,
+                    txHash: undefined,
+                  });
+            }}
+            status={
+              isCancellationPending || isSubmissionPending
+                ? "pending"
+                : order.status
+            }
           >
-            {order.status === "open" ? "cancel" : order.status}
+            {isSubmissionPending || isCancellationPending
+              ? "pending"
+              : order.status === "open"
+              ? "cancel"
+              : order.status}
+            {isSubmissionPending || isCancellationPending ? <Dots /> : null}
           </OrderStatus>
         </RowBetween>
 

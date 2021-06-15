@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import styled from "styled-components/macro";
 import { darken } from "polished";
 import { TYPE } from "../../theme";
@@ -9,7 +9,6 @@ import Row from "../Row";
 import { useGelatoLimitOrdersHistory } from "../../hooks/gelato";
 import useTheme from "../../hooks/useTheme";
 import OrderCard from "./OrderCard/index";
-import TxCard from "./OrderCard/index";
 import { FixedSizeList } from "react-window";
 import { useAllTransactions } from "../../state/gtransactions/hooks";
 
@@ -89,35 +88,29 @@ const LimitOrdersHistoryHeader = ({
   </StyledLimitOrderHistoryHeader>
 );
 
-const Spacer = styled.div`
-  flex: 1 1 auto;
-`;
-
-type Tab = "open" | "cancelled" | "executed" | "txs";
+type Tab = "open" | "cancelled" | "executed";
 
 export default function LimitOrdersHistory() {
   const [orderTab, setOrderTab] = useState<Tab>("open");
 
   const theme = useTheme();
 
-  const txs = useAllTransactions();
-
   const { open, cancelled, executed } = useGelatoLimitOrdersHistory();
 
   const fixedListRef = useRef<FixedSizeList>();
+
+  const allOpenOrders = useMemo(() => [...open.pending, ...open.confirmed], [
+    open,
+  ]);
+  const allCancelledOrders = useMemo(
+    () => [...cancelled.pending, ...cancelled.confirmed],
+    [cancelled]
+  );
 
   const Row = useCallback(function OrderRow({ data, index, style }) {
     return (
       <div style={style}>
         <OrderCard key={index} order={data[index]} />
-      </div>
-    );
-  }, []);
-
-  const TxsRow = useCallback(function OrderRow({ data, index, style }) {
-    return (
-      <div style={style}>
-        <TxCard key={index} order={data[index]} />
       </div>
     );
   }, []);
@@ -161,7 +154,7 @@ export default function LimitOrdersHistory() {
 
         <Wrapper id="limit-order-history">
           <TopSection gap="sm">
-            {orderTab === "open" && !open.length ? (
+            {orderTab === "open" && !open.confirmed.length ? (
               <TYPE.body
                 color={theme.text3}
                 style={{
@@ -179,8 +172,8 @@ export default function LimitOrdersHistory() {
                 height={438}
                 ref={fixedListRef as any}
                 width="100%"
-                itemData={open}
-                itemCount={open.length}
+                itemData={allOpenOrders}
+                itemCount={allOpenOrders.length}
                 itemSize={itemSize}
                 itemKey={itemKey}
               >
@@ -215,7 +208,7 @@ export default function LimitOrdersHistory() {
               </FixedSizeList>
             ) : null}
 
-            {orderTab === "cancelled" && !cancelled.length ? (
+            {orderTab === "cancelled" && !allCancelledOrders.length ? (
               <TYPE.body
                 color={theme.text3}
                 style={{
@@ -233,39 +226,12 @@ export default function LimitOrdersHistory() {
                 height={438}
                 ref={fixedListRef as any}
                 width="100%"
-                itemData={cancelled}
-                itemCount={cancelled.length}
+                itemData={allCancelledOrders}
+                itemCount={allCancelledOrders.length}
                 itemSize={itemSize}
                 itemKey={itemKey}
               >
                 {Row}
-              </FixedSizeList>
-            ) : null}
-
-            {orderTab === "txs" && !txs.length ? (
-              <TYPE.body
-                color={theme.text3}
-                style={{
-                  paddingTop: "20px",
-                  paddingBottom: "20px",
-                  textAlign: "center",
-                }}
-                fontWeight={400}
-                fontSize={16}
-              >
-                {"No transactions"}
-              </TYPE.body>
-            ) : orderTab === "txs" ? (
-              <FixedSizeList
-                height={438}
-                ref={fixedListRef as any}
-                width="100%"
-                itemData={Object.values(txs)}
-                itemCount={Object.values(txs).length}
-                itemSize={itemSize}
-                itemKey={itemKey}
-              >
-                {TxsRow}
               </FixedSizeList>
             ) : null}
           </TopSection>

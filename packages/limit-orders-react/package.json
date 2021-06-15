@@ -61,7 +61,6 @@
     "@types/multicodec": "^2.1.0",
     "@types/node": "14.14.41",
     "@types/react": "^17.0.2",
-    "@types/react-router-dom": "^5.1.7",
     "@types/react-virtualized-auto-sizer": "^1.0.0",
     "@types/react-window": "^1.8.3",
     "@types/rebass": "^4.0.8",
@@ -89,7 +88,6 @@
     "husky": "6.0.0",
     "jsbi": "^3.1.4",
     "lint-staged": "10.5.4",
-    "local-storage": "^2.0.0",
     "lodash.flatmap": "^4.5.0",
     "node-vibrant": "^3.1.5",
     "polished": "^4.1.3",
@@ -97,7 +95,6 @@
     "quickswap-sdk": "^3.0.8",
     "react": "^17.0.2",
     "react-device-detect": "^1.17.0",
-    "react-dom": "^17.0.1",
     "react-feather": "^2.0.9",
     "react-is": "^17.0.2",
     "react-popper": "^2.2.5",
@@ -121,13 +118,12 @@
   "peerDependencies": {
     "@reduxjs/toolkit": "^1.5.1",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1",
     "react-redux": "^7.2.3",
-    "react-router-dom": "^5.2.0",
     "styled-components": "^4.2.0"
   },
   "dependencies": {
     "@gelatonetwork/limit-orders-lib": "^1.0.0-5",
-    "ethers": "5.0.7"
+    "ethers": "5.0.7",
+    "local-storage": "^2.0.0"
   }
 }

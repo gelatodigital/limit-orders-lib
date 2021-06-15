@@ -1,4 +1,10 @@
+import { Order } from "@gelatonetwork/limit-orders-lib";
 import { createReducer } from "@reduxjs/toolkit";
+import {
+  confirmOrderCancellation,
+  confirmOrderSubmission,
+  saveOrder,
+} from "../../utils/localStorageOrders";
 import {
   addTransaction,
   checkedTransaction,
@@ -13,6 +19,7 @@ const now = () => new Date().getTime();
 export interface TransactionDetails {
   hash: string;
   type: TransactionType;
+  order: Order;
   summary?: string;
   receipt?: SerializableTransactionReceipt;
   lastCheckedBlockNumber?: number;
@@ -33,13 +40,17 @@ export default createReducer(initialState, (builder) =>
   builder
     .addCase(
       addTransaction,
-      (transactions, { payload: { chainId, from, hash, summary, type } }) => {
+      (
+        transactions,
+        { payload: { chainId, from, hash, summary, type, order } }
+      ) => {
         if (transactions[chainId]?.[hash]) {
           throw Error("Attempted to add existing transaction.");
         }
         const txs = transactions[chainId] ?? {};
-        txs[hash] = { hash, summary, from, type, addedTime: now() };
+        txs[hash] = { hash, summary, from, order, type, addedTime: now() };
         transactions[chainId] = txs;
+        saveOrder(chainId, from, order, true);
       }
     )
     .addCase(clearAllTransactions, (transactions, { payload: { chainId } }) => {
@@ -72,6 +83,21 @@ export default createReducer(initialState, (builder) =>
         }
         tx.receipt = receipt;
         tx.confirmedTime = now();
+
+        if (transactions[chainId]?.[hash].type === "submission")
+          confirmOrderSubmission(
+            chainId,
+            receipt.from,
+            hash,
+            receipt.status === 0 ? false : true
+          );
+        else if (transactions[chainId]?.[hash].type === "cancellation")
+          confirmOrderCancellation(
+            chainId,
+            receipt.from,
+            hash,
+            receipt.status === 0 ? false : true
+          );
       }
     )
 );
