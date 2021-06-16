@@ -40,7 +40,6 @@ import AppBody from "./AppBody";
 import { TYPE } from "../../theme";
 import { useWeb3 } from "../../web3";
 import useTheme from "../../hooks/useTheme";
-import LimitOrdersHistory from "../LimitOrdersHistory";
 import useGasOverhead from "../../hooks/useGasOverhead";
 import PoweredByGelato from "../../assets/svg/poweredbygelato_transparent.svg";
 
@@ -457,8 +456,6 @@ export default function GelatoLimitOrder() {
           </AutoColumn>
         </Wrapper>
       </AppBody>
-
-      {/* {!account ? null : <LimitOrdersHistory />} */}
 
       {!swapIsUnsupported ? null : (
         <UnsupportedCurrencyFooter

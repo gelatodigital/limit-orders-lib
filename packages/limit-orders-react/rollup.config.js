@@ -33,6 +33,7 @@ export default {
     },
   ],
   plugins: [
+    commonjs(),
     typescript({
       tsconfig: "./tsconfig.json",
       declaration: true,
@@ -40,7 +41,6 @@ export default {
     }),
     peerDepsExternal(),
     resolve({ extensions }),
-    commonjs(),
     babel({
       babelHelpers: "inline",
       include: ["src/**/*"],

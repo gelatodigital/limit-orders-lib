@@ -9,7 +9,8 @@ import {
   useGelatoLimitOrdersHandlers,
 } from "./hooks/gelato";
 import useGelatoLimitOrdersHistory from "./hooks/gelato/useGelatoLimitOrdersHistory";
-import GelatoLimitOrder from "./components/GelatoLimitOrder";
+import GelatoLimitOrderPanel from "./components/GelatoLimitOrder";
+import GelatoLimitOrdersHistoryPanel from "./components/LimitOrdersHistory";
 import { Web3Provider } from "./web3";
 import { Venue } from "@gelatonetwork/limit-orders-lib";
 export * from "@gelatonetwork/limit-orders-lib";
@@ -47,6 +48,7 @@ export {
   useGelatoLimitOrders,
   useGelatoLimitOrdersHandlers,
   useGelatoLimitOrdersHistory,
-  GelatoLimitOrder as GelatoLimitOrderPanel,
+  GelatoLimitOrderPanel,
+  GelatoLimitOrdersHistoryPanel,
   gelatoReducers,
 };

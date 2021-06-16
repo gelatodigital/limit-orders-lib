@@ -29,6 +29,10 @@ export function saveOrder(
 
   const prev = get<Order[]>(key);
 
+  if (!pending) {
+    removeOrder(chainId, account, order, true);
+  }
+
   if (prev === null) {
     set(key, [order]);
   } else {
@@ -50,6 +54,8 @@ export function removeOrder(
     : lsKey(LS_ORDERS, account, chainId);
 
   const prev = get<Order[]>(key);
+
+  if (!prev) return [];
 
   const orders = prev.filter(
     (orderInLS) =>

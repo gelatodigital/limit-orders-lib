@@ -67,6 +67,7 @@ export default function Updater(): null {
       !windowVisible
     )
       return;
+
     dispatch(
       updateBlockNumber({
         chainId: debouncedState.chainId,

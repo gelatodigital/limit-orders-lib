@@ -1,6 +1,6 @@
 import { Pair } from "@uniswap/v2-sdk";
 import { Currency, CurrencyAmount, Percent, Token } from "@uniswap/sdk-core";
-import React, { useState, useCallback, Fragment } from "react";
+import React, { useState, useCallback, Fragment, useMemo } from "react";
 import styled from "styled-components/macro";
 import { darken } from "polished";
 import { useCurrencyBalance } from "../../hooks/Balances";
@@ -19,7 +19,6 @@ import { FiatValue } from "./FiatValue";
 import { formatTokenAmount } from "../../utils/formatTokenAmount";
 import { MouseoverTooltip } from "../Tooltip";
 import HoverInlineText from "../HoverInlineText";
-import { formatUnits } from "ethers/lib/utils";
 import DropDown from "../../assets/images/dropdown.svg";
 
 const InputPanel = styled.div<{ hideInput?: boolean }>`
@@ -204,10 +203,8 @@ export default function CurrencyInputPanel({
   locked = false,
   showCurrencySelector = true,
   showRate = false,
-  currentMarketRate,
   isInvertedRate = false,
   realExecutionRate,
-  gasPrice,
   ...rest
 }: CurrencyInputPanelProps) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -224,14 +221,17 @@ export default function CurrencyInputPanel({
 
   const isEthereum = chainId && chainId === 1;
 
-  const rate =
-    currency && otherCurrency && value
-      ? `1 ${
-          isInvertedRate ? otherCurrency?.symbol : currency?.symbol
-        } = ${value} ${
-          isInvertedRate ? currency?.symbol : otherCurrency?.symbol
-        }`
-      : undefined;
+  const rate = useMemo(
+    () =>
+      currency && otherCurrency && value
+        ? `1 ${
+            isInvertedRate ? otherCurrency?.symbol : currency?.symbol
+          } = ${value} ${
+            isInvertedRate ? currency?.symbol : otherCurrency?.symbol
+          }`
+        : undefined,
+    [currency, isInvertedRate, otherCurrency, value]
+  );
 
   // const currentMarketRateExplainer =
   //   currency && otherCurrency && currentMarketRate
@@ -242,14 +242,17 @@ export default function CurrencyInputPanel({
   //       }`
   //     : undefined;
 
-  const realExecutionRateExplainer =
-    currency && otherCurrency && realExecutionRate
-      ? `1 ${
-          isInvertedRate ? otherCurrency?.symbol : currency?.symbol
-        } = ${realExecutionRate} ${
-          isInvertedRate ? currency?.symbol : otherCurrency?.symbol
-        }`
-      : undefined;
+  const realExecutionRateExplainer = useMemo(
+    () =>
+      currency && otherCurrency && realExecutionRate
+        ? `1 ${
+            isInvertedRate ? otherCurrency?.symbol : currency?.symbol
+          } = ${realExecutionRate} ${
+            isInvertedRate ? currency?.symbol : otherCurrency?.symbol
+          }`
+        : undefined,
+    [currency, isInvertedRate, otherCurrency, realExecutionRate]
+  );
 
   return (
     <InputPanel id={id} hideInput={hideInput} {...rest}>

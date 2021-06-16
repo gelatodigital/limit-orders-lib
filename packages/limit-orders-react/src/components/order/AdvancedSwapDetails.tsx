@@ -8,6 +8,7 @@ import {
   CurrencyAmount,
 } from "@uniswap/sdk-core";
 import { Trade } from "@uniswap/v2-sdk";
+import { formatUnits } from "ethers/lib/utils";
 import JSBI from "jsbi";
 import React, { useMemo } from "react";
 import { useGelatoLimitOrders } from "../../hooks/gelato";
@@ -138,7 +139,9 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
               </TYPE.black>
             </RowFixed>
             <TYPE.black textAlign="right" fontSize={12} color={theme.text1}>
-              {gasPrice ? `${gasPrice} GWEI` : "-"}%
+              {gasPrice
+                ? `${parseFloat(formatUnits(gasPrice, "gwei")).toFixed(0)} GWEI`
+                : "-"}
             </TYPE.black>
           </RowBetween>
           <RowBetween>
