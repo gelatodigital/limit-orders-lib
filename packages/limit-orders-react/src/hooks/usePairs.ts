@@ -4,9 +4,12 @@ import { abi as IUniswapV2PairABI } from "@uniswap/v2-core/build/IUniswapV2Pair.
 import { Interface } from "@ethersproject/abi";
 import { useMultipleContractSingleData } from "../state/gmulticall/hooks";
 import { Currency, CurrencyAmount, Token } from "@uniswap/sdk-core";
-import { Pair as QuickswapPair } from "quickswap-sdk";
-import { Pair as SpiritSwapPair } from "@spiritswap-libs/sdk";
 import { Venue } from "@gelatonetwork/limit-orders-lib";
+import {
+  getSpookySwapPairAddress,
+  getSpiritSwapPairAddress,
+  getQuickSwapPairAddress,
+} from "../utils/pairs";
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI);
 
@@ -23,9 +26,13 @@ const getPairAddress = (
   venue?: Venue
 ): string | undefined => {
   if (tokenA.chainId === 137 && tokenB.chainId === 137) {
-    return QuickswapPair.getAddress(tokenA as any, tokenB as any);
+    return getQuickSwapPairAddress(tokenA, tokenB);
   } else if (tokenA.chainId === 250 && tokenB.chainId === 250)
-    return SpiritSwapPair.getAddress(tokenA as any, tokenB as any);
+    if (venue) {
+      return venue === "spookyswap"
+        ? getSpookySwapPairAddress(tokenA, tokenB)
+        : getSpiritSwapPairAddress(tokenA, tokenB);
+    } else return getSpookySwapPairAddress(tokenA, tokenB);
   else if (
     (tokenA.chainId === 1 && tokenB.chainId === 1) ||
     (tokenA.chainId === 3 && tokenB.chainId === 3)
