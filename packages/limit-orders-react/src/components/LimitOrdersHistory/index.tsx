@@ -102,11 +102,13 @@ export default function LimitOrdersHistory() {
   const fixedListRef = useRef<FixedSizeList>();
 
   const allOpenOrders = useMemo(() => [...open.pending, ...open.confirmed], [
-    open,
+    open.pending,
+    open.confirmed,
   ]);
+
   const allCancelledOrders = useMemo(
     () => [...cancelled.pending, ...cancelled.confirmed],
-    [cancelled]
+    [cancelled.pending, cancelled.confirmed]
   );
 
   const Row = useCallback(function OrderRow({ data, index, style }) {
@@ -156,7 +158,7 @@ export default function LimitOrdersHistory() {
 
         <Wrapper id="limit-order-history">
           <TopSection gap="sm">
-            {orderTab === "open" && !open.confirmed.length ? (
+            {orderTab === "open" && !allOpenOrders.length ? (
               <TYPE.body
                 color={theme.text3}
                 style={{
