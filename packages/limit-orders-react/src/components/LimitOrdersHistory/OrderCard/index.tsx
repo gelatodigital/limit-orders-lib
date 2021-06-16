@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import styled, { DefaultTheme } from "styled-components/macro";
 import { darken } from "polished";
 import { ArrowRight } from "react-feather";
@@ -8,10 +8,7 @@ import { Order } from "@gelatonetwork/limit-orders-lib";
 import useTheme from "../../../hooks/useTheme";
 import { useCurrency } from "../../../hooks/Tokens";
 import CurrencyLogo from "../../CurrencyLogo";
-import {
-  useGelatoLimitOrders,
-  useGelatoLimitOrdersHandlers,
-} from "../../../hooks/gelato";
+import { useGelatoLimitOrdersHandlers } from "../../../hooks/gelato";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 import ConfirmCancellationModal from "../ConfirmCancellationModal";
 import { useTradeExactIn } from "../../../hooks/useTrade";
@@ -176,45 +173,63 @@ export default function OrderCard({ order }: { order: Order }) {
 
   const { chainId } = useWeb3();
 
-  const { handleLimitOrderCancellation } = useGelatoLimitOrdersHandlers();
-
-  const { library: gelatoLibrary } = useGelatoLimitOrders();
+  const {
+    handleLimitOrderCancellation,
+    library: gelatoLibrary,
+  } = useGelatoLimitOrdersHandlers();
 
   const inputToken = useCurrency(order.inputToken);
   const outputToken = useCurrency(order.outputToken);
 
-  const outputAmount = outputToken
-    ? CurrencyAmount.fromRawAmount(outputToken, order.minReturn)
-    : undefined;
+  const inputAmount = useMemo(
+    () =>
+      inputToken
+        ? CurrencyAmount.fromRawAmount(inputToken, order.inputAmount)
+        : undefined,
+    [inputToken, order.inputAmount]
+  );
 
-  const inputAmount = inputToken
-    ? CurrencyAmount.fromRawAmount(inputToken, order.inputAmount)
-    : undefined;
+  const outputAmount = useMemo(
+    () =>
+      outputToken
+        ? CurrencyAmount.fromRawAmount(outputToken, order.minReturn)
+        : undefined,
+    [order.minReturn, outputToken]
+  );
 
-  const rawMinReturn =
-    outputToken && gelatoLibrary && inputToken && chainId
-      ? isEthereumChain(chainId)
-        ? order.minReturn
-        : gelatoLibrary.getRawMinReturn(order.minReturn)
-      : undefined;
+  const rawMinReturn = useMemo(
+    () =>
+      outputToken && gelatoLibrary && inputToken && chainId
+        ? isEthereumChain(chainId)
+          ? order.minReturn
+          : gelatoLibrary.getRawMinReturn(order.minReturn)
+        : undefined,
+    [chainId, gelatoLibrary, inputToken, order.minReturn, outputToken]
+  );
 
-  const rawMinReturnAmount =
-    outputToken && gelatoLibrary && inputToken && rawMinReturn
-      ? CurrencyAmount.fromRawAmount(outputToken, rawMinReturn)
-      : undefined;
+  const rawMinReturnAmount = useMemo(
+    () =>
+      outputToken && gelatoLibrary && inputToken && rawMinReturn
+        ? CurrencyAmount.fromRawAmount(outputToken, rawMinReturn)
+        : undefined,
+    [gelatoLibrary, inputToken, outputToken, rawMinReturn]
+  );
 
-  const executionRate =
-    outputToken && gelatoLibrary && inputToken && rawMinReturn
-      ? CurrencyAmount.fromRawAmount(
-          outputToken,
-          gelatoLibrary.getExecutionPrice(
-            order.inputAmount,
-            inputToken.decimals,
-            rawMinReturn,
-            outputToken.decimals
+  const executionRate = useMemo(
+    () =>
+      outputToken && gelatoLibrary && inputToken && rawMinReturn
+        ? CurrencyAmount.fromRawAmount(
+            outputToken,
+            gelatoLibrary.getExecutionPrice(
+              order.inputAmount,
+              inputToken.decimals,
+              rawMinReturn,
+              outputToken.decimals
+            )
           )
-        )
-      : undefined;
+        : undefined,
+    [gelatoLibrary, inputToken, order.inputAmount, outputToken, rawMinReturn]
+  );
 
   const trade = useTradeExactIn(inputAmount, outputToken ?? undefined);
 
@@ -328,13 +343,22 @@ export default function OrderCard({ order }: { order: Order }) {
             onClick={() => {
               if (!chainId) return;
 
-              if (order.status === "open")
+              if (order.status === "open" && !isSubmissionPending)
                 setCancellationState({
                   attemptingTxn: false,
                   cancellationErrorMessage: undefined,
                   showConfirm: true,
                   txHash: undefined,
                 });
+              else if (order.status === "open" && isSubmissionPending)
+                window.open(
+                  getExplorerLink(
+                    chainId,
+                    order.createdTxHash,
+                    ExplorerDataType.TRANSACTION
+                  ),
+                  "_blank"
+                );
               else if (order.status === "cancelled")
                 window.open(
                   getExplorerLink(

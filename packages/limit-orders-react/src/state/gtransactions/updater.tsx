@@ -44,16 +44,8 @@ export default function Updater(): null {
     state,
   ]);
 
-  // useEffect(() => {
-  //   if (!chainId || !account) return;
-  //   const gtransactions = get(lsKey("gtransactions_", account, chainId));
-
-  // }, [chainId, account]);
-
   useEffect(() => {
     if (!chainId || !library || !lastBlockNumber) return;
-
-    if (!Object.keys(transactions).length) return;
 
     Object.keys(transactions)
       .filter((hash) => shouldCheck(lastBlockNumber, transactions[hash]))

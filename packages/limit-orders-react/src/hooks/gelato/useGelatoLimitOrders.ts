@@ -9,9 +9,6 @@ import {
   useDerivedOrderInfo,
   useOrderState,
 } from "../../state/gorder/hooks";
-import useGelatoLimitOrdersHistory, {
-  GelatoLimitOrdersHistory,
-} from "./useGelatoLimitOrdersHistory";
 import { OrderState } from "../../state/gorder/reducer";
 import { useWeb3 } from "../../web3";
 
@@ -40,8 +37,6 @@ export default function useGelatoLimitOrders(): {
     }
   }, [chainId, provider]);
 
-  // const history = useGelatoLimitOrdersHistory();
-
   const orderState = useOrderState();
 
   const handlers = useGelatoLimitOrdersHandlers();
@@ -49,7 +44,6 @@ export default function useGelatoLimitOrders(): {
   return {
     library,
     gasPrice,
-    // history,
     handlers,
     derivedOrderInfo,
     orderState,

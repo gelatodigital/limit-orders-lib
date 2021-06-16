@@ -10,6 +10,7 @@ import { useGelatoLimitOrdersHistory } from "../../hooks/gelato";
 import useTheme from "../../hooks/useTheme";
 import OrderCard from "./OrderCard/index";
 import { FixedSizeList } from "react-window";
+import { useWeb3 } from "../../web3";
 
 const TopSection = styled(AutoColumn)`
   max-width: 640px;
@@ -92,6 +93,8 @@ type Tab = "open" | "cancelled" | "executed";
 export default function LimitOrdersHistory() {
   const [orderTab, setOrderTab] = useState<Tab>("open");
 
+  const { account } = useWeb3();
+
   const theme = useTheme();
 
   const { open, cancelled, executed } = useGelatoLimitOrdersHistory();
@@ -124,7 +127,7 @@ export default function LimitOrdersHistory() {
 
   const itemSize = 156;
 
-  return (
+  return account ? (
     <>
       <AppBody>
         <HeaderTitles>
@@ -237,5 +240,5 @@ export default function LimitOrdersHistory() {
         </Wrapper>
       </AppBody>
     </>
-  );
+  ) : null;
 }
