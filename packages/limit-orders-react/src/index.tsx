@@ -4,6 +4,7 @@ import ApplicationUpdater from "./state/gapplication/updater";
 import ListsUpdater from "./state/glists/updater";
 import MulticallUpdater from "./state/gmulticall/updater";
 import TransactionUpdater from "./state/gtransactions/updater";
+import { clearAllTransactions } from "./state/gtransactions/actions";
 import {
   useGelatoLimitOrders,
   useGelatoLimitOrdersHandlers,
@@ -52,4 +53,5 @@ export {
   GelatoLimitOrdersHistoryPanel,
   gelatoReducers,
   GELATO_PERSISTED_KEYS,
+  clearAllTransactions,
 };

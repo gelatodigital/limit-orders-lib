@@ -143,9 +143,9 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     const now = Math.round(Date.now() / 1000);
 
     addTransaction(tx, {
-      summary: `Swap ${formattedAmounts.input} ${inputCurrency.symbol} for ${
-        formattedAmounts.output
-      } ${outputCurrency.symbol} when 1 ${
+      summary: `Order submission: Swap ${formattedAmounts.input} ${
+        inputCurrency.symbol
+      } for ${formattedAmounts.output} ${outputCurrency.symbol} when 1 ${
         rateType === Rate.MUL ? inputCurrency.symbol : outputCurrency.symbol
       } = ${formattedAmounts.price} ${
         rateType === Rate.MUL ? outputCurrency.symbol : inputCurrency.symbol
