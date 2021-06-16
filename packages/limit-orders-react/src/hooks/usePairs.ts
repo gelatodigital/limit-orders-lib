@@ -5,6 +5,8 @@ import { Interface } from "@ethersproject/abi";
 import { useMultipleContractSingleData } from "../state/gmulticall/hooks";
 import { Currency, CurrencyAmount, Token } from "@uniswap/sdk-core";
 import { Pair as QuickswapPair } from "quickswap-sdk";
+import { Pair as SpiritSwapPair } from "@spiritswap-libs/sdk";
+import { Venue } from "@gelatonetwork/limit-orders-lib";
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI);
 
@@ -15,10 +17,16 @@ export enum PairState {
   INVALID,
 }
 
-const getPairAddress = (tokenA: Token, tokenB: Token): string | undefined => {
+const getPairAddress = (
+  tokenA: Token,
+  tokenB: Token,
+  venue?: Venue
+): string | undefined => {
   if (tokenA.chainId === 137 && tokenB.chainId === 137) {
     return QuickswapPair.getAddress(tokenA as any, tokenB as any);
-  } else if (
+  } else if (tokenA.chainId === 250 && tokenB.chainId === 250)
+    return SpiritSwapPair.getAddress(tokenA as any, tokenB as any);
+  else if (
     (tokenA.chainId === 1 && tokenB.chainId === 1) ||
     (tokenA.chainId === 3 && tokenB.chainId === 3)
   ) {
@@ -27,7 +35,8 @@ const getPairAddress = (tokenA: Token, tokenB: Token): string | undefined => {
 };
 
 export function usePairs(
-  currencies: [Currency | undefined, Currency | undefined][]
+  currencies: [Currency | undefined, Currency | undefined][],
+  venue?: Venue
 ): [PairState, Pair | null][] {
   const tokens = useMemo(
     () =>
@@ -42,10 +51,10 @@ export function usePairs(
     () =>
       tokens.map(([tokenA, tokenB]) => {
         return tokenA && tokenB && !tokenA.equals(tokenB)
-          ? getPairAddress(tokenA, tokenB)
+          ? getPairAddress(tokenA, tokenB, venue)
           : undefined;
       }),
-    [tokens]
+    [tokens, venue]
   );
 
   const results = useMultipleContractSingleData(

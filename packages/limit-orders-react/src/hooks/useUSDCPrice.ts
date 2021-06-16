@@ -19,7 +19,7 @@ const usdcCurrencyAmountMATIC = CurrencyAmount.fromRawAmount(
 export default function useUSDCPrice(
   currency?: Currency
 ): Price<Currency, Token> | undefined {
-  const { chainId } = useWeb3();
+  const { chainId, venue } = useWeb3();
   const v2USDCTrade = useTradeExactOut(
     currency,
     chainId === 137
@@ -27,6 +27,7 @@ export default function useUSDCPrice(
       : chainId === 1
       ? usdcCurrencyAmount
       : undefined,
+    venue,
     {
       maxHops: 2,
     }

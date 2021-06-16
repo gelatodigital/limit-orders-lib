@@ -5,14 +5,19 @@ import { isTradeBetter } from "../utils/isTradeBetter";
 import { BETTER_TRADE_LESS_HOPS_THRESHOLD } from "../constants/misc";
 import { useAllCurrencyCombinations } from "./useAllCurrencyCombinations";
 import { PairState, usePairs } from "./usePairs";
+import { Venue } from "@gelatonetwork/limit-orders-lib";
 
-function useAllCommonPairs(currencyA?: Currency, currencyB?: Currency): Pair[] {
+function useAllCommonPairs(
+  currencyA?: Currency,
+  currencyB?: Currency,
+  venue?: Venue
+): Pair[] {
   const allCurrencyCombinations = useAllCurrencyCombinations(
     currencyA,
     currencyB
   );
 
-  const allPairs = usePairs(allCurrencyCombinations);
+  const allPairs = usePairs(allCurrencyCombinations, venue);
 
   // only pass along valid pairs, non-duplicated pairs
   return useMemo(
@@ -42,11 +47,13 @@ const MAX_HOPS = 3;
 export function useTradeExactIn(
   currencyAmountIn?: CurrencyAmount<Currency>,
   currencyOut?: Currency,
+  venue?: Venue,
   { maxHops = MAX_HOPS } = {}
 ): Trade<Currency, Currency, TradeType.EXACT_INPUT> | null {
   const allowedPairs = useAllCommonPairs(
     currencyAmountIn?.currency,
-    currencyOut
+    currencyOut,
+    venue
   );
 
   return useMemo(() => {
@@ -99,11 +106,13 @@ export function useTradeExactIn(
 export function useTradeExactOut(
   currencyIn?: Currency,
   currencyAmountOut?: CurrencyAmount<Currency>,
+  venue?: Venue,
   { maxHops = MAX_HOPS } = {}
 ): Trade<Currency, Currency, TradeType.EXACT_OUTPUT> | null {
   const allowedPairs = useAllCommonPairs(
     currencyIn,
-    currencyAmountOut?.currency
+    currencyAmountOut?.currency,
+    venue
   );
 
   return useMemo(() => {
