@@ -33,8 +33,6 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
     }
   }, [chainId, library]);
 
-  const [transactionsValues, setTransactionsValues] = useState<number>(0);
-
   const [openOrders, setOpenOrders] = useState<{
     pending: Order[];
     confirmed: Order[];
@@ -62,8 +60,10 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
         .then(async (res) => {
           const { data } = await res.json();
 
+          const ordersLS = getLSOrders(chainId, account);
+
           data.orders.forEach((order: Order) => {
-            const orderExists = getLSOrders(chainId, account).find(
+            const orderExists = ordersLS.find(
               (confOrder) =>
                 confOrder.createdTxHash.toLowerCase() ===
                 order.createdTxHash.toLowerCase()
@@ -94,7 +94,7 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
                       pendingOrder.createdTxHash.toLowerCase() ===
                       order.createdTxHash.toLowerCase()
                   );
-                return orderCancelled === undefined;
+                return orderCancelled ? false : true;
               })
               .sort(newOrdersFirst),
             pending: pendingOrdersLS
@@ -122,8 +122,10 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
         .then(async (res) => {
           const { data } = await res.json();
 
+          const ordersLS = getLSOrders(chainId, account);
+
           data.orders.forEach((order: Order) => {
-            const orderExists = getLSOrders(chainId, account).find(
+            const orderExists = ordersLS.find(
               (confOrder) =>
                 confOrder.createdTxHash.toLowerCase() ===
                 order.createdTxHash.toLowerCase()
@@ -170,8 +172,10 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
         .then(async (res) => {
           const { data } = await res.json();
 
+          const ordersLS = getLSOrders(chainId, account);
+
           data.orders.forEach((order: Order) => {
-            const orderExists = getLSOrders(chainId, account).find(
+            const orderExists = ordersLS.find(
               (confOrder) =>
                 confOrder.createdTxHash.toLowerCase() ===
                 order.createdTxHash.toLowerCase()
@@ -195,23 +199,14 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
   }, [gelatoLimitOrders, account, chainId]);
 
   useEffect(() => {
-    if (
-      Object.keys(transactions).length + Object.values(transactions).length !==
-      transactionsValues
-    ) {
-      fetchOpenOrders();
-      fetchCancelledOrders();
-      fetchExecutedOrders();
-      setTransactionsValues(
-        Object.keys(transactions).length + Object.values(transactions).length
-      );
-    }
+    fetchOpenOrders();
+    fetchCancelledOrders();
+    fetchExecutedOrders();
   }, [
     fetchCancelledOrders,
     fetchExecutedOrders,
     fetchOpenOrders,
     transactions,
-    transactionsValues,
   ]);
 
   useInterval(fetchOpenOrders, 60000);
