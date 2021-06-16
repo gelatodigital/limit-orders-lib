@@ -27,9 +27,9 @@ export default {
     //   sourcemap: true,
     // },
     {
-      file: packageJson.module,
-      format: "esm",
-      sourcemap: true,
+      name: 'gelatolimitorders',
+      file: packageJson.main,
+			format: 'iife'
     },
   ],
   plugins: [
