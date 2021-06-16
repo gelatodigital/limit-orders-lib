@@ -197,7 +197,7 @@ export interface DerivedOrderInfo {
 
 // from the current swap inputs, compute the best trade and return it.
 export function useDerivedOrderInfo(): DerivedOrderInfo {
-  const { account } = useWeb3();
+  const { account, venue } = useWeb3();
 
   const {
     independentField,
@@ -248,11 +248,13 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
 
   const bestTradeExactIn = useTradeExactIn(
     isExactIn ? parsedAmountToUse : undefined,
-    outputCurrency ?? undefined
+    outputCurrency ?? undefined,
+    venue
   );
   const bestTradeExactOut = useTradeExactOut(
     inputCurrency ?? undefined,
-    !isExactIn ? parsedAmountToUse : undefined
+    !isExactIn ? parsedAmountToUse : undefined,
+    venue
   );
 
   const trade = isExactIn ? bestTradeExactIn : bestTradeExactOut;

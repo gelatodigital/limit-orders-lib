@@ -36,10 +36,8 @@ export const queryOpenOrders = async (
         owner: owner.toLowerCase(),
       }
     );
-    console.log("data", data);
     return data.orders;
   } catch (error) {
-    console.log(error);
     throw new Error("Could not query subgraph for open orders");
   }
 };

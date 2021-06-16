@@ -52,8 +52,12 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gasPrice = useGasPrice();
 
-  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
-    useOrderActionHandlers();
+  const {
+    onSwitchTokens,
+    onCurrencySelection,
+    onUserInput,
+    onChangeRateType,
+  } = useOrderActionHandlers();
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
@@ -118,14 +122,15 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       ? gelatoLimitOrders.getFeeAndSlippageAdjustedMinReturn(rawAmounts.output)
       : { minReturn: rawAmounts.output };
 
-    const { witness } =
-      await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-        inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
-        outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
-        rawAmounts.input,
-        minReturn,
-        account
-      );
+    const {
+      witness,
+    } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+      inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
+      outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
+      rawAmounts.input,
+      minReturn,
+      account
+    );
 
     const tx = await gelatoLimitOrders.submitLimitOrder(
       inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,

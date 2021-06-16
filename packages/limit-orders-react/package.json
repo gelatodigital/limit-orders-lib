@@ -54,6 +54,7 @@
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
     "@rollup/plugin-typescript": "^8.2.1",
+    "@spiritswap-libs/sdk": "^1.0.1",
     "@typechain/ethers-v5": "6.0.5",
     "@types/chai": "4.2.16",
     "@types/lodash.flatmap": "^4.5.6",
