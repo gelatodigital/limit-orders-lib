@@ -7,8 +7,9 @@ import {
 } from "@gelatonetwork/limit-orders-lib";
 import { useWeb3 } from "../../web3";
 import { getLSOrders, saveOrder } from "../../utils/localStorageOrders";
-import { useAllTransactions } from "../../state/gtransactions/hooks";
 import useInterval from "../useInterval";
+import { useSelector } from "react-redux";
+import { AppState } from "../../state";
 
 export interface GelatoLimitOrdersHistory {
   open: { pending: Order[]; confirmed: Order[] };
@@ -43,7 +44,14 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
   }>({ pending: [], confirmed: [] });
   const [executedOrders, setExecutedOrders] = useState<Order[]>([]);
 
-  const transactions = useAllTransactions();
+  const state = useSelector<AppState, AppState["gtransactions"]>(
+    (state) => state.gtransactions
+  ) as any;
+
+  const transactions = useMemo(
+    () => (chainId ? state[chainId] ?? {} : {}),
+    [chainId, state]
+  );
 
   const fetchOpenOrders = useCallback(() => {
     if (gelatoLimitOrders && account && chainId)
