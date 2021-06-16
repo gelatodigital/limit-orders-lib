@@ -73,6 +73,7 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
               saveOrder(chainId, account, order);
             }
           });
+          console.log("open");
 
           const openOrdersLS = getLSOrders(chainId, account).filter(
             (order) => order.status === "open"

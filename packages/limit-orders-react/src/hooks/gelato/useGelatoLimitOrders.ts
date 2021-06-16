@@ -21,7 +21,7 @@ export default function useGelatoLimitOrders(): {
   handlers: GelatoLimitOrdersHandlers;
   derivedOrderInfo: DerivedOrderInfo;
   orderState: OrderState;
-  history: GelatoLimitOrdersHistory;
+  // history: GelatoLimitOrdersHistory;
 } {
   const { chainId, library: provider } = useWeb3();
 
@@ -40,7 +40,7 @@ export default function useGelatoLimitOrders(): {
     }
   }, [chainId, provider]);
 
-  const history = useGelatoLimitOrdersHistory();
+  // const history = useGelatoLimitOrdersHistory();
 
   const orderState = useOrderState();
 
@@ -49,7 +49,7 @@ export default function useGelatoLimitOrders(): {
   return {
     library,
     gasPrice,
-    history,
+    // history,
     handlers,
     derivedOrderInfo,
     orderState,
