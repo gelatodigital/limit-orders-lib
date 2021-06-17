@@ -48,20 +48,23 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
       parsedAmounts.input?.currency &&
       parsedAmounts.output?.currency &&
       realExecutionRate
-        ? `1 ${
-            isInvertedRate
-              ? parsedAmounts.output.currency.symbol
-              : parsedAmounts.input.currency.symbol
-          } = ${realExecutionRate} ${
-            isInvertedRate
-              ? parsedAmounts.input.currency.symbol
-              : parsedAmounts.output.currency.symbol
-          }`
+        ? realExecutionRate === "never executes"
+          ? realExecutionRate
+          : `1 ${
+              isInvertedRate
+                ? parsedAmounts.output.currency.symbol
+                : parsedAmounts.input.currency.symbol
+            } = ${realExecutionRate} ${
+              isInvertedRate
+                ? parsedAmounts.input.currency.symbol
+                : parsedAmounts.output.currency.symbol
+            }`
         : undefined,
     [parsedAmounts, realExecutionRate, isInvertedRate]
   );
 
   const outputAmount = parsedAmounts.output;
+
   const rawOutputAmount = useMemo(
     () =>
       outputAmount
