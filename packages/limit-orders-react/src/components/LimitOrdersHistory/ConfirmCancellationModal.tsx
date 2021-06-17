@@ -1,3 +1,4 @@
+import { Order } from "@gelatonetwork/limit-orders-lib";
 import React, { Fragment, useCallback } from "react";
 import { Text } from "rebass";
 import { ButtonError } from "../Button";
@@ -46,6 +47,7 @@ export default function ConfirmCancellationModal({
   isOpen,
   attemptingTxn,
   txHash,
+  order,
 }: {
   isOpen: boolean;
   attemptingTxn: boolean;
@@ -53,6 +55,7 @@ export default function ConfirmCancellationModal({
   onConfirm: () => void;
   swapErrorMessage: string | undefined;
   onDismiss: () => void;
+  order: Order;
 }) {
   const showAcceptChanges = false;
 

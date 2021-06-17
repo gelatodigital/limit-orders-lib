@@ -89,7 +89,7 @@ function useCallsData(
     const calls = callKeys.map((key) => parseCallKey(key));
 
     const listenerOptions = options ?? {
-      blocksPerFetch: chainId === 1 ? 2 : 100,
+      blocksPerFetch: chainId === 1 ? 2 : 40,
     };
 
     dispatch(

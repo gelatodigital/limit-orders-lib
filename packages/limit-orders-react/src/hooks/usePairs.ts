@@ -1,6 +1,6 @@
 import { Pair } from "@uniswap/v2-sdk";
 import { useMemo } from "react";
-import { abi as IUniswapV2PairABI } from "@uniswap/v2-core/build/IUniswapV2Pair.json";
+import { abi as IUniswapV2PairABI } from "../abis/IUniswapV2Pair.json";
 import { Interface } from "@ethersproject/abi";
 import { useMultipleContractSingleData } from "../state/gmulticall/hooks";
 import { Currency, CurrencyAmount, Token } from "@uniswap/sdk-core";
