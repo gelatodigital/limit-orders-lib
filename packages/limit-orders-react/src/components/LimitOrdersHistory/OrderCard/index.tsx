@@ -32,7 +32,7 @@ const handleColorType = (status: string, theme: DefaultTheme) => {
       return theme.red1;
 
     case "pending":
-      return theme.blue2;
+      return theme.yellow1;
 
     default:
       return theme.text3;

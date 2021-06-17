@@ -245,11 +245,13 @@ export default function CurrencyInputPanel({
   const realExecutionRateExplainer = useMemo(
     () =>
       currency && otherCurrency && realExecutionRate
-        ? `1 ${
-            isInvertedRate ? otherCurrency?.symbol : currency?.symbol
-          } = ${realExecutionRate} ${
-            isInvertedRate ? currency?.symbol : otherCurrency?.symbol
-          }`
+        ? realExecutionRate === "never executes"
+          ? realExecutionRate
+          : `1 ${
+              isInvertedRate ? otherCurrency?.symbol : currency?.symbol
+            } = ${realExecutionRate} ${
+              isInvertedRate ? currency?.symbol : otherCurrency?.symbol
+            }`
         : undefined,
     [currency, isInvertedRate, otherCurrency, realExecutionRate]
   );
@@ -331,9 +333,9 @@ export default function CurrencyInputPanel({
           {showRate && (
             <RowFixed style={{ height: "17px" }}>
               <MouseoverTooltip
-                text={`Price at which you want your order to be executed. ${
+                text={`The virtual price that will determine your output amount. ${
                   chainId === 1
-                    ? "It does not account execution gas costs."
+                    ? "It does not account execution gas costs. For that check the actual execution rate below."
                     : ""
                 } ${rate ? rate + "." : ""}`}
               >
@@ -389,9 +391,9 @@ export default function CurrencyInputPanel({
               <RowBetween>
                 {currency && otherCurrency ? (
                   <MouseoverTooltip
-                    text={`The actual execution rate. Takes into account the gas necessary to execute your order and guarantees that your desired rate is fulfilled. It fluctuates according to gas prices. ${
+                    text={`The actual execution price. Takes into account the gas necessary to execute your order and guarantees that your desired rate is fulfilled. It fluctuates according to gas prices. ${
                       rate
-                        ? "Assuming current gas prices it will execute when " +
+                        ? `Assuming current gas price it should execute when ` +
                           realExecutionRateExplainer +
                           "."
                         : ""
@@ -404,7 +406,7 @@ export default function CurrencyInputPanel({
                       fontSize={14}
                       style={{ display: "inline", cursor: "pointer" }}
                     >
-                      {"Actual execution rate (?)"}
+                      Actual execution rate (?)
                     </TYPE.body>
                   </MouseoverTooltip>
                 ) : (

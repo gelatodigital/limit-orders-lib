@@ -43,32 +43,39 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
 
   const isInvertedRate = rateType === Rate.DIV;
 
-  const realExecutionRateWithSymbols =
-    parsedAmounts.input?.currency &&
-    parsedAmounts.output?.currency &&
-    realExecutionRate
-      ? `1 ${
-          isInvertedRate
-            ? parsedAmounts.output.currency.symbol
-            : parsedAmounts.input.currency.symbol
-        } = ${realExecutionRate} ${
-          isInvertedRate
-            ? parsedAmounts.input.currency.symbol
-            : parsedAmounts.output.currency.symbol
-        }`
-      : undefined;
+  const realExecutionRateWithSymbols = useMemo(
+    () =>
+      parsedAmounts.input?.currency &&
+      parsedAmounts.output?.currency &&
+      realExecutionRate
+        ? `1 ${
+            isInvertedRate
+              ? parsedAmounts.output.currency.symbol
+              : parsedAmounts.input.currency.symbol
+          } = ${realExecutionRate} ${
+            isInvertedRate
+              ? parsedAmounts.input.currency.symbol
+              : parsedAmounts.output.currency.symbol
+          }`
+        : undefined,
+    [parsedAmounts, realExecutionRate, isInvertedRate]
+  );
 
   const outputAmount = parsedAmounts.output;
-  const rawOutputAmount = outputAmount
-    ? outputAmount
-        .multiply(
-          JSBI.exponentiate(
-            JSBI.BigInt(10),
-            JSBI.BigInt(outputAmount.currency.decimals)
-          )
-        )
-        .toExact()
-    : "0"!;
+  const rawOutputAmount = useMemo(
+    () =>
+      outputAmount
+        ? outputAmount
+            .multiply(
+              JSBI.exponentiate(
+                JSBI.BigInt(10),
+                JSBI.BigInt(outputAmount.currency.decimals)
+              )
+            )
+            .toExact()
+        : "0",
+    [outputAmount]
+  );
 
   const { minReturn, slippagePercentage, gelatoFeePercentage } = useMemo(() => {
     if (!outputAmount || !library || !trade || !chainId)
@@ -147,10 +154,16 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
           <RowBetween>
             <RowFixed>
               <MouseoverTooltip
-                text={`The price at which your order will be triggered to guarantee that your desired limit price is respected after gas fees.`}
+                text={`The actual execution price. Takes into account the gas necessary to execute your order and guarantees that your desired rate is fulfilled. It fluctuates according to gas prices. ${
+                  realExecutionRateWithSymbols
+                    ? `Assuming current gas price it should execute when ` +
+                      realExecutionRateWithSymbols +
+                      "."
+                    : ""
+                }`}
               >
                 <TYPE.black fontSize={12} fontWeight={400} color={theme.text2}>
-                  Real Execution Price
+                  Real Execution Price (?)
                 </TYPE.black>{" "}
               </MouseoverTooltip>
             </RowFixed>
@@ -158,7 +171,6 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
               {realExecutionRateWithSymbols
                 ? `${realExecutionRateWithSymbols}`
                 : "-"}
-              %
             </TYPE.black>
           </RowBetween>
         </>

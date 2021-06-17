@@ -29,7 +29,7 @@ export default {
     {
       file: packageJson.browser,
       name: "gelatoLimitOrders",
-      format: "umd"
+      format: "umd",
     },
   ],
   plugins: [
