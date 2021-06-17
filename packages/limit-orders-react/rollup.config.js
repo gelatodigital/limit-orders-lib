@@ -27,20 +27,24 @@ export default {
     //   sourcemap: true,
     // },
     {
-      file: packageJson.module,
-      format: "esm",
-      sourcemap: true,
+      file: packageJson.browser,
+      name: "gelatoLimitOrders",
+      format: "umd"
     },
   ],
   plugins: [
+    peerDepsExternal(),
+    resolve({
+      extensions,
+      modulesOnly: true,
+      jsnext: true,
+    }),
     commonjs(),
     typescript({
       tsconfig: "./tsconfig.json",
       declaration: true,
       declarationDir: ".",
     }),
-    peerDepsExternal(),
-    resolve({ extensions }),
     babel({
       babelHelpers: "inline",
       include: ["src/**/*"],

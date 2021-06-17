@@ -273,7 +273,22 @@ export default function OrderCard({ order }: { order: Order }) {
       txHash: undefined,
     });
 
-    handleLimitOrderCancellation(order)
+    const orderDetails =
+      inputToken?.symbol &&
+      outputToken?.symbol &&
+      inputAmount &&
+      outputAmount &&
+      trade
+        ? {
+            inputTokenSymbol: inputToken.symbol,
+            outputTokenSymbol: outputToken.symbol,
+            inputAmount: inputAmount.toSignificant(4),
+            outputAmount: outputAmount.toSignificant(4),
+            executionPrice: trade.executionPrice.toSignificant(4),
+          }
+        : undefined;
+
+    handleLimitOrderCancellation(order, orderDetails)
       .then((hash) => {
         setCancellationState({
           attemptingTxn: false,
@@ -290,7 +305,16 @@ export default function OrderCard({ order }: { order: Order }) {
           txHash: undefined,
         });
       });
-  }, [setCancellationState, handleLimitOrderCancellation, showConfirm, order]);
+  }, [
+    handleLimitOrderCancellation,
+    showConfirm,
+    inputToken,
+    outputToken,
+    inputAmount,
+    outputAmount,
+    trade,
+    order,
+  ]);
 
   return (
     <OrderPanel>
@@ -301,6 +325,7 @@ export default function OrderCard({ order }: { order: Order }) {
         onConfirm={handleCancellation}
         swapErrorMessage={cancellationErrorMessage}
         onDismiss={handleConfirmDismiss}
+        order={order}
       />
       <Container hideInput={true}>
         <RowBetween padding="10px">

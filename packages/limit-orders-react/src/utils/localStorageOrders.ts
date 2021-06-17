@@ -27,17 +27,15 @@ export function saveOrder(
     ? lsKey(LS_ORDERS + "pending_", account, chainId)
     : lsKey(LS_ORDERS, account, chainId);
 
-  const prev = get<Order[]>(key);
-
   if (!pending) {
     removeOrder(chainId, account, order, true);
   }
 
-  if (prev === null) {
+  const orders = removeOrder(chainId, account, order, pending);
+
+  if (!orders.length) {
     set(key, [order]);
   } else {
-    const orders = removeOrder(chainId, account, order, pending);
-
     orders.push(order);
     set(key, orders);
   }
@@ -87,15 +85,8 @@ export function confirmOrderCancellation(
     const ordersKey = lsKey(LS_ORDERS, account, chainId);
     const orders = get<Order[]>(ordersKey);
     if (orders) {
-      const ordersToSave = removeOrder(
-        chainId,
-        account,
-        { ...confirmedOrder, cancelledTxHash: cancelHash },
-        true
-      );
-
+      const ordersToSave = removeOrder(chainId, account, confirmedOrder);
       ordersToSave.push({ ...confirmedOrder, cancelledTxHash: cancelHash });
-
       set(ordersKey, ordersToSave);
     } else {
       set(ordersKey, [{ ...confirmedOrder, cancelledTxHash: cancelHash }]);
@@ -122,15 +113,11 @@ export function confirmOrderSubmission(
     const ordersKey = lsKey(LS_ORDERS, account, chainId);
     const orders = get<Order[]>(ordersKey);
     if (orders) {
-      const ordersToSave = removeOrder(
-        chainId,
-        account,
-        { ...confirmedOrder, createdTxHash: creationHash },
-        true
-      );
-
+      const ordersToSave = removeOrder(chainId, account, {
+        ...confirmedOrder,
+        createdTxHash: creationHash,
+      });
       ordersToSave.push({ ...confirmedOrder, createdTxHash: creationHash });
-
       set(ordersKey, ordersToSave);
     } else {
       set(ordersKey, [{ ...confirmedOrder, createdTxHash: creationHash }]);

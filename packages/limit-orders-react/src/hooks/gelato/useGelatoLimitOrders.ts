@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { ChainId, GelatoLimitOrders } from "@gelatonetwork/limit-orders-lib";
-import useGasPrice from "../useGasPrice";
 import useGelatoLimitOrdersHandlers, {
   GelatoLimitOrdersHandlers,
 } from "./useGelatoLimitOrdersHandlers";
@@ -14,28 +13,28 @@ import { useWeb3 } from "../../web3";
 
 export default function useGelatoLimitOrders(): {
   library: GelatoLimitOrders | undefined;
-  gasPrice: number | undefined;
   handlers: GelatoLimitOrdersHandlers;
   derivedOrderInfo: DerivedOrderInfo;
   orderState: OrderState;
-  // history: GelatoLimitOrdersHistory;
 } {
-  const { chainId, library: provider } = useWeb3();
+  const { chainId, library: provider, venue } = useWeb3();
 
   const derivedOrderInfo = useDerivedOrderInfo();
-
-  const gasPrice = useGasPrice();
 
   const library = useMemo(() => {
     try {
       return chainId && provider
-        ? new GelatoLimitOrders(chainId as ChainId, provider?.getSigner())
+        ? new GelatoLimitOrders(
+            chainId as ChainId,
+            provider?.getSigner(),
+            venue
+          )
         : undefined;
     } catch (error) {
       console.error("Could not instantiate GelatoLimitOrders");
       return undefined;
     }
-  }, [chainId, provider]);
+  }, [chainId, provider, venue]);
 
   const orderState = useOrderState();
 
@@ -43,7 +42,6 @@ export default function useGelatoLimitOrders(): {
 
   return {
     library,
-    gasPrice,
     handlers,
     derivedOrderInfo,
     orderState,

@@ -84,20 +84,21 @@ export default createReducer(initialState, (builder) =>
         tx.receipt = receipt;
         tx.confirmedTime = now();
 
-        if (transactions[chainId]?.[hash].type === "submission")
+        if (transactions[chainId]?.[hash].type === "submission") {
           confirmOrderSubmission(
             chainId,
             receipt.from,
             hash,
             receipt.status === 0 ? false : true
           );
-        else if (transactions[chainId]?.[hash].type === "cancellation")
+        } else if (transactions[chainId]?.[hash].type === "cancellation") {
           confirmOrderCancellation(
             chainId,
             receipt.from,
             hash,
             receipt.status === 0 ? false : true
           );
+        }
       }
     )
 );

@@ -1,5 +1,5 @@
 import { useAllLists } from "./hooks";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useFetchListCallback } from "../../hooks/useFetchListCallback";
 import useInterval from "../../hooks/useInterval";
 import useIsWindowVisible from "../../hooks/useIsWindowVisible";
@@ -28,17 +28,17 @@ export default function Updater(): null {
   useInterval(fetchAllListsCallback, library ? 1000 * 60 * 10 : null);
 
   // whenever a list is not loaded and not loading, try again to load it
-  // useEffect(() => {
-  //   Object.keys(lists).forEach((listUrl) => {
-  //     const list = lists[listUrl];
-  //     if (!list.current && !list.loadingRequestId && !list.error) {
-  //       if (!library) return;
-  //       fetchList(library, listUrl).catch((error) =>
-  //         console.debug("list added fetching error", error)
-  //       );
-  //     }
-  //   });
-  // }, [dispatch, fetchList, library, lists]);
+  useEffect(() => {
+    Object.keys(lists).forEach((listUrl) => {
+      const list = lists[listUrl];
+      if (!list.current && !list.loadingRequestId && !list.error) {
+        if (!library) return;
+        fetchList(library, listUrl).catch((error) =>
+          console.debug("list added fetching error", error)
+        );
+      }
+    });
+  }, [fetchList, library, lists]);
 
   // if any lists from unsupported lists are loaded, check them too (in case new updates since last visit)
   // useEffect(() => {
