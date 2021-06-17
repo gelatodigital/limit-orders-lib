@@ -406,7 +406,7 @@ export default function CurrencyInputPanel({
                       fontSize={14}
                       style={{ display: "inline", cursor: "pointer" }}
                     >
-                      Actual execution rate (?)
+                      Real execution price (?)
                     </TYPE.body>
                   </MouseoverTooltip>
                 ) : (
