@@ -1,6 +1,7 @@
 import { Interface, FunctionFragment } from "@ethersproject/abi";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Contract } from "@ethersproject/contracts";
+import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useWeb3 } from "../../web3";
@@ -89,7 +90,7 @@ function useCallsData(
     const calls = callKeys.map((key) => parseCallKey(key));
 
     const listenerOptions = options ?? {
-      blocksPerFetch: chainId === 1 ? 2 : 40,
+      blocksPerFetch: isEthereumChain(chainId) ? 1 : 15,
     };
 
     dispatch(

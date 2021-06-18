@@ -4,12 +4,13 @@ import { abi as IUniswapV2PairABI } from "../abis/IUniswapV2Pair.json";
 import { Interface } from "@ethersproject/abi";
 import { useMultipleContractSingleData } from "../state/gmulticall/hooks";
 import { Currency, CurrencyAmount, Token } from "@uniswap/sdk-core";
-import { Venue } from "@gelatonetwork/limit-orders-lib";
+import { Handler } from "@gelatonetwork/limit-orders-lib";
 import {
   getSpookySwapPairAddress,
   getSpiritSwapPairAddress,
   getQuickSwapPairAddress,
 } from "../utils/pairs";
+import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI);
 
@@ -23,27 +24,24 @@ export enum PairState {
 const getPairAddress = (
   tokenA: Token,
   tokenB: Token,
-  venue?: Venue
+  handler?: Handler
 ): string | undefined => {
   if (tokenA.chainId === 137 && tokenB.chainId === 137) {
     return getQuickSwapPairAddress(tokenA, tokenB);
   } else if (tokenA.chainId === 250 && tokenB.chainId === 250)
-    if (venue) {
-      return venue === "spookyswap"
+    if (handler) {
+      return handler === "spookyswap"
         ? getSpookySwapPairAddress(tokenA, tokenB)
         : getSpiritSwapPairAddress(tokenA, tokenB);
     } else return getSpookySwapPairAddress(tokenA, tokenB);
-  else if (
-    (tokenA.chainId === 1 && tokenB.chainId === 1) ||
-    (tokenA.chainId === 3 && tokenB.chainId === 3)
-  ) {
+  else if (isEthereumChain(tokenA.chainId) && isEthereumChain(tokenB.chainId)) {
     return Pair.getAddress(tokenA, tokenB);
   } else return undefined;
 };
 
 export function usePairs(
   currencies: [Currency | undefined, Currency | undefined][],
-  venue?: Venue
+  handler?: Handler
 ): [PairState, Pair | null][] {
   const tokens = useMemo(
     () =>
@@ -58,10 +56,10 @@ export function usePairs(
     () =>
       tokens.map(([tokenA, tokenB]) => {
         return tokenA && tokenB && !tokenA.equals(tokenB)
-          ? getPairAddress(tokenA, tokenB, venue)
+          ? getPairAddress(tokenA, tokenB, handler)
           : undefined;
       }),
-    [tokens, venue]
+    [tokens, handler]
   );
 
   const results = useMultipleContractSingleData(

@@ -1,4 +1,4 @@
-export { GelatoLimitOrders } from "./limit-orders";
+export { GelatoLimitOrders, isValidChainIdAndHandler } from "./limit-orders";
 
 export * from "./types";
 

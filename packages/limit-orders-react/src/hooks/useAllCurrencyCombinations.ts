@@ -13,10 +13,9 @@ export function useAllCurrencyCombinations(
   currencyB?: Currency
 ): [Token, Token][] {
   const { chainId } = useWeb3();
-  const [tokenA, tokenB] =
-    chainId === 137 || chainId === 1
-      ? [currencyA?.wrapped, currencyB?.wrapped]
-      : [undefined, undefined];
+  const [tokenA, tokenB] = chainId
+    ? [currencyA?.wrapped, currencyB?.wrapped]
+    : [undefined, undefined];
 
   const bases: Token[] = useMemo(() => {
     if (!chainId) return [];

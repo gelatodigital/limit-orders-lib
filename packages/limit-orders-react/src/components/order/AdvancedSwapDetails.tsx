@@ -114,7 +114,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
     };
   }, [trade, outputAmount, chainId, library, rawOutputAmount]);
 
-  return !trade || !chainId ? null : (
+  return !chainId ? null : (
     <AutoColumn gap="8px">
       {!isEthereumChain(chainId) ? (
         <>

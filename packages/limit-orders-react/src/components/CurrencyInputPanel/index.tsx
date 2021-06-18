@@ -20,6 +20,7 @@ import { formatTokenAmount } from "../../utils/formatTokenAmount";
 import { MouseoverTooltip } from "../Tooltip";
 import HoverInlineText from "../HoverInlineText";
 import DropDown from "../../assets/images/dropdown.svg";
+import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 
 const InputPanel = styled.div<{ hideInput?: boolean }>`
   ${({ theme }) => theme.flexColumnNoWrap}
@@ -219,7 +220,7 @@ export default function CurrencyInputPanel({
     setModalOpen(false);
   }, [setModalOpen]);
 
-  const isEthereum = chainId && chainId === 1;
+  const isEthereum = chainId && isEthereumChain(chainId);
 
   const rate = useMemo(
     () =>
@@ -334,7 +335,7 @@ export default function CurrencyInputPanel({
             <RowFixed style={{ height: "17px" }}>
               <MouseoverTooltip
                 text={`The virtual price that will determine your output amount. ${
-                  chainId === 1
+                  chainId && isEthereumChain(chainId)
                     ? "It does not account execution gas costs. For that check the actual execution rate below."
                     : ""
                 } ${rate ? rate + "." : ""}`}

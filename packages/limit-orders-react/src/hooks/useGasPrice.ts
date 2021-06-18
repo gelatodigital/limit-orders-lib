@@ -3,6 +3,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { parseUnits } from "ethers/lib/utils";
 import { useWeb3 } from "../web3";
 import useInterval from "./useInterval";
+import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 
 export enum ChainId {
   MAINNET = 1,
@@ -55,7 +56,10 @@ export default function useGasPrice(): number | undefined {
         );
   }, [chainId, setGasPrice]);
 
-  useInterval(gasPriceCallback, chainId === 1 ? 15000 : null);
+  useInterval(
+    gasPriceCallback,
+    chainId && isEthereumChain(chainId) ? 15000 : null
+  );
 
   return gasPrice;
 }

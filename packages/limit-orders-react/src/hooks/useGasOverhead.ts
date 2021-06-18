@@ -10,13 +10,14 @@ import { tryParseAmount } from "../state/gorder/hooks";
 import { Currency, CurrencyAmount } from "@uniswap/sdk-core";
 import { Rate } from "../state/gorder/actions";
 import JSBI from "jsbi";
+import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 
 export default function useGasOverhead(
   inputAmount: CurrencyAmount<Currency> | undefined,
   outputAmount: CurrencyAmount<Currency> | undefined,
   rateType: Rate
 ): { realExecutionRate: string | undefined; gasPrice: number | undefined } {
-  const { chainId, venue } = useWeb3();
+  const { chainId, handler } = useWeb3();
 
   const gasPrice = useGasPrice();
   const nativeCurrency = useCurrency("NATIVE");
@@ -35,7 +36,7 @@ export default function useGasOverhead(
   const gasCostInInputTokens = useTradeExactIn(
     requiredGasAsCurrencyAmount,
     inputAmount?.currency,
-    venue
+    handler
   );
 
   const realInputAmount = useMemo(
@@ -85,7 +86,7 @@ export default function useGasOverhead(
     gasCostInInputTokens,
   ]);
 
-  return chainId === 1
+  return chainId && isEthereumChain(chainId)
     ? { realExecutionRate, gasPrice }
     : { realExecutionRate: undefined, gasPrice: undefined };
 }
