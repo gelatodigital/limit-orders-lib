@@ -3,16 +3,8 @@
 
 # Gelato Limit Order Libraries
 
-Place limit buy and sell orders on Uniswap v2 using Gelato Network.
-
-## Mainnet & Ropsten Demo
-
-<a href="https://www.sorbet.finance" target="_blank">
-     <img src="https://i.imgur.com/66yH4SO.png"
-          alt="Gelato Limit orders"
-          style="width: 640px;"
-     />
-</a>
+Place limit buy and sell orders on Ethereum, Polygon and Fantom using Gelato Network.
+Use our vanilla js library, our ready to use react component or plug in our react hook to handle limit orders on your app.
 
 ### Need help?
 

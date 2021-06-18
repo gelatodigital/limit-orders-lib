@@ -3,12 +3,12 @@
 
 # Gelato Limit Order SDK
 
-Place limit buy and sell orders on Uniswap v2 using Gelato Network.
+Place limit buy and sell orders on Ethereum, Polygon and Fantom using Gelato Network.
 
-## Mainnet & Ropsten Demo
+## Demo
 
 <a href="https://www.sorbet.finance/order" target="_blank">
-     <img src="https://i.imgur.com/66yH4SO.png"
+     <img src="https://i.imgur.com/xE5RKRH.png"
           alt="Gelato Limit orders"
           style="width: 640px;"
      />
@@ -24,13 +24,21 @@ or
 
 ## Getting Started (using ethers.js, but also works with web3.js)
 
-1. Create the limit order payload
+1. Instantiate GelatoLimitOrders and send an order
 
-```javascript
-import { getLimitOrderPayload } from "@gelatonetwork/limit-orders-lib";
+```typescript
+import { GelatoLimitOrders } from "@gelatonetwork/limit-orders-lib";
 
-// Supported networks: Mainnet = 1; Ropsten = 3
+// Supported networks: Mainnet = 1; Ropsten = 3; Polygon = 137; Fantom = 250
 const chainId = 1;
+const signer = await provider.getSigner();
+const handler = "uniswap"; // "spookyswap" | "uniswap" | "quickswap" | "spiritswap";
+
+const gelatoLimitOrders = new GelatoLimitOrders(
+  chainId as ChainId,
+  signer, // optional
+  handler // optional
+);
 
 // Token to sell
 const inToken = "0x6b175474e89094c44da98b954eedeac495271d0f"; // DAI
@@ -49,8 +57,7 @@ const userAddress = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B";
 
 // If 1 ETH is above 2000 DAI, then the user will buy 1 ETH if it is less than 2000 DAI
 // If 1 ETH is below 2000 DAI, then the user will buy 1 ETH if it is greater than 2000 DAI
-const txData = await getLimitOrderPayload(
-  chainId,
+const txData = await gelatoLimitOrders.submitLimitOrder(
   inToken,
   outToken,
   inputAmount,
@@ -59,80 +66,21 @@ const txData = await getLimitOrderPayload(
 );
 ```
 
-2. Place the order by sending the transaction
+2. Cancel an order
 
-```javascript
-// Use Front End web3 provider library of your choice
-import Web3Modal from "web3modal";
-import { useWeb3React } from "@web3-react/core";
-
-// If using Web3Modal
-const web3Modal = new Web3Modal();
-const web3ModalProvider = await web3Modal.connect();
-const provider = new ethers.providers.Web3Provider(web3ModalProvider);
-
-// If using Web3React
-const { library } = useWeb3React();
-const provider = new ethers.providers.Web3Provider(library.provider);
-
-// Submit Limit Order
-const tx = await provider.getSigner().sendTransaction(txData);
-
-// Print out hash
-console.log(`Hash: ${tx.hash}`);
-
-// Wait for tx to be mined
-await tx.wait();
+```typescript
+const tx = await gelatoLimitOrders.cancelLimitOrder(
+  order.inputToken,
+  order.outputToken,
+  order.minReturn,
+  order.witness
+);
 ```
 
 3. Fetch all orders
 
 ```javascript
-import { getAllOpenOrders } from "@gelatonetwork/limit-orders-lib";
-
-const openOrders = await getAllOpenOrders(userAddress, chainId);
-```
-
-4. Cancel pending order
-
-```javascript
-import { getAllOpenOrders } from "@gelatonetwork/limit-orders-lib";
-import { getCancelLimitOrderPayload } from "@gelatonetwork/limit-orders-lib";
-
-const openOrders = await getAllOpenOrders(userAddress, chainId);
-if (openOrders.length === 0) throw new Error("No orders found");
-const order = openOrders[0];
-
-const { module, inputToken, outputToken, minReturn, owner, witness } = order;
-
-const txData = await getCancelLimitOrderPayload(
-  chainId,
-  inputToken,
-  outputToken,
-  minReturn,
-  owner,
-  witness
-);
-
-const tx = await provider.getSigner().sendTransaction(txData);
-
-await tx.wait();
-```
-
-5. Get successfully executed orders
-
-```javascript
-import { getExecutedOrders } from "@gelatonetwork/limit-orders-lib";
-
-const executedOrders = await getExecutedOrders(userAddress, chainId);
-```
-
-6. Get cancelled orders
-
-```javascript
-import { getCancelledOrders } from "@gelatonetwork/limit-orders-lib";
-
-const cancelledOrders = await getCancelledOrders(userAddress, chainId);
+const allOrders = await gelatoLimitOrders.getOrders(userAddress);
 ```
 
 ## Types
@@ -140,29 +88,117 @@ const cancelledOrders = await getCancelledOrders(userAddress, chainId);
 See `dist/src/index.d.ts`
 
 ```typescript
-export interface Order {
-  id: number;
-  inputToken: string;
-  outputToken: string;
-  inputAmount: BigNumber;
-  minReturn: BigNumber;
-  bought: BigNumber;
-  status: string;
-  cancelledTxHash: BytesLike;
-  executedTxHash: BytesLike;
-  updatedAt: string;
+export class GelatoLimitOrders {
+  static slippageBPS: number;
+  static gelatoFeeBPS: number;
+  get chainId(): ChainId;
+  get signer(): Signer | undefined;
+  get subgraphUrl(): string;
+  get handler(): Handler | undefined;
+  get moduleAddress(): string;
+  get contract(): GelatoLimitOrdersContract;
+  constructor(chainId: ChainId, signer?: Signer, handler?: Handler);
+  encodeLimitOrderSubmission(
+    fromCurrency: string,
+    toCurrency: string,
+    amount: BigNumberish,
+    minimumReturn: BigNumberish,
+    owner: string
+  ): Promise<TransactionData>;
+  encodeLimitOrderSubmissionWithSecret(
+    fromCurrency: string,
+    toCurrency: string,
+    amount: BigNumberish,
+    minimumReturn: BigNumberish,
+    owner: string
+  ): Promise<TransactionDataWithSecret>;
+  submitLimitOrder(
+    fromCurrency: string,
+    toCurrency: string,
+    amount: BigNumberish,
+    minimumReturn: BigNumberish,
+    gasPrice?: BigNumberish
+  ): Promise<ContractTransaction>;
+  encodeLimitOrderCancellation(
+    fromCurrency: string,
+    toCurrency: string,
+    minReturn: BigNumberish,
+    witness: string,
+    owner: string
+  ): TransactionData;
+  cancelLimitOrder(
+    fromCurrency: string,
+    toCurrency: string,
+    minReturn: BigNumberish,
+    witness: string,
+    gasPrice?: BigNumberish
+  ): Promise<ContractTransaction>;
+  getExchangeRate(
+    inputValue: BigNumberish,
+    inputDecimals: number,
+    outputValue: BigNumberish,
+    outputDecimals: number,
+    invert?: boolean
+  ): string;
+  getFeeAndSlippageAdjustedMinReturn(
+    outputAmount: BigNumberish,
+    extraSlippageBPS?: number
+  ): {
+    minReturn: string;
+    slippage: string;
+    gelatoFee: string;
+  };
+  getRawMinReturn(minReturn: BigNumberish, extraSlippageBPS?: number): string;
+  getExecutionPrice(
+    inputAmount: BigNumberish,
+    inputDecimals: number,
+    outputAmount: BigNumberish,
+    outputDecimals: number,
+    isInverted?: boolean
+  ): string;
+  getOrders(owner: string): Promise<Order[]>;
+  getOpenOrders(owner: string): Promise<Order[]>;
+  getPastOrders(owner: string): Promise<Order[]>;
+  getExecutedOrders(owner: string): Promise<Order[]>;
+  getCancelledOrders(owner: string): Promise<Order[]>;
 }
 
 export interface TransactionData {
   to: string;
   data: BytesLike;
-  value: BigNumber;
+  value: BigNumberish;
 }
 
 export interface TransactionDataWithSecret {
-  txData: TransactionData;
+  payload: TransactionData;
   secret: string;
   witness: string;
+}
+
+export interface Order {
+  id: number;
+  owner: string;
+  inputToken: string;
+  outputToken: string;
+  minReturn: string;
+  module: string;
+  witness: string;
+  secret: string;
+  inputAmount: string;
+  vault: string;
+  bought: string;
+  auxData: string;
+  status: string;
+  createdTxHash: string;
+  executedTxHash: string;
+  cancelledTxHash: string;
+  blockNumber: string;
+  createdAt: string;
+  updatedAt: string;
+  updatedAtBlock: string;
+  updatedAtBlockHash: string;
+  data: string;
+  inputData: string;
 }
 ```
 
