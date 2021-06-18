@@ -171,7 +171,7 @@ const Spacer = styled.div`
 export default function OrderCard({ order }: { order: Order }) {
   const theme = useTheme();
 
-  const { chainId, venue } = useWeb3();
+  const { chainId, handler } = useWeb3();
 
   const {
     handleLimitOrderCancellation,
@@ -231,7 +231,7 @@ export default function OrderCard({ order }: { order: Order }) {
     [gelatoLibrary, inputToken, order.inputAmount, outputToken, rawMinReturn]
   );
 
-  const trade = useTradeExactIn(inputAmount, outputToken ?? undefined, venue);
+  const trade = useTradeExactIn(inputAmount, outputToken ?? undefined, handler);
 
   const isSubmissionPending = useIsTransactionPending(order.createdTxHash);
   const isCancellationPending = useIsTransactionPending(order.cancelledTxHash);

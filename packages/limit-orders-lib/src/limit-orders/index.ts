@@ -29,7 +29,7 @@ import {
   queryPastOrders,
 } from "../utils/queries";
 import {
-  Venue,
+  Handler,
   ChainId,
   Order,
   TransactionData,
@@ -37,8 +37,11 @@ import {
 } from "../types";
 import { isEthereumChain, isNetworkGasToken } from "../utils";
 
-const isValidChainIdAndVenue = (chainId: ChainId, venue: Venue) => {
-  return venue in NETWORK_VENUES[chainId];
+export const isValidChainIdAndHandler = (
+  chainId: ChainId,
+  handler: Handler
+): boolean => {
+  return handler in NETWORK_VENUES[chainId];
 };
 export class GelatoLimitOrders {
   private _chainId: ChainId;
@@ -46,7 +49,7 @@ export class GelatoLimitOrders {
   private _gelatoLimitOrders: GelatoLimitOrdersContract;
   private _moduleAddress: string;
   private _subgraphUrl: string;
-  private _venue?: Venue;
+  private _handler?: Handler;
 
   public static slippageBPS = SLIPPAGE_BPS;
   public static gelatoFeeBPS = TWO_BPS_GELATO_FEE;
@@ -63,8 +66,8 @@ export class GelatoLimitOrders {
     return this._subgraphUrl;
   }
 
-  get venue(): Venue | undefined {
-    return this._venue;
+  get handler(): Handler | undefined {
+    return this._handler;
   }
 
   get moduleAddress(): string {
@@ -75,9 +78,9 @@ export class GelatoLimitOrders {
     return this._gelatoLimitOrders;
   }
 
-  constructor(chainId: ChainId, signer?: Signer, venue?: Venue) {
-    if (venue && !isValidChainIdAndVenue(chainId, venue)) {
-      throw new Error("Invalid chainId and venue");
+  constructor(chainId: ChainId, signer?: Signer, handler?: Handler) {
+    if (handler && !isValidChainIdAndHandler(chainId, handler)) {
+      throw new Error("Invalid chainId and handler");
     }
     this._chainId = chainId;
     this._subgraphUrl = SUBGRAPH_URL[chainId];
@@ -92,7 +95,7 @@ export class GelatoLimitOrders {
           GelatoLimitOrders__factory.createInterface()
         ) as GelatoLimitOrdersContract);
     this._moduleAddress = GELATO_LIMIT_ORDERS_MODULE_ADDRESS[this._chainId];
-    this._venue = venue;
+    this._handler = handler;
   }
 
   public async encodeLimitOrderSubmission(
@@ -230,7 +233,7 @@ export class GelatoLimitOrders {
     );
   }
 
-  public exchangeRate(
+  public getExchangeRate(
     inputValue: BigNumberish,
     inputDecimals: number,
     outputValue: BigNumberish,
@@ -376,10 +379,10 @@ export class GelatoLimitOrders {
     if (fromCurrency.toLowerCase() === toCurrency.toLowerCase())
       throw new Error("Input token and output token can not be equal");
 
-    const encodedData = this._venue
+    const encodedData = this._handler
       ? new utils.AbiCoder().encode(
           ["address", "uint256", "string"],
-          [toCurrency, minimumReturn, this._venue]
+          [toCurrency, minimumReturn, this._handler]
         )
       : new utils.AbiCoder().encode(
           ["address", "uint256"],

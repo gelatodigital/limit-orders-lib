@@ -40,18 +40,22 @@ export interface GelatoLimitOrdersHandlers {
 }
 
 export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandlers {
-  const { chainId, library, account, venue } = useWeb3();
+  const { chainId, library, account, handler } = useWeb3();
 
   const gelatoLimitOrders = useMemo(() => {
     try {
       return chainId && library
-        ? new GelatoLimitOrders(chainId as ChainId, library?.getSigner(), venue)
+        ? new GelatoLimitOrders(
+            chainId as ChainId,
+            library?.getSigner(),
+            handler
+          )
         : undefined;
     } catch (error) {
       console.error("Could not instantiate GelatoLimitOrders");
       return undefined;
     }
-  }, [chainId, library, venue]);
+  }, [chainId, library, handler]);
 
   const { currencies, parsedAmounts, formattedAmounts } = useDerivedOrderInfo();
 
@@ -61,12 +65,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gasPrice = useGasPrice();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
@@ -131,15 +131,14 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       ? gelatoLimitOrders.getFeeAndSlippageAdjustedMinReturn(rawAmounts.output)
       : { minReturn: rawAmounts.output };
 
-    const {
-      witness,
-    } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-      inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
-      outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
-      rawAmounts.input,
-      minReturn,
-      account
-    );
+    const { witness } =
+      await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+        inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
+        outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
+        rawAmounts.input,
+        minReturn,
+        account
+      );
 
     const tx = await gelatoLimitOrders.submitLimitOrder(
       inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,

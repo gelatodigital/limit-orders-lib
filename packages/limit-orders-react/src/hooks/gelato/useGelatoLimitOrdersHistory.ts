@@ -21,18 +21,22 @@ function newOrdersFirst(a: Order, b: Order) {
 }
 
 export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory {
-  const { account, chainId, library, venue } = useWeb3();
+  const { account, chainId, library, handler } = useWeb3();
 
   const gelatoLimitOrders = useMemo(() => {
     try {
       return chainId && library
-        ? new GelatoLimitOrders(chainId as ChainId, library?.getSigner(), venue)
+        ? new GelatoLimitOrders(
+            chainId as ChainId,
+            library?.getSigner(),
+            handler
+          )
         : undefined;
     } catch (error) {
       console.error("Could not instantiate GelatoLimitOrders");
       return undefined;
     }
-  }, [chainId, library, venue]);
+  }, [chainId, library, handler]);
 
   const [openOrders, setOpenOrders] = useState<{
     pending: Order[];
@@ -48,10 +52,10 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
     (state) => state.gtransactions
   ) as any;
 
-  const transactions = useMemo(() => (chainId ? state[chainId] ?? {} : {}), [
-    chainId,
-    state,
-  ]);
+  const transactions = useMemo(
+    () => (chainId ? state[chainId] ?? {} : {}),
+    [chainId, state]
+  );
 
   const fetchOpenOrders = useCallback(() => {
     if (gelatoLimitOrders && account && chainId)

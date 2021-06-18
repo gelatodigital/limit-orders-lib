@@ -14,7 +14,7 @@ import GelatoLimitOrderPanel from "./components/GelatoLimitOrder";
 import GelatoLimitOrdersHistoryPanel from "./components/LimitOrdersHistory";
 import { Web3Provider } from "./web3";
 import useGasPrice from "./hooks/useGasPrice";
-import { Venue } from "@gelatonetwork/limit-orders-lib";
+import { Handler } from "@gelatonetwork/limit-orders-lib";
 export * from "@gelatonetwork/limit-orders-lib";
 
 export function GelatoProvider({
@@ -22,12 +22,12 @@ export function GelatoProvider({
   library,
   children,
   account,
-  venue,
+  handler,
 }: {
   chainId: number | undefined;
   library: any | undefined;
   account: string | undefined;
-  venue?: Venue;
+  handler?: Handler;
   children?: React.ReactNode;
 }) {
   return (
@@ -35,7 +35,7 @@ export function GelatoProvider({
       chainId={chainId}
       library={library}
       account={account}
-      venue={venue}
+      handler={handler}
     >
       <ListsUpdater />
       <ApplicationUpdater />

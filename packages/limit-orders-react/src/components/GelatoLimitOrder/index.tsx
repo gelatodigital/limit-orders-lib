@@ -37,7 +37,7 @@ import { tryParseAmount } from "../../state/gorder/hooks";
 import { computeFiatValuePriceImpact } from "../../utils/computeFiatValuePriceImpact";
 import { maxAmountSpend } from "../../utils/maxAmountSpend";
 import AppBody from "./AppBody";
-import { TYPE } from "../../theme";
+import { ExternalLink, TYPE } from "../../theme";
 import { useWeb3 } from "../../web3";
 import useTheme from "../../hooks/useTheme";
 import useGasOverhead from "../../hooks/useGasOverhead";
@@ -381,7 +381,9 @@ export default function GelatoLimitOrder() {
               style={{ justifyContent: !trade ? "center" : "space-between" }}
             >
               <RowFixed>
-                <PoweredByWrapper size={126} />
+                <ExternalLink href={"https://www.gelato.network"}>
+                  <PoweredByWrapper size={126} />
+                </ExternalLink>
               </RowFixed>
               {trade ? (
                 <RowFixed>

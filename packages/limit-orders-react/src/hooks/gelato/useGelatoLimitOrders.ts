@@ -17,7 +17,7 @@ export default function useGelatoLimitOrders(): {
   derivedOrderInfo: DerivedOrderInfo;
   orderState: OrderState;
 } {
-  const { chainId, library: provider, venue } = useWeb3();
+  const { chainId, library: provider, handler } = useWeb3();
 
   const derivedOrderInfo = useDerivedOrderInfo();
 
@@ -27,14 +27,14 @@ export default function useGelatoLimitOrders(): {
         ? new GelatoLimitOrders(
             chainId as ChainId,
             provider?.getSigner(),
-            venue
+            handler
           )
         : undefined;
     } catch (error) {
       console.error("Could not instantiate GelatoLimitOrders");
       return undefined;
     }
-  }, [chainId, provider, venue]);
+  }, [chainId, provider, handler]);
 
   const orderState = useOrderState();
 
