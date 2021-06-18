@@ -231,23 +231,13 @@ export class GelatoLimitOrders {
           [toCurrency, minReturn]
         );
 
-    const gasLimitEstimated =
-      await this._gelatoLimitOrders.estimateGas.cancelOrder(
-        this._moduleAddress,
-        fromCurrency,
-        owner,
-        witness,
-        encodedData,
-        { gasPrice }
-      );
     return this._gelatoLimitOrders.cancelOrder(
       this._moduleAddress,
       fromCurrency,
       owner,
       witness,
       encodedData,
-      // Add 50% to gasLimit estimated
-      { gasPrice, gasLimit: gasLimitEstimated.add(gasLimitEstimated.div(2)) }
+      { gasPrice, gasLimit: 200000 }
     );
   }
 
