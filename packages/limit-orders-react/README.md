@@ -7,7 +7,7 @@ use Gelato's react component or hooks to place limit buy and sell orders on Ethe
 
 ## Demo
 
-<a href="https://www.sorbet.finance/order" target="_blank">
+<a href="https://www.sorbet.finance" target="_blank">
      <img src="https://i.imgur.com/xE5RKRH.png"
           alt="Gelato Limit orders"
           style="width: 640px;"
@@ -22,11 +22,56 @@ or
 
 `npm install --save-dev @gelatonetwork/limit-orders-react`
 
-## Getting Started with react components
+## Getting started
+
+import { GelatoProvider } from '@gelatonetwork/limit-orders-react'
+
+```tsx
+import React from "react";
+import ReactDOM from "react-dom";
+import { GelatoProvider } from "@gelatonetwork/limit-orders-react";
+import { useActiveWeb3React } from "hooks/web3";
+
+function Gelato({ children }: { children?: React.ReactNode }) {
+  const { library, chainId, account } = useActiveWeb3React();
+  return (
+    <GelatoProvider
+      library={library}
+      chainId={chainId}
+      account={account ?? undefined}
+    >
+      {children}
+    </GelatoProvider>
+  );
+}
+
+ReactDOM.render(
+  <StrictMode>
+    <FixedGlobalStyle />
+    <Web3ReactProvider getLibrary={getLibrary}>
+      <Web3ProviderNetwork getLibrary={getLibrary}>
+        <Provider store={store}>
+          <ThemeProvider>
+            <ThemedGlobalStyle />
+            <HashRouter>
+              <Gelato>
+                <App />
+              </Gelato>
+            </HashRouter>
+          </ThemeProvider>
+        </Provider>
+      </Web3ProviderNetwork>
+    </Web3ReactProvider>
+  </StrictMode>,
+  document.getElementById("root")
+);
+```
+
+## Use the Gelato react component
 
 Using the gelato react component is the easiest option to get limit orders into your app.
 
-```typescript
+```tsx
 import React from "react";
 import {
   GelatoLimitOrderPanel,
@@ -43,11 +88,11 @@ export default function LimitOrder() {
 }
 ```
 
-## Getting Started with react hooks
+## Use the Gelato react hooks
 
 Using the gelato hooks all logic and state updates are encapsulated and all your have to do is plug them in into your application.
 
-```typescript
+```tsx
 import React from "react";
 import {
   useGelatoLimitOrders,

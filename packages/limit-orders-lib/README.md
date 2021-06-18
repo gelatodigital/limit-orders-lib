@@ -7,7 +7,7 @@ Place limit buy and sell orders on Ethereum, Polygon and Fantom using Gelato Net
 
 ## Demo
 
-<a href="https://www.sorbet.finance/order" target="_blank">
+<a href="https://www.sorbet.finance" target="_blank">
      <img src="https://i.imgur.com/xE5RKRH.png"
           alt="Gelato Limit orders"
           style="width: 640px;"

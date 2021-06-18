@@ -186,18 +186,19 @@ export class GelatoLimitOrders {
     if (!this._gelatoLimitOrders)
       throw new Error("No gelato limit orders contract");
 
-    const data = this._gelatoLimitOrders.interface.encodeFunctionData(
-      "cancelOrder",
-      [
-        this._moduleAddress,
-        fromCurrency,
-        owner,
-        witness,
-        new utils.AbiCoder().encode(
+    const encodedData = this._handler
+      ? new utils.AbiCoder().encode(
+          ["address", "uint256", "string"],
+          [toCurrency, minReturn, this._handler]
+        )
+      : new utils.AbiCoder().encode(
           ["address", "uint256"],
           [toCurrency, minReturn]
-        ),
-      ]
+        );
+
+    const data = this._gelatoLimitOrders.interface.encodeFunctionData(
+      "cancelOrder",
+      [this._moduleAddress, fromCurrency, owner, witness, encodedData]
     );
 
     return {
@@ -220,16 +221,33 @@ export class GelatoLimitOrders {
 
     const owner = await this._signer.getAddress();
 
+    const encodedData = this._handler
+      ? new utils.AbiCoder().encode(
+          ["address", "uint256", "string"],
+          [toCurrency, minReturn, this._handler]
+        )
+      : new utils.AbiCoder().encode(
+          ["address", "uint256"],
+          [toCurrency, minReturn]
+        );
+
+    const gasLimitEstimated =
+      await this._gelatoLimitOrders.estimateGas.cancelOrder(
+        this._moduleAddress,
+        fromCurrency,
+        owner,
+        witness,
+        encodedData,
+        { gasPrice }
+      );
     return this._gelatoLimitOrders.cancelOrder(
       this._moduleAddress,
       fromCurrency,
       owner,
       witness,
-      new utils.AbiCoder().encode(
-        ["address", "uint256"],
-        [toCurrency, minReturn]
-      ),
-      { gasPrice }
+      encodedData,
+      // Add 50% to gasLimit estimated
+      { gasPrice, gasLimit: gasLimitEstimated.add(gasLimitEstimated.div(2)) }
     );
   }
 
