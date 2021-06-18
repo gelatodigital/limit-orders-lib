@@ -283,7 +283,10 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     inputError = "Connect Wallet";
   }
 
-  if (currencies.input?.wrapped === currencies.output?.wrapped) {
+  if (
+    currencies.input?.wrapped.address.toLowerCase() ===
+    currencies.output?.wrapped.address.toLowerCase()
+  ) {
     inputError = inputError ?? "Order not allowed";
   }
 
