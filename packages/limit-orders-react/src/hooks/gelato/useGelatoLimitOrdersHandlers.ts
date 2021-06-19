@@ -65,12 +65,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gasPrice = useGasPrice();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
@@ -131,27 +127,29 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       throw new Error("No account");
     }
 
+    if (!gelatoLimitOrders?.signer) {
+      throw new Error("No signer");
+    }
+
     const { minReturn } = !utils.isEthereumChain(chainId)
       ? gelatoLimitOrders.getFeeAndSlippageAdjustedMinReturn(rawAmounts.output)
       : { minReturn: rawAmounts.output };
 
-    const {
-      witness,
-    } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-      inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
-      outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
-      rawAmounts.input,
-      minReturn,
-      account
-    );
+    const { witness, payload } =
+      await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+        inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
+        outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
+        rawAmounts.input,
+        minReturn,
+        account
+      );
 
-    const tx = await gelatoLimitOrders.submitLimitOrder(
-      inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
-      outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
-      rawAmounts.input,
-      minReturn,
-      gasPrice
-    );
+    const tx = await gelatoLimitOrders.signer.sendTransaction({
+      to: payload.to,
+      data: payload.data,
+      value: payload.value,
+      gasPrice,
+    });
 
     const now = Math.round(Date.now() / 1000);
 
