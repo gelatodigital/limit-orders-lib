@@ -19,6 +19,7 @@ import { NATIVE } from "../../constants/addresses";
 import { useWeb3 } from "../../web3";
 import { useTransactionAdder } from "../../state/gtransactions/hooks";
 import useGasPrice from "../useGasPrice";
+import { BigNumber } from "ethers";
 
 export interface GelatoLimitOrdersHandlers {
   handleLimitOrderSubmission: () => Promise<string | undefined>;
@@ -147,7 +148,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     const tx = await gelatoLimitOrders.signer.sendTransaction({
       to: payload.to,
       data: payload.data,
-      value: payload.value,
+      value: BigNumber.from(payload.value),
       gasPrice,
     });
 
