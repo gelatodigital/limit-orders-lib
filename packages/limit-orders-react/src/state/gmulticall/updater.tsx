@@ -141,6 +141,7 @@ export default function Updater(): null {
   const debouncedListeners = useDebounce(state.callListeners, 100);
   const latestBlockNumber = useBlockNumber(chainId);
   const multicall2Contract = useMulticall2Contract();
+
   const cancellations = useRef<{
     blockNumber: number;
     cancellations: (() => void)[];

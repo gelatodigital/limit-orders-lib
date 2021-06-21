@@ -122,28 +122,6 @@ export function useEIP2612Contract(tokenAddress?: string): Contract | null {
   return useContract(tokenAddress, EIP_2612, false);
 }
 
-// export function usePairContract(
-//   pairAddress?: string,
-//   withSignerIfPossible?: boolean
-// ): Contract | null {
-//   return useContract(pairAddress, IUniswapV2PairABI, withSignerIfPossible);
-// }
-
-// export function useV2RouterContract(
-//   chainId: number | undefined,
-//   library: Web3Provider | undefined,
-//   account: string | undefined
-// ): Contract | null {
-//   return useContract(
-//     chainId,
-//     library,
-//     account,
-//     V2_ROUTER_ADDRESS,
-//     IUniswapV2Router02ABI,
-//     true
-//   );
-// }
-
 export function useMulticall2Contract(): Multicall2 {
   return (useContract(
     MULTICALL2_ADDRESSES,

@@ -16,8 +16,9 @@ import {
   USDT,
   UST,
   WBTC,
-  WETH_MATIC,
+  FANTOM_BASES,
 } from "./tokens";
+import { WETH_MATIC } from "./tokens.matic";
 
 type ChainTokenList = {
   readonly [chainId: number]: Token[];
@@ -60,6 +61,7 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   ...WETH_ONLY,
   [1]: [...WETH_ONLY[1], DAI, USDC, USDT, WBTC],
   [137]: MATIC_BASES,
+  [250]: FANTOM_BASES,
 };
 export const ADDITIONAL_BASES: {
   [chainId: number]: { [tokenAddress: string]: Token[] };
@@ -92,12 +94,14 @@ export const CUSTOM_BASES: {
 export const SUGGESTED_BASES: ChainCurrencyList = {
   [1]: [Ether.onChain(1), DAI, USDC, USDT, WBTC],
   [137]: MATIC_BASES,
+  [250]: FANTOM_BASES,
 };
 // used to construct the list of all pairs we consider by default in the frontend
 export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
   ...WETH_ONLY,
   [1]: [...WETH_ONLY[1], DAI, USDC, USDT, WBTC],
   [127]: MATIC_BASES,
+  [250]: FANTOM_BASES,
 };
 
 export const PINNED_PAIRS: { readonly [chainId: number]: [Token, Token][] } = {
