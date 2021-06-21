@@ -33,7 +33,9 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
           )
         : undefined;
     } catch (error) {
-      console.error("Could not instantiate GelatoLimitOrders");
+      console.error(
+        `Could not instantiate GelatoLimitOrders: ${error.message}`
+      );
       return undefined;
     }
   }, [chainId, library, handler]);
@@ -52,10 +54,10 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
     (state) => state.gtransactions
   ) as any;
 
-  const transactions = useMemo(() => (chainId ? state[chainId] ?? {} : {}), [
-    chainId,
-    state,
-  ]);
+  const transactions = useMemo(
+    () => (chainId ? state[chainId] ?? {} : {}),
+    [chainId, state]
+  );
 
   const fetchOpenOrders = useCallback(() => {
     if (gelatoLimitOrders && account && chainId)

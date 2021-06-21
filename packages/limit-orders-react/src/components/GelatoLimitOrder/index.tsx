@@ -211,8 +211,7 @@ export default function GelatoLimitOrder() {
       });
   }, [priceImpact, handleLimitOrderSubmission, tradeToConfirm, showConfirm]);
 
-  // errors
-  const [showInverted, setShowInverted] = useState<boolean>(true);
+  const [showInverted, setShowInverted] = useState<boolean>(false);
 
   const handleConfirmDismiss = useCallback(() => {
     setSwapState({

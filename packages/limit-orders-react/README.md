@@ -24,7 +24,7 @@ or
 
 ## Getting started
 
-import { GelatoProvider } from '@gelatonetwork/limit-orders-react'
+Wrap your app with the GelatoProvider and pass the gelato reducers into your redux store.
 
 ```tsx
 import React from "react";
@@ -39,6 +39,9 @@ function Gelato({ children }: { children?: React.ReactNode }) {
       library={library}
       chainId={chainId}
       account={account ?? undefined}
+      // Optionally your can set a specific handler to block trades on a specific handler
+      // Make sure chainId and handler are valid
+      // handler={'uniswap'}
     >
       {children}
     </GelatoProvider>
@@ -67,9 +70,35 @@ ReactDOM.render(
 );
 ```
 
+In your store pass the gelato reducers. (example below)
+
+```tsx
+import { configureStore } from "@reduxjs/toolkit";
+import { save, load } from "redux-localstorage-simple";
+import {
+  gelatoReducers,
+  GELATO_PERSISTED_KEYS,
+} from "@gelatonetwork/limit-orders-react";
+
+// set the gelato persisted keys
+const PERSISTED_KEYS: string[] = ["your_keys", ...GELATO_PERSISTED_KEYS];
+
+const store = configureStore({
+  reducer: {
+    ...your_reducers,
+    // Pass the gelato reducers
+    ...gelatoReducers,
+  },
+  middleware: [save({ states: PERSISTED_KEYS, debounce: 1000 })],
+  preloadedState: load({ states: PERSISTED_KEYS }),
+});
+
+export default store;
+```
+
 ## Use the Gelato react component
 
-Using the gelato react component is the easiest option to get limit orders into your app.
+Using the Gelato react component is the easiest option to get limit orders into your app.
 
 ```tsx
 import React from "react";
