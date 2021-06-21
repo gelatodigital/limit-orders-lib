@@ -206,15 +206,26 @@ export class GelatoLimitOrders {
     });
   }
 
-  public encodeLimitOrderCancellation(
+  public async encodeLimitOrderCancellation(
     fromCurrency: string,
     toCurrency: string,
     minReturn: BigNumberish,
     witness: string,
-    owner: string
-  ): TransactionData {
+    owner: string,
+    checkIsActiveOrderData?: { key?: string; vault?: string }
+  ): Promise<TransactionData> {
     if (!this._gelatoLimitOrders)
       throw new Error("No gelato limit orders contract");
+
+    if (checkIsActiveOrderData) {
+      const isActiveOrder = await this.isActiveOrder(
+        fromCurrency,
+        checkIsActiveOrderData.key,
+        checkIsActiveOrderData.vault
+      );
+      if (!isActiveOrder)
+        throw new Error("Order not found. Please review your order data.");
+    }
 
     const encodedData = this._handlerAddress
       ? new utils.AbiCoder().encode(
@@ -257,7 +268,7 @@ export class GelatoLimitOrders {
         checkIsActiveOrderData.vault
       );
       if (!isActiveOrder)
-        throw new Error("Order not found. Please review your encoded data.");
+        throw new Error("Order not found. Please review your order data.");
     }
 
     const owner = await this._signer.getAddress();
