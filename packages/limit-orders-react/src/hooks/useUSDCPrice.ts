@@ -1,6 +1,8 @@
 import { Currency, CurrencyAmount, Price, Token } from "@uniswap/sdk-core";
 import { useMemo } from "react";
-import { USDC, USDC_MATIC } from "../constants/tokens";
+import { USDC } from "../constants/tokens";
+import { USDC_MATIC } from "../constants/tokens.matic";
+import { USDC_FANTOM } from "../constants/tokens.fantom";
 import { useWeb3 } from "../web3";
 import { useTradeExactOut } from "./useTrade";
 
@@ -9,6 +11,10 @@ import { useTradeExactOut } from "./useTrade";
 const usdcCurrencyAmount = CurrencyAmount.fromRawAmount(USDC, 100_000e6);
 const usdcCurrencyAmountMATIC = CurrencyAmount.fromRawAmount(
   USDC_MATIC,
+  100_000e6
+);
+const usdcCurrencyAmountFANTOM = CurrencyAmount.fromRawAmount(
+  USDC_FANTOM,
   100_000e6
 );
 
@@ -24,6 +30,8 @@ export default function useUSDCPrice(
     currency,
     chainId === 137
       ? usdcCurrencyAmountMATIC
+      : chainId === 250
+      ? usdcCurrencyAmountFANTOM
       : chainId === 1
       ? usdcCurrencyAmount
       : undefined,

@@ -17,11 +17,12 @@ import {
 } from "./../state/glists/hooks";
 import { useBytes32TokenContract, useTokenContract } from "./useContract";
 import invariant from "tiny-invariant";
-import { WMATIC_MATIC } from "../constants/tokens";
 import { Contract } from "@ethersproject/contracts";
 import { TokenInfo } from "@uniswap/token-lists";
 import { NATIVE } from "../constants/addresses";
 import { useWeb3 } from "../web3";
+import { WFTM_FANTOM } from "../constants/tokens.fantom";
+import { WMATIC_MATIC } from "../constants/tokens.matic";
 
 export const WETH9: { [chainId: number]: Token } = {
   [1]: new Token(
@@ -72,7 +73,12 @@ export class NativeToken extends NativeCurrency {
   }
 
   public get wrapped(): Token {
-    const weth9 = this.chainId === 137 ? WMATIC_MATIC : WETH9[this.chainId];
+    const weth9 =
+      this.chainId === 137
+        ? WMATIC_MATIC
+        : this.chainId === 250
+        ? WFTM_FANTOM
+        : WETH9[this.chainId];
     invariant(!!weth9, "WRAPPED");
     return weth9;
   }
@@ -286,6 +292,7 @@ export function useToken(tokenAddress?: string): Token | undefined | null {
     undefined,
     NEVER_RELOAD
   );
+
   const symbolBytes32 = useSingleCallResult(
     token ? undefined : tokenContractBytes32,
     "symbol",
@@ -340,16 +347,20 @@ export function useCurrency(
   currencyId: string | undefined
 ): Currency | null | undefined {
   const { chainId } = useWeb3();
+
   const isETH = currencyId?.toUpperCase() === "ETH";
   const isMATIC = currencyId?.toUpperCase() === "MATIC";
+  const isFTM = currencyId?.toUpperCase() === "FTM";
   const isNative =
     currencyId?.toUpperCase() === "NATIVE" ||
     currencyId?.toLowerCase() === NATIVE.toLowerCase();
-  const isNativeCurrency = isETH || isMATIC || isNative;
-  const token = useToken(isETH ? undefined : currencyId);
+  const isNativeCurrency = isETH || isMATIC || isFTM || isNative;
+  const token = useToken(isNativeCurrency ? undefined : currencyId);
   if (isNativeCurrency && chainId)
     return chainId === 137
       ? new NativeToken(chainId, 18, "MATIC", "Matic")
+      : chainId === 250
+      ? new NativeToken(chainId, 18, "FTM", "Fantom")
       : Ether.onChain(chainId);
   else return token;
 }
