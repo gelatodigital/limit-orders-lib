@@ -33,7 +33,7 @@ export const NETWORK_NAME = {
   [CHAIN_ID.FANTOM]: "FANTOM",
 };
 
-export const NETWORK_VENUES = {
+export const NETWORK_HANDLERS = {
   [CHAIN_ID.MAINNET]: ["uniswap"],
   [CHAIN_ID.ROPSTEN]: ["uniswap"],
   [CHAIN_ID.MATIC]: ["quickswap"],

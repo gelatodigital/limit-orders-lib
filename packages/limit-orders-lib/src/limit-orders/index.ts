@@ -2,19 +2,18 @@ import {
   BigNumber,
   constants,
   utils,
-  Wallet,
   Signer,
   ContractTransaction,
   BigNumberish,
   Contract,
+  Wallet,
 } from "ethers";
-import { Provider } from "@ethersproject/abstract-provider";
 import {
   ETH_ADDRESS,
   GELATO_LIMIT_ORDERS_ADDRESS,
   GELATO_LIMIT_ORDERS_MODULE_ADDRESS,
   HANDLERS_ADDRESSES,
-  NETWORK_VENUES,
+  NETWORK_HANDLERS,
   SLIPPAGE_BPS,
   SUBGRAPH_URL,
   TWO_BPS_GELATO_FEE,
@@ -43,11 +42,11 @@ export const isValidChainIdAndHandler = (
   chainId: ChainId,
   handler: Handler
 ): boolean => {
-  return NETWORK_VENUES[chainId].includes(handler);
+  return NETWORK_HANDLERS[chainId].includes(handler);
 };
 export class GelatoLimitOrders {
   private _chainId: ChainId;
-  private _provider: Provider | undefined;
+
   private _signer: Signer | undefined;
   private _gelatoLimitOrders: GelatoLimitOrdersContract;
   private _moduleAddress: string;
@@ -64,10 +63,6 @@ export class GelatoLimitOrders {
 
   get signer(): Signer | undefined {
     return this._signer;
-  }
-
-  get provider(): Provider | undefined {
-    return this._provider;
   }
 
   get subgraphUrl(): string {
@@ -90,40 +85,18 @@ export class GelatoLimitOrders {
     return this._gelatoLimitOrders;
   }
 
-  constructor(
-    chainId: ChainId,
-    signerOrProvider?: Signer | Provider | Wallet,
-    handler?: Handler
-  ) {
+  constructor(chainId: ChainId, signer?: Signer, handler?: Handler) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {
       throw new Error("Invalid chainId and handler");
     }
 
     this._chainId = chainId;
     this._subgraphUrl = SUBGRAPH_URL[chainId];
-    this._signer =
-      (signerOrProvider instanceof Signer ||
-        signerOrProvider instanceof Wallet) &&
-      signerOrProvider._isSigner
-        ? signerOrProvider
-        : undefined;
-    this._provider =
-      signerOrProvider instanceof Provider && signerOrProvider._isProvider
-        ? signerOrProvider
-        : (signerOrProvider instanceof Signer ||
-            signerOrProvider instanceof Wallet) &&
-          signerOrProvider._isSigner
-        ? signerOrProvider.provider
-        : undefined;
+    this._signer = signer;
     this._gelatoLimitOrders = this._signer
       ? GelatoLimitOrders__factory.connect(
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           this._signer
-        )
-      : this._provider
-      ? GelatoLimitOrders__factory.connect(
-          GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
-          this._provider
         )
       : (new Contract(
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
@@ -419,8 +392,7 @@ export class GelatoLimitOrders {
     minimumReturn: BigNumberish,
     privateKey: string
   ): Promise<TransactionData> {
-    if (!this._signer && !this._provider)
-      throw new Error("No signer or provider");
+    if (!this._signer) throw new Error("No signer ");
 
     if (fromCurrency.toLowerCase() === toCurrency.toLowerCase())
       throw new Error("Input token and output token can not be equal");
