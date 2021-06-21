@@ -12,7 +12,7 @@ export const CHAIN_ID = {
 
 export const HANDLERS_ADDRESSES = {
   [CHAIN_ID.MAINNET]: {
-    ["uniswap"]: "",
+    ["uniswap"]: "0x842A8Dea50478814e2bFAFF9E5A27DC0D1FdD37c",
   },
   [CHAIN_ID.ROPSTEN]: {
     ["uniswap"]: "0x4a01bE1dAF0E92fAF59ea3BD0C8Bed2fF944EE08",

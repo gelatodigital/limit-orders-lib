@@ -2,12 +2,13 @@ import {
   BigNumber,
   constants,
   utils,
-  Signer,
   ContractTransaction,
   BigNumberish,
   Contract,
   Wallet,
 } from "ethers";
+import { Provider } from "@ethersproject/abstract-provider";
+import { Signer } from "@ethersproject/abstract-signer";
 import {
   ETH_ADDRESS,
   GELATO_LIMIT_ORDERS_ADDRESS,
@@ -37,6 +38,7 @@ import {
   TransactionDataWithSecret,
 } from "../types";
 import { isEthereumChain, isNetworkGasToken } from "../utils";
+import { Erc20__factory } from "../contracts/types/factories/Erc20__factory";
 
 export const isValidChainIdAndHandler = (
   chainId: ChainId,
@@ -44,9 +46,10 @@ export const isValidChainIdAndHandler = (
 ): boolean => {
   return NETWORK_HANDLERS[chainId].includes(handler);
 };
+
 export class GelatoLimitOrders {
   private _chainId: ChainId;
-
+  private _provider: Provider | undefined;
   private _signer: Signer | undefined;
   private _gelatoLimitOrders: GelatoLimitOrdersContract;
   private _moduleAddress: string;
@@ -63,6 +66,10 @@ export class GelatoLimitOrders {
 
   get signer(): Signer | undefined {
     return this._signer;
+  }
+
+  get provider(): Provider | undefined {
+    return this._provider;
   }
 
   get subgraphUrl(): string {
@@ -85,18 +92,31 @@ export class GelatoLimitOrders {
     return this._gelatoLimitOrders;
   }
 
-  constructor(chainId: ChainId, signer?: Signer, handler?: Handler) {
+  constructor(chainId: ChainId, signerOrProvider?: Signer, handler?: Handler) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {
       throw new Error("Invalid chainId and handler");
     }
 
     this._chainId = chainId;
     this._subgraphUrl = SUBGRAPH_URL[chainId];
-    this._signer = signer;
+    this._signer = Signer.isSigner(signerOrProvider)
+      ? signerOrProvider
+      : undefined;
+    this._provider = Provider.isProvider(signerOrProvider)
+      ? signerOrProvider
+      : Signer.isSigner(signerOrProvider)
+      ? signerOrProvider.provider
+      : undefined;
+
     this._gelatoLimitOrders = this._signer
       ? GelatoLimitOrders__factory.connect(
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           this._signer
+        )
+      : this._provider
+      ? GelatoLimitOrders__factory.connect(
+          GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
+          this._provider
         )
       : (new Contract(
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
@@ -223,11 +243,22 @@ export class GelatoLimitOrders {
     toCurrency: string,
     minReturn: BigNumberish,
     witness: string,
-    gasPrice?: BigNumberish
+    gasPrice?: BigNumberish,
+    checkIsActiveOrderData?: { key?: string; vault?: string }
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
     if (!this._gelatoLimitOrders)
       throw new Error("No gelato limit orders contract");
+
+    if (checkIsActiveOrderData) {
+      const isActiveOrder = await this.isActiveOrder(
+        fromCurrency,
+        checkIsActiveOrderData.key,
+        checkIsActiveOrderData.vault
+      );
+      if (!isActiveOrder)
+        throw new Error("Order not found. Please review your encoded data.");
+    }
 
     const owner = await this._signer.getAddress();
 
@@ -249,6 +280,30 @@ export class GelatoLimitOrders {
       encodedData,
       { gasPrice, gasLimit: 400000 }
     );
+  }
+
+  public async isActiveOrder(
+    fromCurrency: string,
+    key?: string,
+    vault?: string
+  ): Promise<boolean> {
+    if (!this._provider) throw new Error("No provider");
+    if (!this._gelatoLimitOrders)
+      throw new Error("No gelato limit orders contract");
+
+    if (isNetworkGasToken(fromCurrency)) {
+      const ethDeposit = key
+        ? await this._gelatoLimitOrders.ethDeposits(key)
+        : BigNumber.from(0);
+      return ethDeposit.gt(0);
+    } else {
+      const vaultBalance = vault
+        ? await Erc20__factory.connect(fromCurrency, this._provider).balanceOf(
+            vault
+          )
+        : BigNumber.from(0);
+      return vaultBalance.gt(0);
+    }
   }
 
   public getExchangeRate(
@@ -392,7 +447,7 @@ export class GelatoLimitOrders {
     minimumReturn: BigNumberish,
     privateKey: string
   ): Promise<TransactionData> {
-    if (!this._signer) throw new Error("No signer ");
+    if (!this._provider) throw new Error("No provider");
 
     if (fromCurrency.toLowerCase() === toCurrency.toLowerCase())
       throw new Error("Input token and output token can not be equal");
