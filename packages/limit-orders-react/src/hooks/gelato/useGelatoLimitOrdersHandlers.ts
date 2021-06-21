@@ -53,7 +53,9 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
           )
         : undefined;
     } catch (error) {
-      console.error("Could not instantiate GelatoLimitOrders");
+      console.error(
+        `Could not instantiate GelatoLimitOrders: ${error.message}`
+      );
       return undefined;
     }
   }, [chainId, library, handler]);

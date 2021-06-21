@@ -8,10 +8,12 @@ import {
   BigNumberish,
   Contract,
 } from "ethers";
+import { Provider } from "@ethersproject/abstract-provider";
 import {
   ETH_ADDRESS,
   GELATO_LIMIT_ORDERS_ADDRESS,
   GELATO_LIMIT_ORDERS_MODULE_ADDRESS,
+  HANDLERS_ADDRESSES,
   NETWORK_VENUES,
   SLIPPAGE_BPS,
   SUBGRAPH_URL,
@@ -41,14 +43,16 @@ export const isValidChainIdAndHandler = (
   chainId: ChainId,
   handler: Handler
 ): boolean => {
-  return handler in NETWORK_VENUES[chainId];
+  return NETWORK_VENUES[chainId].includes(handler);
 };
 export class GelatoLimitOrders {
   private _chainId: ChainId;
+  private _provider: Provider | undefined;
   private _signer: Signer | undefined;
   private _gelatoLimitOrders: GelatoLimitOrdersContract;
   private _moduleAddress: string;
   private _subgraphUrl: string;
+  private _handlerAddress?: string;
   private _handler?: Handler;
 
   public static slippageBPS = SLIPPAGE_BPS;
@@ -62,12 +66,20 @@ export class GelatoLimitOrders {
     return this._signer;
   }
 
+  get provider(): Provider | undefined {
+    return this._provider;
+  }
+
   get subgraphUrl(): string {
     return this._subgraphUrl;
   }
 
   get handler(): Handler | undefined {
     return this._handler;
+  }
+
+  get handlerAddress(): string | undefined {
+    return this._handlerAddress;
   }
 
   get moduleAddress(): string {
@@ -78,17 +90,40 @@ export class GelatoLimitOrders {
     return this._gelatoLimitOrders;
   }
 
-  constructor(chainId: ChainId, signer?: Signer, handler?: Handler) {
+  constructor(
+    chainId: ChainId,
+    signerOrProvider?: Signer | Provider | Wallet,
+    handler?: Handler
+  ) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {
       throw new Error("Invalid chainId and handler");
     }
+
     this._chainId = chainId;
     this._subgraphUrl = SUBGRAPH_URL[chainId];
-    this._signer = signer;
+    this._signer =
+      (signerOrProvider instanceof Signer ||
+        signerOrProvider instanceof Wallet) &&
+      signerOrProvider._isSigner
+        ? signerOrProvider
+        : undefined;
+    this._provider =
+      signerOrProvider instanceof Provider && signerOrProvider._isProvider
+        ? signerOrProvider
+        : (signerOrProvider instanceof Signer ||
+            signerOrProvider instanceof Wallet) &&
+          signerOrProvider._isSigner
+        ? signerOrProvider.provider
+        : undefined;
     this._gelatoLimitOrders = this._signer
       ? GelatoLimitOrders__factory.connect(
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           this._signer
+        )
+      : this._provider
+      ? GelatoLimitOrders__factory.connect(
+          GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
+          this._provider
         )
       : (new Contract(
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
@@ -96,6 +131,9 @@ export class GelatoLimitOrders {
         ) as GelatoLimitOrdersContract);
     this._moduleAddress = GELATO_LIMIT_ORDERS_MODULE_ADDRESS[this._chainId];
     this._handler = handler;
+    this._handlerAddress = handler
+      ? HANDLERS_ADDRESSES[this._chainId][handler]
+      : undefined;
   }
 
   public async encodeLimitOrderSubmission(
@@ -182,14 +220,13 @@ export class GelatoLimitOrders {
     witness: string,
     owner: string
   ): TransactionData {
-    if (!this._signer) throw new Error("No signer");
     if (!this._gelatoLimitOrders)
       throw new Error("No gelato limit orders contract");
 
-    const encodedData = this._handler
+    const encodedData = this._handlerAddress
       ? new utils.AbiCoder().encode(
           ["address", "uint256", "string"],
-          [toCurrency, minReturn, this._handler]
+          [toCurrency, minReturn, this._handlerAddress]
         )
       : new utils.AbiCoder().encode(
           ["address", "uint256"],
@@ -221,10 +258,10 @@ export class GelatoLimitOrders {
 
     const owner = await this._signer.getAddress();
 
-    const encodedData = this._handler
+    const encodedData = this._handlerAddress
       ? new utils.AbiCoder().encode(
           ["address", "uint256", "string"],
-          [toCurrency, minReturn, this._handler]
+          [toCurrency, minReturn, this._handlerAddress]
         )
       : new utils.AbiCoder().encode(
           ["address", "uint256"],
@@ -382,15 +419,16 @@ export class GelatoLimitOrders {
     minimumReturn: BigNumberish,
     privateKey: string
   ): Promise<TransactionData> {
-    if (!this._signer) throw new Error("No signer");
+    if (!this._signer && !this._provider)
+      throw new Error("No signer or provider");
 
     if (fromCurrency.toLowerCase() === toCurrency.toLowerCase())
       throw new Error("Input token and output token can not be equal");
 
-    const encodedData = this._handler
+    const encodedData = this._handlerAddress
       ? new utils.AbiCoder().encode(
-          ["address", "uint256", "string"],
-          [toCurrency, minimumReturn, this._handler]
+          ["address", "uint256", "address"],
+          [toCurrency, minimumReturn, this._handlerAddress]
         )
       : new utils.AbiCoder().encode(
           ["address", "uint256"],

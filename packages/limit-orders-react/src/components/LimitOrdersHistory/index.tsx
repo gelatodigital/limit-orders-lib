@@ -127,7 +127,7 @@ export default function LimitOrdersHistory() {
     setOrderTab(tab);
   };
 
-  const itemSize = 156;
+  const itemSize = 160;
 
   return account ? (
     <>
@@ -148,12 +148,6 @@ export default function LimitOrdersHistory() {
             active={orderTab === "executed"}
             onClick={() => handleActiveHeader("executed")}
           />
-          {/* <Spacer />
-          <LimitOrdersHistoryHeader
-            title={"All Txs"}
-            active={orderTab === "txs"}
-            onClick={() => handleActiveHeader("txs")}
-          /> */}
         </HeaderTitles>
 
         <Wrapper id="limit-order-history">

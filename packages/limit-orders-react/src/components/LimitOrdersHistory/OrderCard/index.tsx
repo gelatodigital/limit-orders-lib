@@ -2,14 +2,14 @@ import React, { useCallback, useMemo, useState } from "react";
 import styled, { DefaultTheme } from "styled-components/macro";
 import { darken } from "polished";
 import { ArrowRight } from "react-feather";
-import { TYPE } from "../../../theme";
+import { Text } from "rebass";
 import { RowBetween } from "../../Row";
 import { Order } from "@gelatonetwork/limit-orders-lib";
 import useTheme from "../../../hooks/useTheme";
 import { useCurrency } from "../../../hooks/Tokens";
 import CurrencyLogo from "../../CurrencyLogo";
 import { useGelatoLimitOrdersHandlers } from "../../../hooks/gelato";
-import { CurrencyAmount } from "@uniswap/sdk-core";
+import { CurrencyAmount, Price } from "@uniswap/sdk-core";
 import ConfirmCancellationModal from "../ConfirmCancellationModal";
 import { useTradeExactIn } from "../../../hooks/useTrade";
 import { Dots } from "../../order/styleds";
@@ -21,6 +21,7 @@ import {
   ExplorerDataType,
   getExplorerLink,
 } from "../../../utils/getExplorerLink";
+import TradePrice from "../../order/TradePrice";
 
 const handleColorType = (status: string, theme: DefaultTheme) => {
   switch (status) {
@@ -173,6 +174,15 @@ export default function OrderCard({ order }: { order: Order }) {
 
   const { chainId, handler } = useWeb3();
 
+  const [
+    showExecutionPriceInverted,
+    setShowExecutionPriceInverted,
+  ] = useState<boolean>(false);
+  const [
+    showCurrentPriceInverted,
+    setShowCurrentPriceInverted,
+  ] = useState<boolean>(true);
+
   const {
     handleLimitOrderCancellation,
     library: gelatoLibrary,
@@ -215,20 +225,15 @@ export default function OrderCard({ order }: { order: Order }) {
     [gelatoLibrary, inputToken, outputToken, rawMinReturn]
   );
 
-  const executionRate = useMemo(
+  const executionPrice = useMemo(
     () =>
-      outputToken && gelatoLibrary && inputToken && rawMinReturn
-        ? CurrencyAmount.fromRawAmount(
-            outputToken,
-            gelatoLibrary.getExecutionPrice(
-              order.inputAmount,
-              inputToken.decimals,
-              rawMinReturn,
-              outputToken.decimals
-            )
-          )
+      rawMinReturnAmount && inputAmount
+        ? new Price({
+            baseAmount: rawMinReturnAmount,
+            quoteAmount: inputAmount,
+          })
         : undefined,
-    [gelatoLibrary, inputToken, order.inputAmount, outputToken, rawMinReturn]
+    [inputAmount, rawMinReturnAmount]
   );
 
   const trade = useTradeExactIn(inputAmount, outputToken ?? undefined, handler);
@@ -421,61 +426,63 @@ export default function OrderCard({ order }: { order: Order }) {
         <Aligner style={{ marginTop: "10px" }}>
           <OrderRow>
             <RowBetween>
-              <TYPE.main
-                color={theme.text2}
-                fontWeight={400}
-                fontSize={14}
-                style={{ display: "inline" }}
-              >
+              <Text fontWeight={500} fontSize={14} color={theme.text1}>
                 {`Sell ${inputAmount ? inputAmount.toSignificant(4) : "-"} ${
                   inputAmount?.currency.symbol ?? ""
                 } for ${
                   rawMinReturnAmount ? rawMinReturnAmount.toSignificant(4) : "-"
                 } ${outputAmount?.currency.symbol ?? ""}`}
-              </TYPE.main>
+              </Text>
             </RowBetween>
           </OrderRow>
         </Aligner>
-        <Aligner>
+        <Aligner style={{ marginTop: "-2px" }}>
           <OrderRow>
             <RowBetween>
-              <TYPE.body
-                color={theme.text2}
+              <Text
                 fontWeight={400}
-                fontSize={14}
-                style={{ display: "inline", cursor: "pointer" }}
+                fontSize={12}
+                color={theme.text1}
+                style={{ marginRight: "4px", marginTop: "2px" }}
               >
-                Current rate:{" "}
-                {trade && inputToken && outputToken ? (
-                  `1 ${inputToken.symbol}` +
-                  " = " +
-                  trade.executionPrice.toSignificant(4) +
-                  ` ${outputToken.symbol}`
-                ) : (
-                  <Dots />
-                )}
-              </TYPE.body>
+                Current price:
+              </Text>
+              {trade ? (
+                <TradePrice
+                  price={trade.executionPrice}
+                  showInverted={showCurrentPriceInverted}
+                  setShowInverted={setShowCurrentPriceInverted}
+                  fontWeight={500}
+                  fontSize={12}
+                />
+              ) : (
+                <Dots />
+              )}
             </RowBetween>
           </OrderRow>
         </Aligner>
-        <Aligner>
+        <Aligner style={{ marginTop: "-10px" }}>
           <OrderRow>
             <RowBetween>
-              <TYPE.body
-                color={theme.text2}
+              <Text
                 fontWeight={400}
-                fontSize={14}
-                style={{ display: "inline", cursor: "pointer" }}
+                fontSize={12}
+                color={theme.text1}
+                style={{ marginRight: "4px", marginTop: "2px" }}
               >
-                {`Execution rate: ${
-                  executionRate && inputToken && outputToken
-                    ? `1 ${inputToken.symbol}` +
-                      " = " +
-                      executionRate.toSignificant(4) +
-                      ` ${outputToken.symbol}`
-                    : "-"
-                }`}
-              </TYPE.body>
+                Execution price:
+              </Text>
+              {executionPrice ? (
+                <TradePrice
+                  price={executionPrice}
+                  showInverted={showExecutionPriceInverted}
+                  setShowInverted={setShowExecutionPriceInverted}
+                  fontWeight={500}
+                  fontSize={12}
+                />
+              ) : (
+                <Dots />
+              )}
             </RowBetween>
           </OrderRow>
         </Aligner>

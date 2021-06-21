@@ -10,6 +10,22 @@ export const CHAIN_ID = {
   FANTOM: 250,
 };
 
+export const HANDLERS_ADDRESSES = {
+  [CHAIN_ID.MAINNET]: {
+    ["uniswap"]: "",
+  },
+  [CHAIN_ID.ROPSTEN]: {
+    ["uniswap"]: "0x4a01bE1dAF0E92fAF59ea3BD0C8Bed2fF944EE08",
+  },
+  [CHAIN_ID.MATIC]: {
+    ["quickswap"]: "0x879133681EC687C4AA169A3EfAdE96F45398ee3e",
+  },
+  [CHAIN_ID.FANTOM]: {
+    ["spiritswap"]: "0xfc20a06Ad2E9FFeA12E2bb8337E92FC2C9468ffE",
+    ["spookyswap"]: "0xEeF05eEF9149e9088F0995dfa85B48d4BAd2CD97",
+  },
+};
+
 export const NETWORK_NAME = {
   [CHAIN_ID.MAINNET]: "Ethereum",
   [CHAIN_ID.ROPSTEN]: "Ropsten",
