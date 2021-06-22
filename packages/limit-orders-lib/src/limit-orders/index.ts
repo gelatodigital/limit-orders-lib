@@ -38,7 +38,6 @@ import {
   TransactionDataWithSecret,
 } from "../types";
 import { isEthereumChain, isNetworkGasToken } from "../utils";
-import { Erc20__factory } from "../contracts/types/factories/Erc20__factory";
 
 export const isValidChainIdAndHandler = (
   chainId: ChainId,
@@ -130,17 +129,17 @@ export class GelatoLimitOrders {
   }
 
   public async encodeLimitOrderSubmission(
-    fromCurrency: string,
-    toCurrency: string,
-    amount: BigNumberish,
-    minimumReturn: BigNumberish,
+    inputToken: string,
+    outputToken: string,
+    inputAmount: BigNumberish,
+    minReturn: BigNumberish,
     owner: string
   ): Promise<TransactionData> {
     const { payload } = await this.encodeLimitOrderSubmissionWithSecret(
-      fromCurrency,
-      toCurrency,
-      amount,
-      minimumReturn,
+      inputToken,
+      outputToken,
+      inputAmount,
+      minReturn,
       owner
     );
 
@@ -148,30 +147,53 @@ export class GelatoLimitOrders {
   }
 
   public async encodeLimitOrderSubmissionWithSecret(
-    fromCurrency: string,
-    toCurrency: string,
-    amount: BigNumberish,
-    minimumReturn: BigNumberish,
+    inputToken: string,
+    outputToken: string,
+    inputAmount: BigNumberish,
+    minReturn: BigNumberish,
     owner: string
   ): Promise<TransactionDataWithSecret> {
     const secret = utils.hexlify(utils.randomBytes(13)).replace("0x", "");
     const fullSecret = `0x4200696e652e66696e616e63652020d83ddc09${secret}`;
     try {
-      const { privateKey, address } = new Wallet(fullSecret);
-      const payload = await this._encodeData(
-        fromCurrency,
-        toCurrency,
+      const { privateKey: secret, address: witness } = new Wallet(fullSecret);
+      const payload = await this._encodeSubmitData(
+        inputToken,
+        outputToken,
         owner,
-        address,
-        amount,
-        minimumReturn,
-        privateKey
+        witness,
+        inputAmount,
+        minReturn,
+        secret
       );
+
+      const encodedData = this._handlerAddress
+        ? new utils.AbiCoder().encode(
+            ["address", "uint256", "address"],
+            [outputToken, minReturn, this._handlerAddress]
+          )
+        : new utils.AbiCoder().encode(
+            ["address", "uint256"],
+            [outputToken, minReturn]
+          );
 
       return {
         payload,
-        secret: privateKey,
-        witness: address,
+        secret,
+        witness,
+        order: {
+          module: this._moduleAddress.toLowerCase(),
+          data: encodedData,
+          inputToken: inputToken.toLowerCase(),
+          outputToken: outputToken.toLowerCase(),
+          owner: owner.toLowerCase(),
+          witness: witness.toLowerCase(),
+          inputAmount: inputAmount.toString(),
+          minReturn: minReturn.toString(),
+          inputData: payload.data.toString(),
+          secret: secret.toLowerCase(),
+          handler: this._handlerAddress ?? undefined,
+        },
       };
     } catch (error) {
       console.error(error);
@@ -180,10 +202,10 @@ export class GelatoLimitOrders {
   }
 
   public async submitLimitOrder(
-    fromCurrency: string,
-    toCurrency: string,
-    amount: BigNumberish,
-    minimumReturn: BigNumberish,
+    inputToken: string,
+    outputToken: string,
+    inputAmount: BigNumberish,
+    minReturn: BigNumberish,
     gasPrice?: BigNumberish
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
@@ -191,10 +213,10 @@ export class GelatoLimitOrders {
     const owner = await this._signer.getAddress();
 
     const txData = await this.encodeLimitOrderSubmission(
-      fromCurrency,
-      toCurrency,
-      amount,
-      minimumReturn,
+      inputToken,
+      outputToken,
+      inputAmount,
+      minReturn,
       owner
     );
 
@@ -207,39 +229,43 @@ export class GelatoLimitOrders {
   }
 
   public async encodeLimitOrderCancellation(
-    fromCurrency: string,
-    toCurrency: string,
-    minReturn: BigNumberish,
-    witness: string,
-    owner: string,
-    checkIsActiveOrderData?: { key?: string; vault?: string }
+    order: Order,
+    checkIsActiveOrder?: boolean
   ): Promise<TransactionData> {
     if (!this._gelatoLimitOrders)
       throw new Error("No gelato limit orders contract");
 
-    if (checkIsActiveOrderData) {
-      const isActiveOrder = await this.isActiveOrder(
-        fromCurrency,
-        checkIsActiveOrderData.key,
-        checkIsActiveOrderData.vault
-      );
+    if (!order.inputToken) throw new Error("No input token in order");
+    if (!order.witness) throw new Error("No witness in order");
+    if (!order.outputToken) throw new Error("No output token in order");
+    if (!order.minReturn) throw new Error("No minReturn in order");
+    if (!order.owner) throw new Error("No owner");
+
+    if (checkIsActiveOrder) {
+      const isActiveOrder = await this.isActiveOrder(order);
       if (!isActiveOrder)
         throw new Error("Order not found. Please review your order data.");
     }
 
-    const encodedData = this._handlerAddress
+    const encodedData = order.handler
       ? new utils.AbiCoder().encode(
-          ["address", "uint256", "string"],
-          [toCurrency, minReturn, this._handlerAddress]
+          ["address", "uint256", "address"],
+          [order.outputToken, order.minReturn, order.handler]
         )
       : new utils.AbiCoder().encode(
           ["address", "uint256"],
-          [toCurrency, minReturn]
+          [order.outputToken, order.minReturn]
         );
 
     const data = this._gelatoLimitOrders.interface.encodeFunctionData(
       "cancelOrder",
-      [this._moduleAddress, fromCurrency, owner, witness, encodedData]
+      [
+        this._moduleAddress,
+        order.inputToken,
+        order.owner,
+        order.witness,
+        encodedData,
+      ]
     );
 
     return {
@@ -250,71 +276,68 @@ export class GelatoLimitOrders {
   }
 
   public async cancelLimitOrder(
-    fromCurrency: string,
-    toCurrency: string,
-    minReturn: BigNumberish,
-    witness: string,
-    gasPrice?: BigNumberish,
-    checkIsActiveOrderData?: { key?: string; vault?: string }
+    order: Order,
+    checkIsActiveOrder?: boolean,
+    gasPrice?: BigNumberish
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
     if (!this._gelatoLimitOrders)
       throw new Error("No gelato limit orders contract");
 
-    if (checkIsActiveOrderData) {
-      const isActiveOrder = await this.isActiveOrder(
-        fromCurrency,
-        checkIsActiveOrderData.key,
-        checkIsActiveOrderData.vault
-      );
+    if (!order.inputToken) throw new Error("No input token in order");
+    if (!order.witness) throw new Error("No witness in order");
+    if (!order.outputToken) throw new Error("No output token in order");
+    if (!order.minReturn) throw new Error("No minReturn in order");
+
+    if (checkIsActiveOrder) {
+      const isActiveOrder = await this.isActiveOrder(order);
       if (!isActiveOrder)
         throw new Error("Order not found. Please review your order data.");
     }
 
     const owner = await this._signer.getAddress();
 
-    const encodedData = this._handlerAddress
+    if (owner.toLowerCase() !== order.owner.toLowerCase())
+      throw new Error("Owner and signer mismatch");
+
+    const encodedData = order.handler
       ? new utils.AbiCoder().encode(
-          ["address", "uint256", "string"],
-          [toCurrency, minReturn, this._handlerAddress]
+          ["address", "uint256", "address"],
+          [order.outputToken, order.minReturn, order.handler]
         )
       : new utils.AbiCoder().encode(
           ["address", "uint256"],
-          [toCurrency, minReturn]
+          [order.outputToken, order.minReturn]
         );
 
     return this._gelatoLimitOrders.cancelOrder(
       this._moduleAddress,
-      fromCurrency,
-      owner,
-      witness,
+      order.inputToken,
+      order.owner,
+      order.witness,
       encodedData,
       { gasPrice, gasLimit: 400000 }
     );
   }
 
-  public async isActiveOrder(
-    fromCurrency: string,
-    key?: string,
-    vault?: string
-  ): Promise<boolean> {
+  public async isActiveOrder(order: Order): Promise<boolean> {
     if (!this._provider) throw new Error("No provider");
     if (!this._gelatoLimitOrders)
       throw new Error("No gelato limit orders contract");
 
-    if (isNetworkGasToken(fromCurrency)) {
-      const ethDeposit = key
-        ? await this._gelatoLimitOrders.ethDeposits(key)
-        : BigNumber.from(0);
-      return ethDeposit.gt(0);
-    } else {
-      const vaultBalance = vault
-        ? await Erc20__factory.connect(fromCurrency, this._provider).balanceOf(
-            vault
-          )
-        : BigNumber.from(0);
-      return vaultBalance.gt(0);
-    }
+    if (!order.module) throw new Error("No module in order");
+    if (!order.inputToken) throw new Error("No input token in order");
+    if (!order.owner) throw new Error("No owner in order");
+    if (!order.witness) throw new Error("No witness in order");
+    if (!order.data) throw new Error("No data in order");
+
+    return this._gelatoLimitOrders.existOrder(
+      order.module,
+      order.inputToken,
+      order.owner,
+      order.witness,
+      order.data
+    );
   }
 
   public getExchangeRate(
@@ -449,37 +472,37 @@ export class GelatoLimitOrders {
     return queryCancelledOrders(owner, this._chainId);
   }
 
-  private async _encodeData(
-    fromCurrency: string,
-    toCurrency: string,
-    account: string,
-    address: string,
+  private async _encodeSubmitData(
+    inputToken: string,
+    outputToken: string,
+    owner: string,
+    witness: string,
     amount: BigNumberish,
-    minimumReturn: BigNumberish,
+    minReturn: BigNumberish,
     privateKey: string
   ): Promise<TransactionData> {
     if (!this._provider) throw new Error("No provider");
 
-    if (fromCurrency.toLowerCase() === toCurrency.toLowerCase())
+    if (inputToken.toLowerCase() === outputToken.toLowerCase())
       throw new Error("Input token and output token can not be equal");
 
     const encodedData = this._handlerAddress
       ? new utils.AbiCoder().encode(
           ["address", "uint256", "address"],
-          [toCurrency, minimumReturn, this._handlerAddress]
+          [outputToken, minReturn, this._handlerAddress]
         )
       : new utils.AbiCoder().encode(
           ["address", "uint256"],
-          [toCurrency, minimumReturn]
+          [outputToken, minReturn]
         );
 
     let data, value, to;
-    if (isNetworkGasToken(fromCurrency)) {
+    if (isNetworkGasToken(inputToken)) {
       const encodedEthOrder = await this._gelatoLimitOrders.encodeEthOrder(
         this._moduleAddress,
         ETH_ADDRESS, // we also use ETH_ADDRESS if it's MATIC
-        account,
-        address,
+        owner,
+        witness,
         encodedData,
         privateKey
       );
@@ -492,15 +515,15 @@ export class GelatoLimitOrders {
     } else {
       data = await this._gelatoLimitOrders.encodeTokenOrder(
         this._moduleAddress,
-        fromCurrency,
-        account,
-        address,
+        inputToken,
+        owner,
+        witness,
         encodedData,
         privateKey,
         amount
       );
       value = constants.Zero;
-      to = fromCurrency;
+      to = inputToken;
     }
 
     return { data, value, to };
