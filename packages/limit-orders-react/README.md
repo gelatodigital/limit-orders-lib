@@ -3,14 +3,14 @@
 
 # Gelato Limit Order React SDK
 
-use Gelato's react component or hooks to place limit buy and sell orders on Ethereum, Polygon and Fantom using Gelato Network.
+Use Gelato's react component or hooks to place limit buy and sell orders on Ethereum, Polygon and Fantom using Gelato Network.
 
-## Demo
+## [Demo](https://www.sorbet.finance)
 
 <a href="https://www.sorbet.finance" target="_blank">
      <img src="https://i.imgur.com/xE5RKRH.png"
           alt="Gelato Limit orders"
-          style="width: 640px;"
+          style="width: 440px;"
      />
 </a>
 
@@ -25,6 +25,34 @@ or
 ## Getting started
 
 Wrap your app with the GelatoProvider and pass the gelato reducers into your redux store.
+
+In your store pass the gelato reducers:
+
+```tsx
+import { configureStore } from "@reduxjs/toolkit";
+import { save, load } from "redux-localstorage-simple";
+import {
+  gelatoReducers,
+  GELATO_PERSISTED_KEYS,
+} from "@gelatonetwork/limit-orders-react";
+
+// set the gelato persisted keys
+const PERSISTED_KEYS: string[] = ["your_keys", ...GELATO_PERSISTED_KEYS];
+
+const store = configureStore({
+  reducer: {
+    ...your_reducers,
+    // Pass the gelato reducers
+    ...gelatoReducers,
+  },
+  middleware: [save({ states: PERSISTED_KEYS, debounce: 1000 })],
+  preloadedState: load({ states: PERSISTED_KEYS }),
+});
+
+export default store;
+```
+
+In your main file wrap your app with `GelatoProvider`:
 
 ```tsx
 import React from "react";
@@ -70,32 +98,6 @@ ReactDOM.render(
 );
 ```
 
-In your store pass the gelato reducers. (example below)
-
-```tsx
-import { configureStore } from "@reduxjs/toolkit";
-import { save, load } from "redux-localstorage-simple";
-import {
-  gelatoReducers,
-  GELATO_PERSISTED_KEYS,
-} from "@gelatonetwork/limit-orders-react";
-
-// set the gelato persisted keys
-const PERSISTED_KEYS: string[] = ["your_keys", ...GELATO_PERSISTED_KEYS];
-
-const store = configureStore({
-  reducer: {
-    ...your_reducers,
-    // Pass the gelato reducers
-    ...gelatoReducers,
-  },
-  middleware: [save({ states: PERSISTED_KEYS, debounce: 1000 })],
-  preloadedState: load({ states: PERSISTED_KEYS }),
-});
-
-export default store;
-```
-
 ## Use the Gelato react component
 
 Using the Gelato react component is the easiest option to get limit orders into your app.
@@ -119,7 +121,7 @@ export default function LimitOrder() {
 
 ## Use the Gelato react hooks
 
-Using the gelato hooks all logic and state updates are encapsulated and all your have to do is plug them in into your application.
+Using the gelato hooks all logic and state updates are encapsulated and all your have to do is plug them into your application.
 
 ```tsx
 import React from "react";
@@ -154,9 +156,9 @@ export default function LimitOrder() {
 }
 ```
 
-## Types
+See complete integration example [here](https://github.com/gelatodigital/limit-orders-lib/tree/master/packages/limit-orders-react/src/components/GelatoLimitOrder/index.tsx#L81).
 
-See `dist/src/index.d.ts`
+### Types
 
 ```typescript
 useGelatoLimitOrders(): {

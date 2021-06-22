@@ -68,12 +68,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gasPrice = useGasPrice();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
@@ -142,16 +138,14 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       ? gelatoLimitOrders.getFeeAndSlippageAdjustedMinReturn(rawAmounts.output)
       : { minReturn: rawAmounts.output };
 
-    const {
-      witness,
-      payload,
-    } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-      inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
-      outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
-      rawAmounts.input,
-      minReturn,
-      account
-    );
+    const { witness, payload, order } =
+      await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+        inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
+        outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
+        rawAmounts.input,
+        minReturn,
+        account
+      );
 
     const tx = await gelatoLimitOrders.signer.sendTransaction({
       to: payload.to,
@@ -172,19 +166,11 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       }`,
       type: "submission",
       order: {
+        ...order,
         createdTxHash: tx?.hash.toLowerCase(),
-        inputToken: inputCurrency?.isNative
-          ? NATIVE.toLowerCase()
-          : inputCurrency.wrapped.address.toLowerCase(),
-        outputToken: outputCurrency?.isNative
-          ? NATIVE.toLowerCase()
-          : outputCurrency.wrapped.address.toLowerCase(),
-        inputAmount: rawAmounts.input,
-        minReturn,
+        witness,
         status: "open",
-        witness: witness.toLowerCase(),
         updatedAt: now.toString(),
-        owner: account.toLowerCase(),
       } as Order,
     });
 
@@ -225,11 +211,17 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
         throw new Error("No account");
       }
 
+      const checkIfOrderExists = Boolean(
+        orderToCancel.module &&
+          orderToCancel.inputToken &&
+          orderToCancel.owner &&
+          orderToCancel.witness &&
+          orderToCancel.data
+      );
+
       const tx = await gelatoLimitOrders.cancelLimitOrder(
-        orderToCancel.inputToken,
-        orderToCancel.outputToken,
-        orderToCancel.minReturn,
-        orderToCancel.witness,
+        orderToCancel,
+        checkIfOrderExists,
         gasPrice
       );
 
