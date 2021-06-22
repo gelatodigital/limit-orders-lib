@@ -15,10 +15,11 @@ export interface TransactionDataWithSecret {
   payload: TransactionData;
   secret: string;
   witness: string;
+  order: PartialOrder;
 }
 
 export interface Order {
-  id: number;
+  id: string;
   owner: string;
   inputToken: string;
   outputToken: string;
@@ -28,12 +29,12 @@ export interface Order {
   secret: string;
   inputAmount: string;
   vault: string;
-  bought: string;
-  auxData: string;
+  bought: string | null;
+  auxData: string | null;
   status: string;
   createdTxHash: string;
-  executedTxHash: string;
-  cancelledTxHash: string;
+  executedTxHash: string | null;
+  cancelledTxHash: string | null;
   blockNumber: string;
   createdAt: string;
   updatedAt: string;
@@ -41,4 +42,19 @@ export interface Order {
   updatedAtBlockHash: string;
   data: string;
   inputData: string;
+  handler: string | null;
+}
+
+export interface PartialOrder {
+  owner: string;
+  inputToken: string;
+  outputToken: string;
+  minReturn: string;
+  module: string;
+  witness: string;
+  secret: string;
+  inputAmount: string;
+  data: string;
+  inputData: string;
+  handler?: string;
 }

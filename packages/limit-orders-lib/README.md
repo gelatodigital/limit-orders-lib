@@ -5,14 +5,7 @@
 
 Place limit buy and sell orders on Ethereum, Polygon and Fantom using Gelato Network.
 
-## Demo
-
-<a href="https://www.sorbet.finance" target="_blank">
-     <img src="https://i.imgur.com/xE5RKRH.png"
-          alt="Gelato Limit orders"
-          style="width: 640px;"
-     />
-</a>
+## [Demo - Sorbet Finance](https://www.sorbet.finance)
 
 ## Installation
 
@@ -22,47 +15,50 @@ or
 
 `npm install --save-dev @gelatonetwork/limit-orders-lib`
 
-## Getting Started (using ethers.js, but also works with web3.js)
+## Getting Started
 
-1. Instantiate GelatoLimitOrders and send an order
+Instantiate GelatoLimitOrders
 
 ```typescript
 import { GelatoLimitOrders } from "@gelatonetwork/limit-orders-lib";
 
 // Supported networks: Mainnet = 1; Ropsten = 3; Polygon = 137; Fantom = 250
 const chainId = 1;
-const signer = await provider.getSigner();
+const signerOrProvider = await provider.getSigner();
 const handler = "uniswap"; // "spookyswap" | "uniswap" | "quickswap" | "spiritswap";
 
 const gelatoLimitOrders = new GelatoLimitOrders(
   chainId as ChainId,
-  signer, // optional
+  signerOrProvider, // optional
   handler // optional
 );
+```
 
+### Examples
+
+1. Submit a limit order
+
+```typescript
 // Token to sell
-const inToken = "0x6b175474e89094c44da98b954eedeac495271d0f"; // DAI
+const inputToken = "0x6b175474e89094c44da98b954eedeac495271d0f"; // DAI
 
 // Token to buy
-const outToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // ETH
+const outputToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // ETH
 
 // Amount to sell
 const inputAmount = ethers.utils.parseUnits("2000", "18");
 
 // Minimum amount of outTOken which the users wants to receive back
-const minimumReturn = ethers.utils.parseEther("1", "18");
+const minReturn = ethers.utils.parseEther("1", "18");
 
 // Address of user who places the order (must be same as signer address)
 const userAddress = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B";
 
-// If 1 ETH is above 2000 DAI, then the user will buy 1 ETH if it is less than 2000 DAI
-// If 1 ETH is below 2000 DAI, then the user will buy 1 ETH if it is greater than 2000 DAI
-const txData = await gelatoLimitOrders.submitLimitOrder(
-  inToken,
-  outToken,
+const tx = await gelatoLimitOrders.submitLimitOrder(
+  inputToken,
+  outputToken,
   inputAmount,
-  minimumReturn,
-  userAddress
+  minReturn
 );
 ```
 
@@ -70,14 +66,11 @@ const txData = await gelatoLimitOrders.submitLimitOrder(
 
 ```typescript
 const tx = await gelatoLimitOrders.cancelLimitOrder(
-  order.inputToken,
-  order.outputToken,
-  order.minReturn,
-  order.witness
-);
+  order,
+  true // Optional: checkIsActiveOrder = true, to check if order to be cancelled actually exists. It is recommended to use this check before trying to cancel an order to avoid faulty cancellations and gas waste.
 ```
 
-3. Fetch all orders
+3. Fetch orders
 
 ```javascript
 const allOrders = await gelatoLimitOrders.getOrders(userAddress);
@@ -85,54 +78,58 @@ const allOrders = await gelatoLimitOrders.getOrders(userAddress);
 
 ## Types
 
-See `dist/src/index.d.ts`
-
 ```typescript
 export class GelatoLimitOrders {
+  private _chainId;
+  private _provider;
+  private _signer;
+  private _gelatoLimitOrders;
+  private _moduleAddress;
+  private _subgraphUrl;
+  private _handlerAddress?;
+  private _handler?;
   static slippageBPS: number;
   static gelatoFeeBPS: number;
   get chainId(): ChainId;
   get signer(): Signer | undefined;
+  get provider(): Provider | undefined;
   get subgraphUrl(): string;
   get handler(): Handler | undefined;
+  get handlerAddress(): string | undefined;
   get moduleAddress(): string;
   get contract(): GelatoLimitOrdersContract;
-  constructor(chainId: ChainId, signer?: Signer, handler?: Handler);
+  constructor(chainId: ChainId, signerOrProvider?: Signer, handler?: Handler);
   encodeLimitOrderSubmission(
-    fromCurrency: string,
-    toCurrency: string,
-    amount: BigNumberish,
-    minimumReturn: BigNumberish,
+    inputToken: string,
+    outputToken: string,
+    inputAmount: BigNumberish,
+    minReturn: BigNumberish,
     owner: string
   ): Promise<TransactionData>;
   encodeLimitOrderSubmissionWithSecret(
-    fromCurrency: string,
-    toCurrency: string,
-    amount: BigNumberish,
-    minimumReturn: BigNumberish,
+    inputToken: string,
+    outputToken: string,
+    inputAmount: BigNumberish,
+    minReturn: BigNumberish,
     owner: string
   ): Promise<TransactionDataWithSecret>;
   submitLimitOrder(
-    fromCurrency: string,
-    toCurrency: string,
-    amount: BigNumberish,
-    minimumReturn: BigNumberish,
+    inputToken: string,
+    outputToken: string,
+    inputAmount: BigNumberish,
+    minReturn: BigNumberish,
     gasPrice?: BigNumberish
   ): Promise<ContractTransaction>;
   encodeLimitOrderCancellation(
-    fromCurrency: string,
-    toCurrency: string,
-    minReturn: BigNumberish,
-    witness: string,
-    owner: string
-  ): TransactionData;
+    order: Order,
+    checkIsActiveOrder?: boolean
+  ): Promise<TransactionData>;
   cancelLimitOrder(
-    fromCurrency: string,
-    toCurrency: string,
-    minReturn: BigNumberish,
-    witness: string,
+    order: Order,
+    checkIsActiveOrder?: boolean,
     gasPrice?: BigNumberish
   ): Promise<ContractTransaction>;
+  isActiveOrder(order: Order): Promise<boolean>;
   getExchangeRate(
     inputValue: BigNumberish,
     inputDecimals: number,
@@ -162,6 +159,13 @@ export class GelatoLimitOrders {
   getExecutedOrders(owner: string): Promise<Order[]>;
   getCancelledOrders(owner: string): Promise<Order[]>;
 }
+export declare type ChainId = 1 | 3 | 137 | 250;
+
+export declare type Handler =
+  | "spookyswap"
+  | "uniswap"
+  | "quickswap"
+  | "spiritswap";
 
 export interface TransactionData {
   to: string;
@@ -173,10 +177,11 @@ export interface TransactionDataWithSecret {
   payload: TransactionData;
   secret: string;
   witness: string;
+  order: PartialOrder;
 }
 
 export interface Order {
-  id: number;
+  id: string;
   owner: string;
   inputToken: string;
   outputToken: string;
@@ -186,12 +191,12 @@ export interface Order {
   secret: string;
   inputAmount: string;
   vault: string;
-  bought: string;
-  auxData: string;
+  bought: string | null;
+  auxData: string | null;
   status: string;
   createdTxHash: string;
-  executedTxHash: string;
-  cancelledTxHash: string;
+  executedTxHash: string | null;
+  cancelledTxHash: string | null;
   blockNumber: string;
   createdAt: string;
   updatedAt: string;
@@ -199,6 +204,21 @@ export interface Order {
   updatedAtBlockHash: string;
   data: string;
   inputData: string;
+  handler: string | null;
+}
+
+export interface PartialOrder {
+  owner: string;
+  inputToken: string;
+  outputToken: string;
+  minReturn: string;
+  module: string;
+  witness: string;
+  secret: string;
+  inputAmount: string;
+  data: string;
+  inputData: string;
+  handler?: string;
 }
 ```
 
