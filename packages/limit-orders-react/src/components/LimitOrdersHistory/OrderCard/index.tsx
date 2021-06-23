@@ -239,7 +239,9 @@ export default function OrderCard({ order }: { order: Order }) {
   const trade = useTradeExactIn(inputAmount, outputToken ?? undefined, handler);
 
   const isSubmissionPending = useIsTransactionPending(order.createdTxHash);
-  const isCancellationPending = useIsTransactionPending(order.cancelledTxHash);
+  const isCancellationPending = useIsTransactionPending(
+    order.cancelledTxHash ?? undefined
+  );
 
   // modal and loading
   const [
@@ -389,7 +391,7 @@ export default function OrderCard({ order }: { order: Order }) {
                   ),
                   "_blank"
                 );
-              else if (order.status === "cancelled")
+              else if (order.status === "cancelled" && order.cancelledTxHash)
                 window.open(
                   getExplorerLink(
                     chainId,
@@ -398,7 +400,7 @@ export default function OrderCard({ order }: { order: Order }) {
                   ),
                   "_blank"
                 );
-              else if (order.status === "executed")
+              else if (order.status === "executed" && order.executedTxHash)
                 window.open(
                   getExplorerLink(
                     chainId,
