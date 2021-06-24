@@ -317,8 +317,21 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
       output:
         independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount,
     }),
-    [independentField, parsedAmount, trade, inputAmount]
+    [independentField, parsedAmount, inputAmount, trade]
   );
+
+  if (
+    !parsedAmounts.output &&
+    isDesiredRateUpdate &&
+    inputAmount &&
+    parsedAmount &&
+    outputCurrency
+  )
+    parsedAmounts.output = inputAmount
+      .multiply(parsedAmount.asFraction)
+      .divide(
+        JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(outputCurrency.decimals))
+      );
 
   const price = useMemo(
     () =>
@@ -331,7 +344,12 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     [parsedAmounts]
   );
 
-  if (price && trade && price.lessThan(trade.executionPrice.asFraction)) {
+  if (
+    price &&
+    trade &&
+    (price.lessThan(trade.executionPrice.asFraction) ||
+      price.equalTo(trade.executionPrice.asFraction))
+  ) {
     inputError =
       inputError ?? "Only possible to place orders above market rate";
   }
