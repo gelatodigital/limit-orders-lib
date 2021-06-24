@@ -41,18 +41,13 @@ export default function useUSDCPrice(
     }
   );
 
-  // const v3USDCTrade = useBestV3TradeExactOut(
-  //   currency,
-  //   chainId === 1 || chainId === 137 ? usdcCurrencyAmount : undefined
-  // )
-
   return useMemo(() => {
     if (!currency || !chainId) {
       return undefined;
     }
 
     // return some fake price data for non-mainnet
-    if (chainId !== 1 && chainId !== 137) {
+    if (chainId !== 1 && chainId !== 137 && chainId !== 250) {
       const fakeUSDC = new Token(
         chainId,
         "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
