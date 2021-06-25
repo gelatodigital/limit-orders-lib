@@ -36,7 +36,9 @@ import {
   GELATO_PERSISTED_KEYS,
 } from "@gelatonetwork/limit-orders-react";
 
-// set the gelato persisted keys
+// OPTIONAL: set the gelato persisted keys
+// If don't use `redux-localstorage-simple` you can skip this step and only set the reducers
+// You can also skip you don't use the GelatoLimitOrderPanel component
 const PERSISTED_KEYS: string[] = ["your_keys", ...GELATO_PERSISTED_KEYS];
 
 const store = configureStore({
