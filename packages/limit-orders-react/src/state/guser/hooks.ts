@@ -1,5 +1,4 @@
 import { Token } from "@uniswap/sdk-core";
-import { Pair } from "@uniswap/v2-sdk";
 import flatMap from "lodash.flatmap";
 import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,6 +8,7 @@ import {
 } from "../../constants/routing";
 
 import { useAllTokens } from "../../hooks/Tokens";
+import { Pair } from "../../types/pair";
 import { useWeb3 } from "../../web3";
 import { AppDispatch, AppState } from "../index";
 import {

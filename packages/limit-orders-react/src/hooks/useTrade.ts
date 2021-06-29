@@ -1,11 +1,12 @@
 import { Currency, CurrencyAmount, TradeType } from "@uniswap/sdk-core";
-import { Pair, Trade } from "@uniswap/v2-sdk";
+import { Trade, Pair as UniswapPair } from "@uniswap/v2-sdk";
 import { useMemo } from "react";
 import { isTradeBetter } from "../utils/isTradeBetter";
 import { BETTER_TRADE_LESS_HOPS_THRESHOLD } from "../constants/misc";
 import { useAllCurrencyCombinations } from "./useAllCurrencyCombinations";
 import { PairState, usePairs } from "./usePairs";
 import { Handler } from "@gelatonetwork/limit-orders-lib";
+import { Pair } from "../types/pair";
 
 function useAllCommonPairs(
   currencyA?: Currency,
@@ -50,11 +51,11 @@ export function useTradeExactIn(
   handler?: Handler,
   { maxHops = MAX_HOPS } = {}
 ): Trade<Currency, Currency, TradeType.EXACT_INPUT> | null {
-  const allowedPairs = useAllCommonPairs(
+  const allowedPairs = (useAllCommonPairs(
     currencyAmountIn?.currency,
     currencyOut,
     handler
-  );
+  ) as unknown) as UniswapPair[];
 
   return useMemo(() => {
     if (currencyAmountIn && currencyOut && allowedPairs.length > 0) {
@@ -109,11 +110,11 @@ export function useTradeExactOut(
   handler?: Handler,
   { maxHops = MAX_HOPS } = {}
 ): Trade<Currency, Currency, TradeType.EXACT_OUTPUT> | null {
-  const allowedPairs = useAllCommonPairs(
+  const allowedPairs = (useAllCommonPairs(
     currencyIn,
     currencyAmountOut?.currency,
     handler
-  );
+  ) as unknown) as UniswapPair[];
 
   return useMemo(() => {
     if (currencyIn && currencyAmountOut && allowedPairs.length > 0) {

@@ -1,16 +1,10 @@
-import { Pair } from "@uniswap/v2-sdk";
 import { useMemo } from "react";
 import { abi as IUniswapV2PairABI } from "../abis/IUniswapV2Pair.json";
 import { Interface } from "@ethersproject/abi";
 import { useMultipleContractSingleData } from "../state/gmulticall/hooks";
-import { Currency, CurrencyAmount, Token } from "@uniswap/sdk-core";
+import { Currency, CurrencyAmount } from "@uniswap/sdk-core";
 import { Handler } from "@gelatonetwork/limit-orders-lib";
-import {
-  getSpookySwapPairAddress,
-  getSpiritSwapPairAddress,
-  getQuickSwapPairAddress,
-} from "../utils/pairs";
-import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
+import { Pair } from "../types/pair";
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI);
 
@@ -20,24 +14,6 @@ export enum PairState {
   EXISTS,
   INVALID,
 }
-
-const getPairAddress = (
-  tokenA: Token,
-  tokenB: Token,
-  handler?: Handler
-): string | undefined => {
-  if (tokenA.chainId === 137 && tokenB.chainId === 137) {
-    return getQuickSwapPairAddress(tokenA, tokenB);
-  } else if (tokenA.chainId === 250 && tokenB.chainId === 250)
-    if (handler) {
-      return handler === "spookyswap"
-        ? getSpookySwapPairAddress(tokenA, tokenB)
-        : getSpiritSwapPairAddress(tokenA, tokenB);
-    } else return getSpookySwapPairAddress(tokenA, tokenB);
-  else if (isEthereumChain(tokenA.chainId) && isEthereumChain(tokenB.chainId)) {
-    return Pair.getAddress(tokenA, tokenB);
-  } else return undefined;
-};
 
 export function usePairs(
   currencies: [Currency | undefined, Currency | undefined][],
@@ -56,7 +32,7 @@ export function usePairs(
     () =>
       tokens.map(([tokenA, tokenB]) => {
         return tokenA && tokenB && !tokenA.equals(tokenB)
-          ? getPairAddress(tokenA, tokenB, handler)
+          ? Pair.getAddress(tokenA, tokenB, handler)
           : undefined;
       }),
     [tokens, handler]
@@ -86,11 +62,12 @@ export function usePairs(
         PairState.EXISTS,
         new Pair(
           CurrencyAmount.fromRawAmount(token0, reserve0.toString()),
-          CurrencyAmount.fromRawAmount(token1, reserve1.toString())
+          CurrencyAmount.fromRawAmount(token1, reserve1.toString()),
+          handler
         ),
       ];
     });
-  }, [results, tokens]);
+  }, [results, tokens, handler]);
 }
 
 export function usePair(
