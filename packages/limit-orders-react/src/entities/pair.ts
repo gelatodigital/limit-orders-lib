@@ -14,6 +14,10 @@ import {
   getUniswapPairAddress,
 } from "../utils/pairs";
 import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
+import {
+  InsufficientInputAmountError,
+  InsufficientReservesError,
+} from "./errors";
 
 export const UNISWAP_FACTORY_ADDRESS =
   "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
@@ -171,7 +175,12 @@ export class Pair {
     inputAmount: CurrencyAmount<Token>
   ): [CurrencyAmount<Token>, Pair] {
     invariant(this.involvesToken(inputAmount.currency), "TOKEN");
-
+    if (
+      JSBI.equal(this.reserve0.quotient, ZERO) ||
+      JSBI.equal(this.reserve1.quotient, ZERO)
+    ) {
+      throw new InsufficientReservesError();
+    }
     const inputReserve = this.reserveOf(inputAmount.currency);
     const outputReserve = this.reserveOf(
       inputAmount.currency.equals(this.token0) ? this.token1 : this.token0
@@ -187,6 +196,10 @@ export class Pair {
       JSBI.divide(numerator, denominator)
     );
 
+    if (JSBI.equal(outputAmount.quotient, ZERO)) {
+      throw new InsufficientInputAmountError();
+    }
+
     return [
       outputAmount,
       new Pair(
@@ -201,6 +214,16 @@ export class Pair {
     outputAmount: CurrencyAmount<Token>
   ): [CurrencyAmount<Token>, Pair] {
     invariant(this.involvesToken(outputAmount.currency), "TOKEN");
+    if (
+      JSBI.equal(this.reserve0.quotient, ZERO) ||
+      JSBI.equal(this.reserve1.quotient, ZERO) ||
+      JSBI.greaterThanOrEqual(
+        outputAmount.quotient,
+        this.reserveOf(outputAmount.currency).quotient
+      )
+    ) {
+      throw new InsufficientReservesError();
+    }
 
     const outputReserve = this.reserveOf(outputAmount.currency);
     const inputReserve = this.reserveOf(
@@ -262,7 +285,9 @@ export class Pair {
       );
       liquidity = JSBI.lessThanOrEqual(amount0, amount1) ? amount0 : amount1;
     }
-
+    if (!JSBI.greaterThan(liquidity, ZERO)) {
+      throw new Error("Pair: InsufficientInputAmountError");
+    }
     return CurrencyAmount.fromRawAmount(this.liquidityToken, liquidity);
   }
 

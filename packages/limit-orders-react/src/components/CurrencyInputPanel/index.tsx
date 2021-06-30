@@ -20,7 +20,7 @@ import { MouseoverTooltip } from "../Tooltip";
 import HoverInlineText from "../HoverInlineText";
 import DropDown from "../../assets/images/dropdown.svg";
 import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
-import { Pair } from "../../types/pair";
+import { Pair } from "../../entities/pair";
 
 const InputPanel = styled.div<{ hideInput?: boolean }>`
   ${({ theme }) => theme.flexColumnNoWrap}

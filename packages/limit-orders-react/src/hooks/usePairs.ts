@@ -4,7 +4,7 @@ import { Interface } from "@ethersproject/abi";
 import { useMultipleContractSingleData } from "../state/gmulticall/hooks";
 import { Currency, CurrencyAmount } from "@uniswap/sdk-core";
 import { Handler } from "@gelatonetwork/limit-orders-lib";
-import { Pair } from "../types/pair";
+import { Pair } from "../entities/pair";
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI);
 

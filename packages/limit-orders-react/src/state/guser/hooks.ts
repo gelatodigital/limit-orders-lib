@@ -8,7 +8,7 @@ import {
 } from "../../constants/routing";
 
 import { useAllTokens } from "../../hooks/Tokens";
-import { Pair } from "../../types/pair";
+import { Pair } from "../../entities/pair";
 import { useWeb3 } from "../../web3";
 import { AppDispatch, AppState } from "../index";
 import {
