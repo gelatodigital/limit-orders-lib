@@ -69,9 +69,14 @@ function Gelato({ children }: { children?: React.ReactNode }) {
       library={library}
       chainId={chainId}
       account={account ?? undefined}
+
       // Optionally your can set a specific handler to block trades on a specific handler
       // Make sure chainId and handler are valid
       // handler={'uniswap'}
+
+      // [ONLY IF USING COMPONENT] Optionally pass a toggle modal to be able to connect
+      // to a wallet via the component button
+      // toggleWalletModal={toggleWalletModal}
     >
       {children}
     </GelatoProvider>
