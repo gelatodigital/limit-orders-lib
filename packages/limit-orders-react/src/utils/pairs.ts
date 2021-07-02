@@ -20,6 +20,12 @@ const SPIRIT_SWAP_FACTORY_ADDRESS =
 const SPIRIT_SWAP_INIT_CODE_HASH =
   "0xe242e798f6cee26a9cb0bbf24653bf066e5356ffeac160907fe2cc108e238617";
 
+export const UNISWAP_FACTORY_ADDRESS =
+  "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+
+export const UNISWAP_INIT_CODE_HASH =
+  "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f";
+
 export const getSpiritSwapPairAddress = (
   tokenA: Token,
   tokenB: Token
@@ -117,6 +123,38 @@ export const getSpookySwapPairAddress = (
             ]
           ),
           SPOOKY_SWAP_INIT_CODE_HASH
+        ),
+      },
+    };
+  }
+
+  return PAIR_ADDRESS_CACHE[tokens[0].address][tokens[1].address];
+};
+
+export const getUniswapPairAddress = (tokenA: Token, tokenB: Token): string => {
+  const tokens = tokenA.sortsBefore(tokenB)
+    ? [tokenA, tokenB]
+    : [tokenB, tokenA]; // does safety checks
+
+  if (
+    PAIR_ADDRESS_CACHE?.[tokens[0].address]?.[tokens[1].address] === undefined
+  ) {
+    PAIR_ADDRESS_CACHE = {
+      ...PAIR_ADDRESS_CACHE,
+      [tokens[0].address]: {
+        ...PAIR_ADDRESS_CACHE?.[tokens[0].address],
+        [tokens[1].address]: getCreate2Address(
+          UNISWAP_FACTORY_ADDRESS,
+          keccak256(
+            ["bytes"],
+            [
+              pack(
+                ["address", "address"],
+                [tokens[0].address, tokens[1].address]
+              ),
+            ]
+          ),
+          UNISWAP_INIT_CODE_HASH
         ),
       },
     };

@@ -72,7 +72,7 @@ const PoweredByWrapper = styled(PoweredByGelato)<{ size: number }>`
 `;
 
 export default function GelatoLimitOrder() {
-  const { account } = useWeb3();
+  const { account, toggleWalletModal } = useWeb3();
 
   const theme = useTheme();
 
@@ -412,7 +412,9 @@ export default function GelatoLimitOrder() {
                   <TYPE.main mb="4px">Unsupported Asset</TYPE.main>
                 </ButtonPrimary>
               ) : !account ? (
-                <ButtonLight>Connect Wallet</ButtonLight>
+                <ButtonLight onClick={toggleWalletModal}>
+                  Connect Wallet
+                </ButtonLight>
               ) : routeNotFound &&
                 userHasSpecifiedInputOutput &&
                 parsedAmounts.input ? (

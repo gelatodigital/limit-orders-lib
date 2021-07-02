@@ -8,6 +8,7 @@ interface Web3State {
   account: string | undefined | null;
   chainId: number | undefined;
   handler?: Handler;
+  toggleWalletModal?: () => void;
 }
 
 interface Web3ProviderProps {
@@ -16,6 +17,7 @@ interface Web3ProviderProps {
   account: string | undefined | null;
   chainId: number | undefined;
   handler?: Handler;
+  toggleWalletModal?: () => void;
 }
 
 const initialWeb3State: Web3State = {
@@ -23,6 +25,7 @@ const initialWeb3State: Web3State = {
   chainId: undefined,
   account: undefined,
   handler: undefined,
+  toggleWalletModal: undefined,
 };
 
 const Web3Context = createContext<Web3State>({} as Web3State);
@@ -35,12 +38,13 @@ export const Web3Provider: FC<Web3ProviderProps> = ({
   chainId,
   account,
   handler,
+  toggleWalletModal,
 }: Web3ProviderProps) => {
   const [state, setState] = useState<Web3State>(initialWeb3State);
 
   useEffect(() => {
-    setState({ library, chainId, account, handler });
-  }, [library, chainId, account, handler]);
+    setState({ library, chainId, account, handler, toggleWalletModal });
+  }, [library, chainId, account, handler, toggleWalletModal]);
 
   return (
     <Web3Context.Provider

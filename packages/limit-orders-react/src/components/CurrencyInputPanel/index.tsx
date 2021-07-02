@@ -1,4 +1,3 @@
-import { Pair } from "@uniswap/v2-sdk";
 import { Currency, CurrencyAmount, Percent, Token } from "@uniswap/sdk-core";
 import React, { useState, useCallback, Fragment, useMemo } from "react";
 import styled from "styled-components/macro";
@@ -21,6 +20,7 @@ import { MouseoverTooltip } from "../Tooltip";
 import HoverInlineText from "../HoverInlineText";
 import DropDown from "../../assets/images/dropdown.svg";
 import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
+import { Pair } from "../../entities/pair";
 
 const InputPanel = styled.div<{ hideInput?: boolean }>`
   ${({ theme }) => theme.flexColumnNoWrap}

@@ -36,7 +36,9 @@ import {
   GELATO_PERSISTED_KEYS,
 } from "@gelatonetwork/limit-orders-react";
 
-// set the gelato persisted keys
+// OPTIONAL: set the gelato persisted keys
+// If don't use `redux-localstorage-simple` you can skip this step and only set the reducers
+// You can also skip you don't use the GelatoLimitOrderPanel component
 const PERSISTED_KEYS: string[] = ["your_keys", ...GELATO_PERSISTED_KEYS];
 
 const store = configureStore({
@@ -67,9 +69,14 @@ function Gelato({ children }: { children?: React.ReactNode }) {
       library={library}
       chainId={chainId}
       account={account ?? undefined}
+
       // Optionally your can set a specific handler to block trades on a specific handler
       // Make sure chainId and handler are valid
       // handler={'uniswap'}
+
+      // [ONLY IF USING COMPONENT] Optionally pass a toggle modal to be able to connect
+      // to a wallet via the component button
+      // toggleWalletModal={toggleWalletModal}
     >
       {children}
     </GelatoProvider>

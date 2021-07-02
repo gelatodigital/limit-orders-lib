@@ -23,11 +23,13 @@ export function GelatoProvider({
   children,
   account,
   handler,
+  toggleWalletModal,
 }: {
   chainId: number | undefined;
   library: any | undefined;
   account: string | undefined;
   handler?: Handler;
+  toggleWalletModal?: () => void;
   children?: React.ReactNode;
 }) {
   return (
@@ -36,6 +38,7 @@ export function GelatoProvider({
       library={library}
       account={account}
       handler={handler}
+      toggleWalletModal={toggleWalletModal}
     >
       <ListsUpdater />
       <ApplicationUpdater />

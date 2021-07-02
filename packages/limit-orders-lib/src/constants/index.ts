@@ -11,18 +11,22 @@ export const CHAIN_ID = {
 };
 
 export const HANDLERS_ADDRESSES = {
+  // UniswapV2Router02Handler
   [CHAIN_ID.MAINNET]: {
-    ["uniswap"]: "0x842A8Dea50478814e2bFAFF9E5A27DC0D1FdD37c",
+    ["uniswap"]: "0x5e7c839ef196e5a50ddc284a11457e8849698acc",
   },
+  // UniswapV2Router02Handler
   [CHAIN_ID.ROPSTEN]: {
-    ["uniswap"]: "0x4a01bE1dAF0E92fAF59ea3BD0C8Bed2fF944EE08",
+    ["uniswap"]: "0x4db7ff3ba491690d812a87c648a9f7c33f74fd08",
   },
+  // UniswapV2Router02Handler
   [CHAIN_ID.MATIC]: {
-    ["quickswap"]: "0x879133681EC687C4AA169A3EfAdE96F45398ee3e",
+    ["quickswap"]: "0x523b0df27e57745917ac57f7dffbbebe39822424",
   },
+  // UniswapV2Router02Handler
   [CHAIN_ID.FANTOM]: {
-    ["spiritswap"]: "0xedc93d05271B22004dd8E0e623264C855239f1b2",
-    ["spookyswap"]: "0xEeF05eEF9149e9088F0995dfa85B48d4BAd2CD97",
+    ["spiritswap"]: "0xfc20a06ad2e9ffea12e2bb8337e92fc2c9468ffe",
+    ["spookyswap"]: "0x68235ba6321b187ce7b97f907a4c5c31a1cfa84e",
   },
 };
 

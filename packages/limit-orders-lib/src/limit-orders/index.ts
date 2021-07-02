@@ -316,7 +316,7 @@ export class GelatoLimitOrders {
       order.owner,
       order.witness,
       encodedData,
-      { gasPrice, gasLimit: 400000 }
+      { gasPrice, gasLimit: 500000 }
     );
   }
 
