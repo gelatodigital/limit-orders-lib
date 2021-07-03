@@ -77,6 +77,10 @@ function Gelato({ children }: { children?: React.ReactNode }) {
       // [ONLY IF USING COMPONENT] Optionally pass a toggle modal to be able to connect
       // to a wallet via the component button
       // toggleWalletModal={toggleWalletModal}
+
+      // Optionally, if your theme is not compatible (is not uniswap style)
+      // you can opt to use the default theme
+      // useDefaultTheme={true}
     >
       {children}
     </GelatoProvider>
