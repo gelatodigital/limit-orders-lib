@@ -247,16 +247,6 @@ export class GelatoLimitOrders {
         throw new Error("Order not found. Please review your order data.");
     }
 
-    const encodedData = order.handler
-      ? new utils.AbiCoder().encode(
-          ["address", "uint256", "address"],
-          [order.outputToken, order.minReturn, order.handler]
-        )
-      : new utils.AbiCoder().encode(
-          ["address", "uint256"],
-          [order.outputToken, order.minReturn]
-        );
-
     const data = this._gelatoLimitOrders.interface.encodeFunctionData(
       "cancelOrder",
       [
@@ -264,7 +254,7 @@ export class GelatoLimitOrders {
         order.inputToken,
         order.owner,
         order.witness,
-        encodedData,
+        order.data,
       ]
     );
 
@@ -288,6 +278,7 @@ export class GelatoLimitOrders {
     if (!order.witness) throw new Error("No witness in order");
     if (!order.outputToken) throw new Error("No output token in order");
     if (!order.minReturn) throw new Error("No minReturn in order");
+    if (!order.minReturn) throw new Error("No data in order");
 
     if (checkIsActiveOrder) {
       const isActiveOrder = await this.isActiveOrder(order);
@@ -300,22 +291,12 @@ export class GelatoLimitOrders {
     if (owner.toLowerCase() !== order.owner.toLowerCase())
       throw new Error("Owner and signer mismatch");
 
-    const encodedData = order.handler
-      ? new utils.AbiCoder().encode(
-          ["address", "uint256", "address"],
-          [order.outputToken, order.minReturn, order.handler]
-        )
-      : new utils.AbiCoder().encode(
-          ["address", "uint256"],
-          [order.outputToken, order.minReturn]
-        );
-
     return this._gelatoLimitOrders.cancelOrder(
       this._moduleAddress,
       order.inputToken,
       order.owner,
       order.witness,
-      encodedData,
+      order.data,
       { gasPrice, gasLimit: 500000 }
     );
   }
