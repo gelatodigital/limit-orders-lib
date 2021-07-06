@@ -26,7 +26,8 @@ export function GelatoProvider({
   account,
   handler,
   toggleWalletModal,
-  useDefaultTheme = false,
+  useDefaultTheme = true,
+  useDarkMode = true,
 }: {
   chainId: number | undefined;
   library: any | undefined;
@@ -34,10 +35,11 @@ export function GelatoProvider({
   handler?: Handler;
   toggleWalletModal?: () => void;
   useDefaultTheme?: boolean;
+  useDarkMode?: boolean;
   children?: React.ReactNode;
 }) {
   return useDefaultTheme ? (
-    <ThemeProvider>
+    <ThemeProvider useDarkMode={useDarkMode}>
       <Web3Provider
         chainId={chainId}
         library={library}

@@ -233,13 +233,13 @@ html {
 `;
 
 export default function ThemeProvider({
+  useDarkMode,
   children,
 }: {
+  useDarkMode: boolean;
   children: React.ReactNode;
 }) {
-  const darkMode = true;
-
-  const themeObject = useMemo(() => theme(darkMode), [darkMode]);
+  const themeObject = useMemo(() => theme(useDarkMode), [useDarkMode]);
 
   return (
     <StyledComponentsThemeProvider theme={themeObject}>

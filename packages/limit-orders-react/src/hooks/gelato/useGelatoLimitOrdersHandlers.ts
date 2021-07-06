@@ -60,7 +60,12 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     }
   }, [chainId, library, handler]);
 
-  const { currencies, parsedAmounts, formattedAmounts } = useDerivedOrderInfo();
+  const {
+    currencies,
+    parsedAmounts,
+    formattedAmounts,
+    rawAmounts,
+  } = useDerivedOrderInfo();
 
   const addTransaction = useTransactionAdder();
 
@@ -77,33 +82,6 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
-
-  const rawAmounts = useMemo(
-    () => ({
-      input: inputCurrency
-        ? parsedAmounts.input
-            ?.multiply(
-              JSBI.exponentiate(
-                JSBI.BigInt(10),
-                JSBI.BigInt(inputCurrency.decimals)
-              )
-            )
-            .toExact()
-        : undefined,
-
-      output: outputCurrency
-        ? parsedAmounts.output
-            ?.multiply(
-              JSBI.exponentiate(
-                JSBI.BigInt(10),
-                JSBI.BigInt(outputCurrency.decimals)
-              )
-            )
-            .toExact()
-        : undefined,
-    }),
-    [inputCurrency, outputCurrency, parsedAmounts]
-  );
 
   const handleLimitOrderSubmission = useCallback(async () => {
     if (!inputCurrency?.wrapped.address) {
@@ -138,10 +116,6 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       throw new Error("No signer");
     }
 
-    const { minReturn } = !utils.isEthereumChain(chainId)
-      ? gelatoLimitOrders.getFeeAndSlippageAdjustedMinReturn(rawAmounts.output)
-      : { minReturn: rawAmounts.output };
-
     const {
       witness,
       payload,
@@ -150,7 +124,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
       outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
       rawAmounts.input,
-      minReturn,
+      rawAmounts.output,
       account
     );
 
@@ -284,7 +258,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
                   JSBI.BigInt(outputCurrency.decimals)
                 )
               )
-              ?.toSignificant(12)
+              ?.toSignificant(6)
           : undefined;
       onChangeRateType(Rate.DIV);
       if (flipped) onUserInput(Field.PRICE, flipped);
@@ -299,7 +273,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
                   JSBI.BigInt(inputCurrency.decimals)
                 )
               )
-              ?.toSignificant(12)
+              ?.toSignificant(6)
           : undefined;
       onChangeRateType(Rate.MUL);
       if (flipped) onUserInput(Field.PRICE, flipped);

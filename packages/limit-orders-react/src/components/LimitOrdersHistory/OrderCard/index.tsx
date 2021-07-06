@@ -207,15 +207,7 @@ export default function OrderCard({ order }: { order: Order }) {
     [order.minReturn, outputToken]
   );
 
-  const rawMinReturn = useMemo(
-    () =>
-      outputToken && gelatoLibrary && inputToken && chainId
-        ? isEthereumChain(chainId)
-          ? order.minReturn
-          : gelatoLibrary.getRawMinReturn(order.minReturn)
-        : undefined,
-    [chainId, gelatoLibrary, inputToken, order.minReturn, outputToken]
-  );
+  const rawMinReturn = order.adjustedMinReturn;
 
   const rawMinReturnAmount = useMemo(
     () =>
@@ -416,8 +408,10 @@ export default function OrderCard({ order }: { order: Order }) {
                 : order.status
             }
           >
-            {isSubmissionPending || isCancellationPending
+            {isSubmissionPending
               ? "pending"
+              : isCancellationPending
+              ? "cancelling"
               : order.status === "open"
               ? "cancel"
               : order.status}

@@ -5,6 +5,9 @@
 
 Use Gelato's react component or hooks to place limit buy and sell orders on Ethereum, Polygon and Fantom using Gelato Network.
 
+- To hook it up in simple and direct way, using our default style, just use our react component (uniswap trade style widget). It's as is as a couple of lines of code.
+- If your want to build your custom UI you can use our react hooks and plug them in into your components. Check the steps below.
+
 ## [Demo](https://www.sorbet.finance)
 
 <a href="https://www.sorbet.finance" target="_blank">
@@ -71,6 +74,8 @@ function Gelato({ children }: { children?: React.ReactNode }) {
       account={account ?? undefined}
 
       // Optionally your can set a specific handler to block trades on a specific handler
+      // Currently we offer support out of the box for "uniswap", "quickswap", "spookyswap" and "spiritswap"
+      // Please reach out to us if you want to register a custom handler
       // Make sure chainId and handler are valid
       // handler={'uniswap'}
 
@@ -78,9 +83,13 @@ function Gelato({ children }: { children?: React.ReactNode }) {
       // to a wallet via the component button
       // toggleWalletModal={toggleWalletModal}
 
-      // Optionally, if your theme is not compatible (is not uniswap style)
-      // you can opt to use the default theme
-      // useDefaultTheme={true}
+      // By default `useDefaultTheme`and `useDarkMode` are set to true
+      // Optionally, if you can try to use and pass your own theme by setting `useDefaultTheme`={false}
+      // as long as it conforms with our theme definitions (you can check our `ThemeProvider` [here](https://github.com/gelatodigital/limit-orders-lib/tree/master/packages/limit-orders-react/theme/index.tsx))
+      // Optionally, if your main theme does not comply with our definitions, you can also wrap `GelatoProvider`
+      // with a custom `ThemeProvider` with your own custom definitions. (check our `ThemeProvider` as an example)
+      // useDefaultTheme={false}
+      // useDarkMode={false}
     >
       {children}
     </GelatoProvider>
@@ -205,6 +214,6 @@ useGelatoLimitOrdersHistory(): {
 }
 ```
 
-### Need help?
+### Need help? Want to add a new handler?
 
 Reach out to us on [Telegram](https://t.me/therealgelatonetwork), [Discord](https://discord.gg/ApbA39BKyJ) or [Twitter](https://twitter.com/gelatonetwork)

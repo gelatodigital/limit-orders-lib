@@ -61,22 +61,12 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
 
   const fetchOpenOrders = useCallback(() => {
     if (gelatoLimitOrders && account && chainId)
-      fetch(gelatoLimitOrders.subgraphUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: utils.queries.GET_ALL_OPEN_ORDERS_BY_OWNER,
-          variables: {
-            owner: account.toLowerCase(),
-          },
-        }),
-      })
-        .then(async (res) => {
-          const { data } = await res.json();
-
+      gelatoLimitOrders
+        .getOpenOrders(account.toLowerCase())
+        .then(async (orders) => {
           const ordersLS = getLSOrders(chainId, account);
 
-          data.orders.forEach((order: Order) => {
+          orders.forEach((order: Order) => {
             const orderExists = ordersLS.find(
               (confOrder) =>
                 confOrder.createdTxHash.toLowerCase() ===
@@ -123,22 +113,12 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
 
   const fetchCancelledOrders = useCallback(() => {
     if (gelatoLimitOrders && account && chainId)
-      fetch(gelatoLimitOrders.subgraphUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: utils.queries.GET_ALL_CANCELLED_ORDERS_BY_OWNER,
-          variables: {
-            owner: account.toLowerCase(),
-          },
-        }),
-      })
-        .then(async (res) => {
-          const { data } = await res.json();
-
+      gelatoLimitOrders
+        .getCancelledOrders(account.toLowerCase())
+        .then(async (orders) => {
           const ordersLS = getLSOrders(chainId, account);
 
-          data.orders.forEach((order: Order) => {
+          orders.forEach((order: Order) => {
             const orderExists = ordersLS.find(
               (confOrder) =>
                 confOrder.createdTxHash.toLowerCase() ===
@@ -173,22 +153,12 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
 
   const fetchExecutedOrders = useCallback(() => {
     if (gelatoLimitOrders && account && chainId)
-      fetch(gelatoLimitOrders.subgraphUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: utils.queries.GET_ALL_EXECUTED_ORDERS_BY_OWNER,
-          variables: {
-            owner: account.toLowerCase(),
-          },
-        }),
-      })
-        .then(async (res) => {
-          const { data } = await res.json();
-
+      gelatoLimitOrders
+        .getExecutedOrders(account.toLowerCase())
+        .then(async (orders) => {
           const ordersLS = getLSOrders(chainId, account);
 
-          data.orders.forEach((order: Order) => {
+          orders.forEach((order: Order) => {
             const orderExists = ordersLS.find(
               (confOrder) =>
                 confOrder.createdTxHash.toLowerCase() ===

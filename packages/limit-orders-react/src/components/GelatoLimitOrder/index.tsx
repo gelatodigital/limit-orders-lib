@@ -94,7 +94,7 @@ export default function GelatoLimitOrder() {
       formattedAmounts,
       inputError,
     },
-    orderState: { independentField, rateType, typedValue },
+    orderState: { independentField, rateType },
   } = useGelatoLimitOrders();
 
   const fiatValueInput = useUSDCValue(parsedAmounts.input);
@@ -158,12 +158,10 @@ export default function GelatoLimitOrder() {
   );
   const routeNotFound = !trade?.route;
   const isLoadingRoute =
-    (parsedAmounts.input && !trade) ||
-    (typedValue && currencies.input && currencies.output && !trade) ||
-    ((parsedAmounts.input || parsedAmounts.output) &&
-      currencies.input &&
-      currencies.output &&
-      !trade);
+    parsedAmounts.input &&
+    !parsedAmounts.output &&
+    currencies.input &&
+    currencies.output;
 
   const maxInputAmount: CurrencyAmount<Currency> | undefined = maxAmountSpend(
     currencyBalances.input
@@ -392,14 +390,7 @@ export default function GelatoLimitOrder() {
                     showInverted={showInverted}
                     setShowInverted={setShowInverted}
                   />
-                  <MouseoverTooltipContent
-                    content={
-                      <AdvancedSwapDetails
-                        trade={trade as any}
-                        allowedSlippage={allowedSlippage}
-                      />
-                    }
-                  >
+                  <MouseoverTooltipContent content={<AdvancedSwapDetails />}>
                     <StyledInfo />
                   </MouseoverTooltipContent>
                 </RowFixed>

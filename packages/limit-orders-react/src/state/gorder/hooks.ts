@@ -135,6 +135,7 @@ export function tryParseAmount<T extends Currency>(
   }
   try {
     const typedValueParsed = parseUnits(value, currency.decimals).toString();
+
     if (typedValueParsed !== "0") {
       return CurrencyAmount.fromRawAmount(
         currency,
@@ -191,6 +192,10 @@ export interface DerivedOrderInfo {
     input: string;
     output: string;
     price: string;
+  };
+  rawAmounts: {
+    input: string | undefined;
+    output: string | undefined;
   };
   price: Price<Currency, Currency> | undefined;
 }
@@ -259,11 +264,10 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
 
   const trade = isExactIn ? bestTradeExactIn : bestTradeExactOut;
 
-  const inputAmount =
-    (isDesiredRateUpdate && inputValue && inputCurrency) ||
-    (independentField === Field.OUTPUT && inputCurrency)
-      ? tryParseAmount(inputValue, inputCurrency) ?? undefined
-      : trade?.inputAmount;
+  const inputAmount = useMemo(() => {
+    return tryParseAmount(inputValue, inputCurrency ?? undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputValue, inputCurrencyId]);
 
   const currencyBalances = {
     input: relevantTokenBalances[0],
@@ -325,13 +329,20 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     isDesiredRateUpdate &&
     inputAmount &&
     parsedAmount &&
+    inputCurrency &&
     outputCurrency
-  )
-    parsedAmounts.output = inputAmount
+  ) {
+    const outAmount = inputAmount
       .multiply(parsedAmount.asFraction)
       .divide(
-        JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(outputCurrency.decimals))
+        JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(inputCurrency.decimals))
       );
+    parsedAmounts.output = CurrencyAmount.fromFractionalAmount(
+      outputCurrency,
+      outAmount.numerator,
+      outAmount.denominator
+    );
+  }
 
   const price = useMemo(
     () =>
@@ -363,10 +374,7 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
   }
 
   const formattedAmounts = {
-    input:
-      independentField === Field.INPUT
-        ? typedValue
-        : inputAmount?.toSignificant(6) ?? "",
+    input: inputValue ?? "",
     output:
       independentField === Field.OUTPUT
         ? typedValue
@@ -377,6 +385,33 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
         : price?.toSignificant(6) ?? "",
   };
 
+  const rawAmounts = useMemo(
+    () => ({
+      input: inputCurrency
+        ? parsedAmounts.input
+            ?.multiply(
+              JSBI.exponentiate(
+                JSBI.BigInt(10),
+                JSBI.BigInt(inputCurrency.decimals)
+              )
+            )
+            .toFixed(0)
+        : undefined,
+
+      output: outputCurrency
+        ? parsedAmounts.output
+            ?.multiply(
+              JSBI.exponentiate(
+                JSBI.BigInt(10),
+                JSBI.BigInt(outputCurrency.decimals)
+              )
+            )
+            .toFixed(0)
+        : undefined,
+    }),
+    [inputCurrency, outputCurrency, parsedAmounts]
+  );
+
   return {
     currencies,
     currencyBalances,
@@ -385,5 +420,6 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     trade: trade ?? undefined,
     parsedAmounts,
     price,
+    rawAmounts,
   };
 }
