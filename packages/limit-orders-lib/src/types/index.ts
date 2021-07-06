@@ -29,6 +29,7 @@ export interface Order {
   inputToken: string;
   outputToken: string;
   minReturn: string;
+  adjustedMinReturn: string;
   module: string;
   witness: string;
   secret: string;
@@ -55,6 +56,7 @@ export interface PartialOrder {
   inputToken: string;
   outputToken: string;
   minReturn: string;
+  adjustedMinReturn: string;
   module: string;
   witness: string;
   secret: string;

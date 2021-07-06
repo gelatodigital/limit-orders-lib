@@ -21,7 +21,6 @@ export const GET_ALL_ORDERS_BY_OWNER = gql`
       bought
       auxData
       status
-      handler
       createdTxHash
       executedTxHash
       cancelledTxHash
@@ -56,7 +55,6 @@ export const GET_ALL_OPEN_ORDERS_BY_OWNER = gql`
       vault
       bought
       auxData
-      handler
       status
       createdTxHash
       executedTxHash
@@ -93,7 +91,6 @@ export const GET_ALL_PAST_ORDERS_BY_OWNER = gql`
       bought
       auxData
       status
-      handler
       createdTxHash
       executedTxHash
       cancelledTxHash
@@ -127,7 +124,6 @@ export const GET_ALL_EXECUTED_ORDERS_BY_OWNER = gql`
       inputAmount
       vault
       bought
-      handler
       auxData
       status
       createdTxHash
@@ -164,7 +160,6 @@ export const GET_ALL_CANCELLED_ORDERS_BY_OWNER = gql`
       vault
       bought
       auxData
-      handler
       status
       createdTxHash
       executedTxHash

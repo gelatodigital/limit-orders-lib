@@ -20,7 +20,7 @@ or
 Instantiate GelatoLimitOrders
 
 ```typescript
-import { GelatoLimitOrders } from "@gelatonetwork/limit-orders-lib";
+import { GelatoLimitOrders, utils } from "@gelatonetwork/limit-orders-lib";
 
 // Supported networks: Mainnet = 1; Ropsten = 3; Polygon = 137; Fantom = 250
 const chainId = 1;
@@ -49,7 +49,7 @@ const outputToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // ETH
 const inputAmount = ethers.utils.parseUnits("2000", "18");
 
 // Minimum amount of outTOken which the users wants to receive back
-const minReturn = ethers.utils.parseEther("1", "18");
+const minReturnToBeParsed = ethers.utils.parseEther("1", "18");
 
 // Address of user who places the order (must be same as signer address)
 const userAddress = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B";
@@ -71,6 +71,8 @@ const tx = await gelatoLimitOrders.cancelLimitOrder(
 ```
 
 3. Fetch orders
+
+Note: to display the minReturn you should always use the `adjustedMinReturn` field of the order.
 
 ```javascript
 const allOrders = await gelatoLimitOrders.getOrders(userAddress);
@@ -186,6 +188,7 @@ export interface Order {
   inputToken: string;
   outputToken: string;
   minReturn: string;
+  adjustedMinReturn: string;
   module: string;
   witness: string;
   secret: string;
@@ -212,6 +215,7 @@ export interface PartialOrder {
   inputToken: string;
   outputToken: string;
   minReturn: string;
+  adjustedMinReturn: string;
   module: string;
   witness: string;
   secret: string;
