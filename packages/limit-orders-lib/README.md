@@ -49,7 +49,7 @@ const outputToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // ETH
 const inputAmount = ethers.utils.parseUnits("2000", "18");
 
 // Minimum amount of outTOken which the users wants to receive back
-const minReturnToBeParsed = ethers.utils.parseEther("1", "18");
+const minReturn = ethers.utils.parseEther("1", "18");
 
 // Address of user who places the order (must be same as signer address)
 const userAddress = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B";
@@ -72,7 +72,7 @@ const tx = await gelatoLimitOrders.cancelLimitOrder(
 
 3. Fetch orders
 
-Note: to display the minReturn you should always use the `adjustedMinReturn` field of the order.
+Note: to display the minimum amount returned (i.e the output amount of the order) you should always use the `adjustedMinReturn` field of the order.
 
 ```javascript
 const allOrders = await gelatoLimitOrders.getOrders(userAddress);
