@@ -199,22 +199,14 @@ export default function OrderCard({ order }: { order: Order }) {
     [inputToken, order.inputAmount]
   );
 
+  const rawMinReturn = order.adjustedMinReturn;
+
   const outputAmount = useMemo(
     () =>
       outputToken
-        ? CurrencyAmount.fromRawAmount(outputToken, order.minReturn)
+        ? CurrencyAmount.fromRawAmount(outputToken, rawMinReturn)
         : undefined,
-    [order.minReturn, outputToken]
-  );
-
-  const rawMinReturn = useMemo(
-    () =>
-      outputToken && gelatoLibrary && inputToken && chainId
-        ? isEthereumChain(chainId)
-          ? order.minReturn
-          : gelatoLibrary.getRawMinReturn(order.minReturn)
-        : undefined,
-    [chainId, gelatoLibrary, inputToken, order.minReturn, outputToken]
+    [rawMinReturn, outputToken]
   );
 
   const rawMinReturnAmount = useMemo(
@@ -281,17 +273,12 @@ export default function OrderCard({ order }: { order: Order }) {
     });
 
     const orderDetails =
-      inputToken?.symbol &&
-      outputToken?.symbol &&
-      inputAmount &&
-      outputAmount &&
-      trade
+      inputToken?.symbol && outputToken?.symbol && inputAmount && outputAmount
         ? {
             inputTokenSymbol: inputToken.symbol,
             outputTokenSymbol: outputToken.symbol,
             inputAmount: inputAmount.toSignificant(4),
             outputAmount: outputAmount.toSignificant(4),
-            executionPrice: trade.executionPrice.toSignificant(4),
           }
         : undefined;
 
@@ -319,21 +306,16 @@ export default function OrderCard({ order }: { order: Order }) {
     outputToken,
     inputAmount,
     outputAmount,
-    trade,
+    executionPrice,
     order,
   ]);
 
-  return (
+  const OrderCard = ({
+    showStatusButton = true,
+  }: {
+    showStatusButton?: boolean;
+  }) => (
     <OrderPanel>
-      <ConfirmCancellationModal
-        isOpen={showConfirm}
-        attemptingTxn={attemptingTxn}
-        txHash={txHash}
-        onConfirm={handleCancellation}
-        swapErrorMessage={cancellationErrorMessage}
-        onDismiss={handleConfirmDismiss}
-        order={order}
-      />
       <Container hideInput={true}>
         <RowBetween padding="10px">
           {inputToken ? (
@@ -370,59 +352,63 @@ export default function OrderCard({ order }: { order: Order }) {
             <Dots />
           )}
           <Spacer />
-          <OrderStatus
-            clickable={true}
-            onClick={() => {
-              if (!chainId) return;
+          {showStatusButton ? (
+            <OrderStatus
+              clickable={true}
+              onClick={() => {
+                if (!chainId) return;
 
-              if (order.status === "open" && !isSubmissionPending)
-                setCancellationState({
-                  attemptingTxn: false,
-                  cancellationErrorMessage: undefined,
-                  showConfirm: true,
-                  txHash: undefined,
-                });
-              else if (order.status === "open" && isSubmissionPending)
-                window.open(
-                  getExplorerLink(
-                    chainId,
-                    order.createdTxHash,
-                    ExplorerDataType.TRANSACTION
-                  ),
-                  "_blank"
-                );
-              else if (order.status === "cancelled" && order.cancelledTxHash)
-                window.open(
-                  getExplorerLink(
-                    chainId,
-                    order.cancelledTxHash,
-                    ExplorerDataType.TRANSACTION
-                  ),
-                  "_blank"
-                );
-              else if (order.status === "executed" && order.executedTxHash)
-                window.open(
-                  getExplorerLink(
-                    chainId,
-                    order.executedTxHash,
-                    ExplorerDataType.TRANSACTION
-                  ),
-                  "_blank"
-                );
-            }}
-            status={
-              isCancellationPending || isSubmissionPending
+                if (order.status === "open" && !isSubmissionPending)
+                  setCancellationState({
+                    attemptingTxn: false,
+                    cancellationErrorMessage: undefined,
+                    showConfirm: true,
+                    txHash: undefined,
+                  });
+                else if (order.status === "open" && isSubmissionPending)
+                  window.open(
+                    getExplorerLink(
+                      chainId,
+                      order.createdTxHash,
+                      ExplorerDataType.TRANSACTION
+                    ),
+                    "_blank"
+                  );
+                else if (order.status === "cancelled" && order.cancelledTxHash)
+                  window.open(
+                    getExplorerLink(
+                      chainId,
+                      order.cancelledTxHash,
+                      ExplorerDataType.TRANSACTION
+                    ),
+                    "_blank"
+                  );
+                else if (order.status === "executed" && order.executedTxHash)
+                  window.open(
+                    getExplorerLink(
+                      chainId,
+                      order.executedTxHash,
+                      ExplorerDataType.TRANSACTION
+                    ),
+                    "_blank"
+                  );
+              }}
+              status={
+                isCancellationPending || isSubmissionPending
+                  ? "pending"
+                  : order.status
+              }
+            >
+              {isSubmissionPending
                 ? "pending"
-                : order.status
-            }
-          >
-            {isSubmissionPending || isCancellationPending
-              ? "pending"
-              : order.status === "open"
-              ? "cancel"
-              : order.status}
-            {isSubmissionPending || isCancellationPending ? <Dots /> : null}
-          </OrderStatus>
+                : isCancellationPending
+                ? "cancelling"
+                : order.status === "open"
+                ? "cancel"
+                : order.status}
+              {isSubmissionPending || isCancellationPending ? <Dots /> : null}
+            </OrderStatus>
+          ) : null}
         </RowBetween>
 
         <Aligner style={{ marginTop: "10px" }}>
@@ -490,5 +476,25 @@ export default function OrderCard({ order }: { order: Order }) {
         </Aligner>
       </Container>
     </OrderPanel>
+  );
+
+  return (
+    <>
+      <ConfirmCancellationModal
+        isOpen={showConfirm}
+        attemptingTxn={attemptingTxn}
+        txHash={txHash}
+        onConfirm={handleCancellation}
+        swapErrorMessage={cancellationErrorMessage}
+        onDismiss={handleConfirmDismiss}
+        topContent={() => (
+          <>
+            <br />
+            <OrderCard showStatusButton={false} />
+          </>
+        )}
+      />
+      <OrderCard />
+    </>
   );
 }

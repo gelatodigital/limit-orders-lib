@@ -1,15 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { GelatoLimitOrders, utils } from "@gelatonetwork/limit-orders-lib";
 import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
-import {
-  Percent,
-  Currency,
-  TradeType,
-  CurrencyAmount,
-} from "@uniswap/sdk-core";
-import { Trade } from "@uniswap/v2-sdk";
+import { CurrencyAmount } from "@uniswap/sdk-core";
 import { formatUnits } from "ethers/lib/utils";
-import JSBI from "jsbi";
 import React, { useMemo } from "react";
 import { useGelatoLimitOrders } from "../../hooks/gelato";
 import useGasOverhead from "../../hooks/useGasOverhead";
@@ -21,21 +14,16 @@ import { AutoColumn } from "../Column";
 import { RowBetween, RowFixed } from "../Row";
 import { MouseoverTooltip } from "../Tooltip";
 
-export interface AdvancedSwapDetailsProps {
-  trade?: Trade<Currency, Currency, TradeType>;
-  allowedSlippage: Percent;
-}
-
-export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
+export function AdvancedSwapDetails() {
   const theme = useTheme();
   const { chainId } = useWeb3();
   const {
     library,
-    derivedOrderInfo: { parsedAmounts },
+    derivedOrderInfo: { parsedAmounts, rawAmounts },
     orderState: { rateType },
   } = useGelatoLimitOrders();
 
-  const { gasPrice, realExecutionRate } = useGasOverhead(
+  const { gasPrice, realExecutionPriceAsString } = useGasOverhead(
     parsedAmounts.input,
     parsedAmounts.output,
     rateType
@@ -47,41 +35,28 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
     () =>
       parsedAmounts.input?.currency &&
       parsedAmounts.output?.currency &&
-      realExecutionRate
-        ? realExecutionRate === "never executes"
-          ? realExecutionRate
+      realExecutionPriceAsString
+        ? realExecutionPriceAsString === "never executes"
+          ? realExecutionPriceAsString
           : `1 ${
               isInvertedRate
                 ? parsedAmounts.output.currency.symbol
                 : parsedAmounts.input.currency.symbol
-            } = ${realExecutionRate} ${
+            } = ${realExecutionPriceAsString} ${
               isInvertedRate
                 ? parsedAmounts.input.currency.symbol
                 : parsedAmounts.output.currency.symbol
             }`
         : undefined,
-    [parsedAmounts, realExecutionRate, isInvertedRate]
+    [parsedAmounts, realExecutionPriceAsString, isInvertedRate]
   );
 
   const outputAmount = parsedAmounts.output;
 
-  const rawOutputAmount = useMemo(
-    () =>
-      outputAmount
-        ? outputAmount
-            .multiply(
-              JSBI.exponentiate(
-                JSBI.BigInt(10),
-                JSBI.BigInt(outputAmount.currency.decimals)
-              )
-            )
-            .toExact()
-        : "0",
-    [outputAmount]
-  );
+  const rawOutputAmount = rawAmounts.output ?? "0";
 
   const { minReturn, slippagePercentage, gelatoFeePercentage } = useMemo(() => {
-    if (!outputAmount || !library || !trade || !chainId)
+    if (!outputAmount || !library || !chainId)
       return {
         minReturn: undefined,
         slippagePercentage: undefined,
@@ -112,7 +87,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
       slippagePercentage,
       gelatoFeePercentage,
     };
-  }, [trade, outputAmount, chainId, library, rawOutputAmount]);
+  }, [outputAmount, chainId, library, rawOutputAmount]);
 
   return !chainId ? null : (
     <AutoColumn gap="8px">

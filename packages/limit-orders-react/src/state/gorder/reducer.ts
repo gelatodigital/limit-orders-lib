@@ -69,8 +69,7 @@ export default createReducer<OrderState>(initialState, (builder) =>
     .addCase(switchCurrencies, (state) => {
       return {
         ...state,
-        independentField:
-          state.independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT,
+        independentField: Field.INPUT,
         [Field.INPUT]: { currencyId: state[Field.OUTPUT].currencyId },
         [Field.OUTPUT]: { currencyId: state[Field.INPUT].currencyId },
       };

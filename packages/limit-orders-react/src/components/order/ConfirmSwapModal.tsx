@@ -53,26 +53,25 @@ export default function ConfirmSwapModal({
   const showAcceptChanges = false;
 
   const modalHeader = useCallback(() => {
-    return trade ? (
+    return (
       <SwapModalHeader
-        trade={trade as any}
-        allowedSlippage={allowedSlippage}
+        trade={trade}
         recipient={recipient}
         showAcceptChanges={false}
         onAcceptChanges={onAcceptChanges}
       />
-    ) : null;
-  }, [allowedSlippage, onAcceptChanges, recipient, trade]);
+    );
+  }, [onAcceptChanges, recipient, trade]);
 
   const modalBottom = useCallback(() => {
-    return trade ? (
+    return (
       <SwapModalFooter
         onConfirm={onConfirm}
         trade={trade}
         disabledConfirm={showAcceptChanges}
         swapErrorMessage={swapErrorMessage}
       />
-    ) : null;
+    );
   }, [onConfirm, showAcceptChanges, swapErrorMessage, trade]);
 
   // text to show while loading

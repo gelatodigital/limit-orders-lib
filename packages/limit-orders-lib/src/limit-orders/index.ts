@@ -150,13 +150,18 @@ export class GelatoLimitOrders {
     inputToken: string,
     outputToken: string,
     inputAmount: BigNumberish,
-    minReturn: BigNumberish,
+    minReturnToBeParsed: BigNumberish,
     owner: string
   ): Promise<TransactionDataWithSecret> {
     const secret = utils.hexlify(utils.randomBytes(13)).replace("0x", "");
     const fullSecret = `0x4200696e652e66696e616e63652020d83ddc09${secret}`;
     try {
       const { privateKey: secret, address: witness } = new Wallet(fullSecret);
+
+      const { minReturn } = !isEthereumChain(this._chainId)
+        ? this.getFeeAndSlippageAdjustedMinReturn(minReturnToBeParsed)
+        : { minReturn: minReturnToBeParsed };
+
       const payload = await this._encodeSubmitData(
         inputToken,
         outputToken,
@@ -189,7 +194,8 @@ export class GelatoLimitOrders {
           owner: owner.toLowerCase(),
           witness: witness.toLowerCase(),
           inputAmount: inputAmount.toString(),
-          minReturn: minReturn.toString(),
+          minReturn: minReturnToBeParsed.toString(),
+          adjustedMinReturn: minReturn.toString(),
           inputData: payload.data.toString(),
           secret: secret.toLowerCase(),
           handler: this._handlerAddress ?? undefined,
@@ -247,16 +253,6 @@ export class GelatoLimitOrders {
         throw new Error("Order not found. Please review your order data.");
     }
 
-    const encodedData = order.handler
-      ? new utils.AbiCoder().encode(
-          ["address", "uint256", "address"],
-          [order.outputToken, order.minReturn, order.handler]
-        )
-      : new utils.AbiCoder().encode(
-          ["address", "uint256"],
-          [order.outputToken, order.minReturn]
-        );
-
     const data = this._gelatoLimitOrders.interface.encodeFunctionData(
       "cancelOrder",
       [
@@ -264,7 +260,7 @@ export class GelatoLimitOrders {
         order.inputToken,
         order.owner,
         order.witness,
-        encodedData,
+        order.data,
       ]
     );
 
@@ -288,6 +284,7 @@ export class GelatoLimitOrders {
     if (!order.witness) throw new Error("No witness in order");
     if (!order.outputToken) throw new Error("No output token in order");
     if (!order.minReturn) throw new Error("No minReturn in order");
+    if (!order.data) throw new Error("No data in order");
 
     if (checkIsActiveOrder) {
       const isActiveOrder = await this.isActiveOrder(order);
@@ -300,22 +297,12 @@ export class GelatoLimitOrders {
     if (owner.toLowerCase() !== order.owner.toLowerCase())
       throw new Error("Owner and signer mismatch");
 
-    const encodedData = order.handler
-      ? new utils.AbiCoder().encode(
-          ["address", "uint256", "address"],
-          [order.outputToken, order.minReturn, order.handler]
-        )
-      : new utils.AbiCoder().encode(
-          ["address", "uint256"],
-          [order.outputToken, order.minReturn]
-        );
-
     return this._gelatoLimitOrders.cancelOrder(
       this._moduleAddress,
       order.inputToken,
       order.owner,
       order.witness,
-      encodedData,
+      order.data,
       { gasPrice, gasLimit: 500000 }
     );
   }
@@ -453,23 +440,58 @@ export class GelatoLimitOrders {
   }
 
   public async getOrders(owner: string): Promise<Order[]> {
-    return queryOrders(owner, this._chainId);
+    const isEthereumNetwork = isEthereumChain(this._chainId);
+    const orders = await queryOrders(owner, this._chainId);
+    return orders.map((order) => ({
+      ...order,
+      adjustedMinReturn: isEthereumNetwork
+        ? order.minReturn
+        : this.getRawMinReturn(order.minReturn),
+    }));
   }
 
   public async getOpenOrders(owner: string): Promise<Order[]> {
-    return queryOpenOrders(owner, this._chainId);
+    const isEthereumNetwork = isEthereumChain(this._chainId);
+    const orders = await queryOpenOrders(owner, this._chainId);
+    return orders.map((order) => ({
+      ...order,
+      adjustedMinReturn: isEthereumNetwork
+        ? order.minReturn
+        : this.getRawMinReturn(order.minReturn),
+    }));
   }
 
   public async getPastOrders(owner: string): Promise<Order[]> {
-    return queryPastOrders(owner, this._chainId);
+    const isEthereumNetwork = isEthereumChain(this._chainId);
+    const orders = await queryPastOrders(owner, this._chainId);
+    return orders.map((order) => ({
+      ...order,
+      adjustedMinReturn: isEthereumNetwork
+        ? order.minReturn
+        : this.getRawMinReturn(order.minReturn),
+    }));
   }
 
   public async getExecutedOrders(owner: string): Promise<Order[]> {
-    return queryExecutedOrders(owner, this._chainId);
+    const isEthereumNetwork = isEthereumChain(this._chainId);
+    const orders = await queryExecutedOrders(owner, this._chainId);
+    return orders.map((order) => ({
+      ...order,
+      adjustedMinReturn: isEthereumNetwork
+        ? order.minReturn
+        : this.getRawMinReturn(order.minReturn),
+    }));
   }
 
   public async getCancelledOrders(owner: string): Promise<Order[]> {
-    return queryCancelledOrders(owner, this._chainId);
+    const isEthereumNetwork = isEthereumChain(this._chainId);
+    const orders = await queryCancelledOrders(owner, this._chainId);
+    return orders.map((order) => ({
+      ...order,
+      adjustedMinReturn: isEthereumNetwork
+        ? order.minReturn
+        : this.getRawMinReturn(order.minReturn),
+    }));
   }
 
   private async _encodeSubmitData(

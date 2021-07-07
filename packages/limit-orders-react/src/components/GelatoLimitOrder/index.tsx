@@ -94,7 +94,7 @@ export default function GelatoLimitOrder() {
       formattedAmounts,
       inputError,
     },
-    orderState: { independentField, rateType, typedValue },
+    orderState: { independentField, rateType },
   } = useGelatoLimitOrders();
 
   const fiatValueInput = useUSDCValue(parsedAmounts.input);
@@ -158,12 +158,10 @@ export default function GelatoLimitOrder() {
   );
   const routeNotFound = !trade?.route;
   const isLoadingRoute =
-    (parsedAmounts.input && !trade) ||
-    (typedValue && currencies.input && currencies.output && !trade) ||
-    ((parsedAmounts.input || parsedAmounts.output) &&
-      currencies.input &&
-      currencies.output &&
-      !trade);
+    parsedAmounts.input &&
+    !parsedAmounts.output &&
+    currencies.input &&
+    currencies.output;
 
   const maxInputAmount: CurrencyAmount<Currency> | undefined = maxAmountSpend(
     currencyBalances.input
@@ -259,11 +257,11 @@ export default function GelatoLimitOrder() {
     currencies?.output
   );
 
-  const { gasPrice, realExecutionRate } = useGasOverhead(
-    parsedAmounts.input,
-    parsedAmounts.output,
-    rateType
-  );
+  const {
+    gasPrice,
+    realExecutionPrice,
+    realExecutionPriceAsString,
+  } = useGasOverhead(parsedAmounts.input, parsedAmounts.output, rateType);
 
   return (
     <Fragment>
@@ -272,7 +270,7 @@ export default function GelatoLimitOrder() {
         <Wrapper id="limit-order-page">
           <ConfirmSwapModal
             isOpen={showConfirm}
-            trade={trade as any}
+            trade={trade}
             originalTrade={tradeToConfirm}
             onAcceptChanges={handleAcceptChanges}
             attemptingTxn={attemptingTxn}
@@ -342,7 +340,8 @@ export default function GelatoLimitOrder() {
                 showRate={true}
                 isInvertedRate={rateType === Rate.MUL ? false : true}
                 gasPrice={gasPrice}
-                realExecutionRate={realExecutionRate}
+                realExecutionPrice={realExecutionPrice}
+                realExecutionPriceAsString={realExecutionPriceAsString}
               />
               <ArrowWrapper clickable>
                 <ArrowDown
@@ -388,18 +387,11 @@ export default function GelatoLimitOrder() {
                 <RowFixed>
                   {/* Current market rate */}
                   <TradePrice
-                    price={trade.executionPrice as any}
+                    price={trade.executionPrice}
                     showInverted={showInverted}
                     setShowInverted={setShowInverted}
                   />
-                  <MouseoverTooltipContent
-                    content={
-                      <AdvancedSwapDetails
-                        trade={trade as any}
-                        allowedSlippage={allowedSlippage}
-                      />
-                    }
-                  >
+                  <MouseoverTooltipContent content={<AdvancedSwapDetails />}>
                     <StyledInfo />
                   </MouseoverTooltipContent>
                 </RowFixed>

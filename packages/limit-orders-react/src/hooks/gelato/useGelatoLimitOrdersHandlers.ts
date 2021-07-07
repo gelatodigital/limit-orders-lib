@@ -30,11 +30,13 @@ export interface GelatoLimitOrdersHandlers {
       outputTokenSymbol: string;
       inputAmount: string;
       outputAmount: string;
-      executionPrice: string;
     }
   ) => Promise<string | undefined>;
   handleInput: (field: Field, value: string) => void;
-  handleCurrencySelection: (field: Field, currency: Currency) => void;
+  handleCurrencySelection: (
+    field: Field.INPUT | Field.OUTPUT,
+    currency: Currency
+  ) => void;
   handleSwitchTokens: () => void;
   handleRateType: () => void;
   library: GelatoLimitOrders | undefined;
@@ -60,7 +62,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     }
   }, [chainId, library, handler]);
 
-  const { currencies, parsedAmounts, formattedAmounts } = useDerivedOrderInfo();
+  const { currencies, parsedAmounts, formattedAmounts, rawAmounts } =
+    useDerivedOrderInfo();
 
   const addTransaction = useTransactionAdder();
 
@@ -68,42 +71,11 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gasPrice = useGasPrice();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
-
-  const rawAmounts = useMemo(
-    () => ({
-      input: inputCurrency
-        ? parsedAmounts.input
-            ?.multiply(
-              JSBI.exponentiate(
-                JSBI.BigInt(10),
-                JSBI.BigInt(inputCurrency.decimals)
-              )
-            )
-            .toExact()
-        : undefined,
-
-      output: outputCurrency
-        ? parsedAmounts.output
-            ?.multiply(
-              JSBI.exponentiate(
-                JSBI.BigInt(10),
-                JSBI.BigInt(outputCurrency.decimals)
-              )
-            )
-            .toExact()
-        : undefined,
-    }),
-    [inputCurrency, outputCurrency, parsedAmounts]
-  );
 
   const handleLimitOrderSubmission = useCallback(async () => {
     if (!inputCurrency?.wrapped.address) {
@@ -138,21 +110,14 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       throw new Error("No signer");
     }
 
-    const { minReturn } = !utils.isEthereumChain(chainId)
-      ? gelatoLimitOrders.getFeeAndSlippageAdjustedMinReturn(rawAmounts.output)
-      : { minReturn: rawAmounts.output };
-
-    const {
-      witness,
-      payload,
-      order,
-    } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-      inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
-      outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
-      rawAmounts.input,
-      minReturn,
-      account
-    );
+    const { witness, payload, order } =
+      await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+        inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
+        outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
+        rawAmounts.input,
+        rawAmounts.output,
+        account
+      );
 
     const tx = await gelatoLimitOrders.signer.sendTransaction({
       to: payload.to,
@@ -203,7 +168,6 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
         outputTokenSymbol: string;
         inputAmount: string;
         outputAmount: string;
-        executionPrice: string;
       }
     ) => {
       if (!gelatoLimitOrders) {
@@ -235,7 +199,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       const now = Math.round(Date.now() / 1000);
 
       const summary = orderDetails
-        ? `Order cancellation: Swap ${orderDetails.inputAmount} ${orderDetails.inputTokenSymbol} for ${orderDetails.outputAmount} ${orderDetails.outputTokenSymbol} when 1 ${orderDetails.inputTokenSymbol} = ${orderDetails.executionPrice} ${orderDetails.outputTokenSymbol}`
+        ? `Order cancellation: Swap ${orderDetails.inputAmount} ${orderDetails.inputTokenSymbol} for ${orderDetails.outputAmount} ${orderDetails.outputTokenSymbol}`
         : "Order cancellation";
 
       addTransaction(tx, {
@@ -262,7 +226,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
   );
 
   const handleCurrencySelection = useCallback(
-    (field: Field, currency: Currency) => {
+    (field: Field.INPUT | Field.OUTPUT, currency: Currency) => {
       onCurrencySelection(field, currency);
     },
     [onCurrencySelection]
@@ -284,7 +248,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
                   JSBI.BigInt(outputCurrency.decimals)
                 )
               )
-              ?.toSignificant(12)
+              ?.toSignificant(6)
           : undefined;
       onChangeRateType(Rate.DIV);
       if (flipped) onUserInput(Field.PRICE, flipped);
@@ -299,7 +263,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
                   JSBI.BigInt(inputCurrency.decimals)
                 )
               )
-              ?.toSignificant(12)
+              ?.toSignificant(6)
           : undefined;
       onChangeRateType(Rate.MUL);
       if (flipped) onUserInput(Field.PRICE, flipped);

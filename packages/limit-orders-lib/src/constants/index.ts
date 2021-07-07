@@ -13,20 +13,20 @@ export const CHAIN_ID = {
 export const HANDLERS_ADDRESSES = {
   // UniswapV2Router02Handler
   [CHAIN_ID.MAINNET]: {
-    ["uniswap"]: "0x5e7c839ef196e5a50ddc284a11457e8849698acc",
+    ["uniswap"]: "0x837c03414fb86861f28ca7e91e5fd770fda0f52d",
   },
   // UniswapV2Router02Handler
   [CHAIN_ID.ROPSTEN]: {
-    ["uniswap"]: "0x4db7ff3ba491690d812a87c648a9f7c33f74fd08",
+    ["uniswap"]: "0x1f397f95d31eb20183b69d685a5060cfdefd508b",
   },
   // UniswapV2Router02Handler
   [CHAIN_ID.MATIC]: {
-    ["quickswap"]: "0x523b0df27e57745917ac57f7dffbbebe39822424",
+    ["quickswap"]: "0xaccbd2c6ad75ad3394dc5f4b1f606bf111e4eae3",
   },
   // UniswapV2Router02Handler
   [CHAIN_ID.FANTOM]: {
-    ["spiritswap"]: "0xfc20a06ad2e9ffea12e2bb8337e92fc2c9468ffe",
-    ["spookyswap"]: "0x68235ba6321b187ce7b97f907a4c5c31a1cfa84e",
+    ["spiritswap"]: "0x5fb00386558ccc219e51b69d8e963ef20b0c267a",
+    ["spookyswap"]: "0x228ffd7122d202c0cd24330892881c47b0817c7a",
   },
 };
 

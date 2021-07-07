@@ -39,13 +39,11 @@ export const ArrowWrapper = styled.div`
 
 export default function SwapModalHeader({
   trade,
-  allowedSlippage,
   recipient,
   showAcceptChanges,
   onAcceptChanges,
 }: {
-  trade: Trade<Currency, Currency, TradeType>;
-  allowedSlippage: Percent;
+  trade?: Trade<Currency, Currency, TradeType>;
   recipient: string | null;
   showAcceptChanges: boolean;
   onAcceptChanges: () => void;
@@ -93,7 +91,7 @@ export default function SwapModalHeader({
                 fontWeight={500}
                 color={
                   showAcceptChanges &&
-                  trade.tradeType === TradeType.EXACT_OUTPUT
+                  trade?.tradeType === TradeType.EXACT_OUTPUT
                     ? theme.primary1
                     : ""
                 }
@@ -155,7 +153,7 @@ export default function SwapModalHeader({
       </RowBetween>
 
       <LightCard style={{ padding: ".75rem", marginTop: "0.5rem" }}>
-        <AdvancedSwapDetails trade={trade} allowedSlippage={allowedSlippage} />
+        <AdvancedSwapDetails />
       </LightCard>
 
       {showAcceptChanges ? (

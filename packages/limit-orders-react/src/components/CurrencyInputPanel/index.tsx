@@ -1,4 +1,10 @@
-import { Currency, CurrencyAmount, Percent, Token } from "@uniswap/sdk-core";
+import {
+  Currency,
+  CurrencyAmount,
+  Percent,
+  Price,
+  Token,
+} from "@uniswap/sdk-core";
 import React, { useState, useCallback, Fragment, useMemo } from "react";
 import styled from "styled-components/macro";
 import { darken } from "polished";
@@ -21,6 +27,7 @@ import HoverInlineText from "../HoverInlineText";
 import DropDown from "../../assets/images/dropdown.svg";
 import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 import { Pair } from "../../entities/pair";
+import TradePrice from "../order/TradePrice";
 
 const InputPanel = styled.div<{ hideInput?: boolean }>`
   ${({ theme }) => theme.flexColumnNoWrap}
@@ -181,7 +188,8 @@ interface CurrencyInputPanelProps {
   showRate?: boolean;
   currentMarketRate?: string;
   isInvertedRate?: boolean;
-  realExecutionRate?: string;
+  realExecutionPrice?: Price<Currency, Currency> | undefined;
+  realExecutionPriceAsString?: string | undefined;
   gasPrice?: number;
 }
 
@@ -205,10 +213,13 @@ export default function CurrencyInputPanel({
   showCurrencySelector = true,
   showRate = false,
   isInvertedRate = false,
-  realExecutionRate,
+  realExecutionPrice,
+  realExecutionPriceAsString,
   ...rest
 }: CurrencyInputPanelProps) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [showInverted, setShowInverted] = useState<boolean>(true);
+
   const { account, chainId } = useWeb3();
   const selectedCurrencyBalance = useCurrencyBalance(
     account ?? undefined,
@@ -245,16 +256,16 @@ export default function CurrencyInputPanel({
 
   const realExecutionRateExplainer = useMemo(
     () =>
-      currency && otherCurrency && realExecutionRate
-        ? realExecutionRate === "never executes"
-          ? realExecutionRate
+      currency && otherCurrency && realExecutionPriceAsString
+        ? realExecutionPriceAsString === "never executes"
+          ? realExecutionPriceAsString
           : `1 ${
               isInvertedRate ? otherCurrency?.symbol : currency?.symbol
-            } = ${realExecutionRate} ${
+            } = ${realExecutionPriceAsString} ${
               isInvertedRate ? currency?.symbol : otherCurrency?.symbol
             }`
         : undefined,
-    [currency, isInvertedRate, otherCurrency, realExecutionRate]
+    [currency, isInvertedRate, otherCurrency, realExecutionPriceAsString]
   );
 
   return (
@@ -413,20 +424,29 @@ export default function CurrencyInputPanel({
                 ) : (
                   "-"
                 )}
-
-                <TYPE.body
-                  fontSize={14}
-                  color={realExecutionRateExplainer ? theme.text2 : theme.text4}
-                >
-                  {/* {realExecutionRateExplainer ? "~" : ""} */}
-                  <HoverInlineText
-                    text={
-                      realExecutionRateExplainer
-                        ? realExecutionRateExplainer
-                        : "-"
-                    }
+                {realExecutionPrice ? (
+                  <TradePrice
+                    price={realExecutionPrice}
+                    showInverted={showInverted}
+                    setShowInverted={setShowInverted}
                   />
-                </TYPE.body>
+                ) : (
+                  <TYPE.body
+                    fontSize={14}
+                    color={
+                      realExecutionRateExplainer ? theme.text2 : theme.text4
+                    }
+                  >
+                    {/* {realExecutionRateExplainer ? "~" : ""} */}
+                    <HoverInlineText
+                      text={
+                        realExecutionRateExplainer
+                          ? realExecutionRateExplainer
+                          : "-"
+                      }
+                    />
+                  </TYPE.body>
+                )}
               </RowBetween>
             </FiatRow>
             {/* <FiatRow>
