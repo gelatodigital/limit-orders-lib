@@ -193,39 +193,41 @@ export default function OrderCard({ order }: { order: Order }) {
 
   const inputAmount = useMemo(
     () =>
-      inputToken
+      inputToken && order.inputAmount
         ? CurrencyAmount.fromRawAmount(inputToken, order.inputAmount)
         : undefined,
     [inputToken, order.inputAmount]
   );
 
-  const rawMinReturn = order.adjustedMinReturn;
+  const rawMinReturn = useMemo(
+    () =>
+      order.adjustedMinReturn
+        ? order.adjustedMinReturn
+        : gelatoLibrary && chainId && order.minReturn
+        ? isEthereumChain(chainId)
+          ? order.minReturn
+          : gelatoLibrary.getRawMinReturn(order.minReturn)
+        : undefined,
+    [chainId, gelatoLibrary, order.adjustedMinReturn, order.minReturn]
+  );
 
   const outputAmount = useMemo(
     () =>
-      outputToken
+      outputToken && rawMinReturn
         ? CurrencyAmount.fromRawAmount(outputToken, rawMinReturn)
         : undefined,
-    [rawMinReturn, outputToken]
-  );
-
-  const rawMinReturnAmount = useMemo(
-    () =>
-      outputToken && gelatoLibrary && inputToken && rawMinReturn
-        ? CurrencyAmount.fromRawAmount(outputToken, rawMinReturn)
-        : undefined,
-    [gelatoLibrary, inputToken, outputToken, rawMinReturn]
+    [outputToken, rawMinReturn]
   );
 
   const executionPrice = useMemo(
     () =>
-      rawMinReturnAmount && inputAmount
+      outputAmount && inputAmount
         ? new Price({
-            baseAmount: rawMinReturnAmount,
+            baseAmount: outputAmount,
             quoteAmount: inputAmount,
           })
         : undefined,
-    [inputAmount, rawMinReturnAmount]
+    [inputAmount, outputAmount]
   );
 
   const trade = useTradeExactIn(inputAmount, outputToken ?? undefined, handler);
@@ -306,7 +308,6 @@ export default function OrderCard({ order }: { order: Order }) {
     outputToken,
     inputAmount,
     outputAmount,
-    executionPrice,
     order,
   ]);
 
@@ -417,9 +418,9 @@ export default function OrderCard({ order }: { order: Order }) {
               <Text fontWeight={500} fontSize={14} color={theme.text1}>
                 {`Sell ${inputAmount ? inputAmount.toSignificant(4) : "-"} ${
                   inputAmount?.currency.symbol ?? ""
-                } for ${
-                  rawMinReturnAmount ? rawMinReturnAmount.toSignificant(4) : "-"
-                } ${outputAmount?.currency.symbol ?? ""}`}
+                } for ${outputAmount ? outputAmount.toSignificant(4) : "-"} ${
+                  outputAmount?.currency.symbol ?? ""
+                }`}
               </Text>
             </RowBetween>
           </OrderRow>
