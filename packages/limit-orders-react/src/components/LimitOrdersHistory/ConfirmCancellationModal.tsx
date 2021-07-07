@@ -47,7 +47,7 @@ export default function ConfirmCancellationModal({
   isOpen,
   attemptingTxn,
   txHash,
-  order,
+  topContent,
 }: {
   isOpen: boolean;
   attemptingTxn: boolean;
@@ -55,7 +55,7 @@ export default function ConfirmCancellationModal({
   onConfirm: () => void;
   swapErrorMessage: string | undefined;
   onDismiss: () => void;
-  order: Order;
+  topContent: () => React.ReactNode;
 }) {
   const showAcceptChanges = false;
 
@@ -68,10 +68,6 @@ export default function ConfirmCancellationModal({
       />
     );
   }, [onConfirm, showAcceptChanges, swapErrorMessage]);
-
-  const modalTop = useCallback(() => {
-    return null;
-  }, []);
 
   // text to show while loading
   const pendingText = `Cancelling order...`;
@@ -87,11 +83,11 @@ export default function ConfirmCancellationModal({
         <ConfirmationModalContent
           title="Cancel Order"
           onDismiss={onDismiss}
-          topContent={modalTop}
+          topContent={topContent}
           bottomContent={modalBottom}
         />
       ),
-    [onDismiss, modalBottom, swapErrorMessage, modalTop]
+    [onDismiss, modalBottom, swapErrorMessage, topContent]
   );
 
   return (
