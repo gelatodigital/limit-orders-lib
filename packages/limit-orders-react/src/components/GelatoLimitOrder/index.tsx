@@ -257,11 +257,11 @@ export default function GelatoLimitOrder() {
     currencies?.output
   );
 
-  const { gasPrice, realExecutionRate } = useGasOverhead(
-    parsedAmounts.input,
-    parsedAmounts.output,
-    rateType
-  );
+  const {
+    gasPrice,
+    realExecutionPrice,
+    realExecutionPriceAsString,
+  } = useGasOverhead(parsedAmounts.input, parsedAmounts.output, rateType);
 
   return (
     <Fragment>
@@ -270,7 +270,7 @@ export default function GelatoLimitOrder() {
         <Wrapper id="limit-order-page">
           <ConfirmSwapModal
             isOpen={showConfirm}
-            trade={trade as any}
+            trade={trade}
             originalTrade={tradeToConfirm}
             onAcceptChanges={handleAcceptChanges}
             attemptingTxn={attemptingTxn}
@@ -340,7 +340,8 @@ export default function GelatoLimitOrder() {
                 showRate={true}
                 isInvertedRate={rateType === Rate.MUL ? false : true}
                 gasPrice={gasPrice}
-                realExecutionRate={realExecutionRate}
+                realExecutionPrice={realExecutionPrice}
+                realExecutionPriceAsString={realExecutionPriceAsString}
               />
               <ArrowWrapper clickable>
                 <ArrowDown
@@ -386,7 +387,7 @@ export default function GelatoLimitOrder() {
                 <RowFixed>
                   {/* Current market rate */}
                   <TradePrice
-                    price={trade.executionPrice as any}
+                    price={trade.executionPrice}
                     showInverted={showInverted}
                     setShowInverted={setShowInverted}
                   />

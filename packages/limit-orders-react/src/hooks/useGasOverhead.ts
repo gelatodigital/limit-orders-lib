@@ -7,16 +7,20 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { GENERIC_GAS_LIMIT_ORDER_EXECUTION } from "../constants/misc";
 import { useTradeExactIn } from "./useTrade";
 import { tryParseAmount } from "../state/gorder/hooks";
-import { Currency, CurrencyAmount } from "@uniswap/sdk-core";
-import { Rate } from "../state/gorder/actions";
+import { Currency, CurrencyAmount, Price } from "@uniswap/sdk-core";
 import JSBI from "jsbi";
 import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
+import { Rate } from "../state/gorder/actions";
 
 export default function useGasOverhead(
   inputAmount: CurrencyAmount<Currency> | undefined,
   outputAmount: CurrencyAmount<Currency> | undefined,
   rateType: Rate
-): { realExecutionRate: string | undefined; gasPrice: number | undefined } {
+): {
+  realExecutionPrice: Price<Currency, Currency> | undefined;
+  realExecutionPriceAsString: string | undefined;
+  gasPrice: number | undefined;
+} {
   const { chainId, handler } = useWeb3();
 
   const gasPrice = useGasPrice();
@@ -47,7 +51,26 @@ export default function useGasOverhead(
     [gasCostInInputTokens, inputAmount]
   );
 
-  const realExecutionRate = useMemo(() => {
+  const realExecutionPrice = useMemo(() => {
+    if (
+      !inputAmount ||
+      !gasCostInInputTokens ||
+      !realInputAmount ||
+      !outputAmount
+    )
+      return undefined;
+
+    if (gasCostInInputTokens.outputAmount.greaterThan(inputAmount.asFraction))
+      return undefined;
+    else {
+      return new Price({
+        baseAmount: realInputAmount,
+        quoteAmount: outputAmount,
+      });
+    }
+  }, [realInputAmount, outputAmount, inputAmount, gasCostInInputTokens]);
+
+  const realExecutionPriceAsString = useMemo(() => {
     if (
       !inputAmount ||
       !gasCostInInputTokens ||
@@ -87,6 +110,10 @@ export default function useGasOverhead(
   ]);
 
   return chainId && isEthereumChain(chainId)
-    ? { realExecutionRate, gasPrice }
-    : { realExecutionRate: undefined, gasPrice: undefined };
+    ? { realExecutionPrice, gasPrice, realExecutionPriceAsString }
+    : {
+        realExecutionPrice: undefined,
+        realExecutionPriceAsString: undefined,
+        gasPrice: undefined,
+      };
 }

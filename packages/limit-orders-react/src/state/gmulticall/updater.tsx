@@ -189,7 +189,7 @@ export default function Updater(): null {
     cancellations.current = {
       blockNumber: latestBlockNumber,
       cancellations: chunkedCalls.map((chunk, index) => {
-        const blockDiff = isEthereumChain(chainId) ? 1 : 30;
+        const blockDiff = isEthereumChain(chainId) ? 5 : 60;
         const { cancel, promise } = retry(
           () =>
             fetchChunk(

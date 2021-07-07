@@ -5,7 +5,6 @@ import { Trade } from "@uniswap/v2-sdk";
 import { useCallback, useMemo } from "react";
 import { useCurrency } from "../../hooks/Tokens";
 import { useTradeExactIn, useTradeExactOut } from "../../hooks/useTrade";
-import { isAddress } from "../../utils";
 import { useCurrencyBalances } from "../../hooks/Balances";
 import {
   Field,
@@ -156,26 +155,6 @@ const BAD_RECIPIENT_ADDRESSES: { [address: string]: true } = {
   "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D": true, // v2 router 02
 };
 
-/**
- * Returns true if any of the pairs or tokens in a trade have the given checksummed address
- * @param trade to check for the given address
- * @param checksummedAddress address to check in the pairs and tokens
- */
-function involvesAddress(
-  trade: Trade<Currency, Currency, TradeType>,
-  checksummedAddress: string
-): boolean {
-  const path = trade.route.path;
-  return (
-    path.some((token) => token.address === checksummedAddress) ||
-    (trade instanceof Trade
-      ? trade.route.pairs.some(
-          (pair) => pair.liquidityToken.address === checksummedAddress
-        )
-      : false)
-  );
-}
-
 export interface DerivedOrderInfo {
   currencies: { input: Currency | undefined; output: Currency | undefined };
   currencyBalances: {
@@ -215,8 +194,6 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
 
   const inputCurrency = useCurrency(inputCurrencyId);
   const outputCurrency = useCurrency(outputCurrencyId);
-
-  const to: string | null = account ?? null;
 
   const relevantTokenBalances = useCurrencyBalances(account ?? undefined, [
     inputCurrency ?? undefined,
@@ -262,7 +239,9 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     handler
   );
 
-  const trade = isExactIn ? bestTradeExactIn : bestTradeExactOut;
+  const trade = useMemo(() => {
+    return isExactIn ? bestTradeExactIn : bestTradeExactOut;
+  }, [isExactIn, bestTradeExactIn, bestTradeExactOut]);
 
   const inputAmount = useMemo(() => {
     return tryParseAmount(inputValue, inputCurrency ?? undefined);
@@ -302,19 +281,6 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     inputError = inputError ?? "Select a token";
   }
 
-  const formattedTo = isAddress(to);
-  if (!to || !formattedTo) {
-    inputError = inputError ?? "Enter a recipient";
-  } else {
-    if (
-      BAD_RECIPIENT_ADDRESSES[formattedTo] ||
-      (bestTradeExactIn && involvesAddress(bestTradeExactIn, formattedTo)) ||
-      (bestTradeExactOut && involvesAddress(bestTradeExactOut, formattedTo))
-    ) {
-      inputError = inputError ?? "Invalid recipient";
-    }
-  }
-
   const parsedAmounts = useMemo(
     () => ({
       input: independentField === Field.INPUT ? parsedAmount : inputAmount,
@@ -344,25 +310,28 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     );
   }
 
-  const price = useMemo(
-    () =>
-      parsedAmounts.input && parsedAmounts.output
-        ? new Price({
-            baseAmount: parsedAmounts.input,
-            quoteAmount: parsedAmounts.output,
-          })
-        : undefined,
-    [parsedAmounts]
-  );
+  const price = useMemo(() => {
+    if (!parsedAmounts.input || !parsedAmounts.output) return undefined;
 
-  if (
-    price &&
-    trade &&
-    (price.lessThan(trade.executionPrice.asFraction) ||
-      price.equalTo(trade.executionPrice.asFraction))
-  ) {
-    inputError =
-      inputError ?? "Only possible to place orders above market rate";
+    const priceGiven = new Price({
+      baseAmount: parsedAmounts.input,
+      quoteAmount: parsedAmounts.output,
+    });
+
+    return rateType === Rate.MUL ? priceGiven : priceGiven.invert();
+  }, [parsedAmounts.input, parsedAmounts.output, rateType]);
+
+  if (price && trade) {
+    if (
+      (rateType === Rate.MUL &&
+        (price.lessThan(trade.executionPrice.asFraction) ||
+          price.equalTo(trade.executionPrice.asFraction))) ||
+      (rateType === Rate.DIV &&
+        (price.greaterThan(trade.executionPrice.invert().asFraction) ||
+          price.equalTo(trade.executionPrice.invert().asFraction)))
+    )
+      inputError =
+        inputError ?? "Only possible to place orders above market rate";
   }
 
   // compare input to balance

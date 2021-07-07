@@ -23,7 +23,7 @@ export function AdvancedSwapDetails() {
     orderState: { rateType },
   } = useGelatoLimitOrders();
 
-  const { gasPrice, realExecutionRate } = useGasOverhead(
+  const { gasPrice, realExecutionPriceAsString } = useGasOverhead(
     parsedAmounts.input,
     parsedAmounts.output,
     rateType
@@ -35,20 +35,20 @@ export function AdvancedSwapDetails() {
     () =>
       parsedAmounts.input?.currency &&
       parsedAmounts.output?.currency &&
-      realExecutionRate
-        ? realExecutionRate === "never executes"
-          ? realExecutionRate
+      realExecutionPriceAsString
+        ? realExecutionPriceAsString === "never executes"
+          ? realExecutionPriceAsString
           : `1 ${
               isInvertedRate
                 ? parsedAmounts.output.currency.symbol
                 : parsedAmounts.input.currency.symbol
-            } = ${realExecutionRate} ${
+            } = ${realExecutionPriceAsString} ${
               isInvertedRate
                 ? parsedAmounts.input.currency.symbol
                 : parsedAmounts.output.currency.symbol
             }`
         : undefined,
-    [parsedAmounts, realExecutionRate, isInvertedRate]
+    [parsedAmounts, realExecutionPriceAsString, isInvertedRate]
   );
 
   const outputAmount = parsedAmounts.output;
