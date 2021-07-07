@@ -150,6 +150,7 @@ import {
   GelatoLimitOrdersHistoryPanel,
 } from "@gelatonetwork/limit-orders-react";
 
+
 export default function LimitOrder() {
   const {
     handlers: {
@@ -158,6 +159,7 @@ export default function LimitOrder() {
       handleCurrencySelection,
       handleSwitchTokens,
       handleLimitOrderSubmission,
+      handleLimitOrderCancellation
     },
     derivedOrderInfo: {
       parsedAmounts,
@@ -189,7 +191,7 @@ useGelatoLimitOrders(): {
 }
 
 useGelatoLimitOrdersHandlers(): {
-  handleLimitOrderSubmission: () => Promise<string | undefined>;
+ handleLimitOrderSubmission: () => Promise<string | undefined>;
   handleLimitOrderCancellation: (
     order: Order,
     orderDetails?: {
@@ -197,11 +199,13 @@ useGelatoLimitOrdersHandlers(): {
       outputTokenSymbol: string;
       inputAmount: string;
       outputAmount: string;
-      executionPrice: string;
     }
   ) => Promise<string | undefined>;
   handleInput: (field: Field, value: string) => void;
-  handleCurrencySelection: (field: Field, currency: Currency) => void;
+  handleCurrencySelection: (
+    field: Field.INPUT | Field.OUTPUT,
+    currency: Currency
+  ) => void;
   handleSwitchTokens: () => void;
   handleRateType: () => void;
   library: GelatoLimitOrders | undefined;
@@ -213,6 +217,15 @@ useGelatoLimitOrdersHistory(): {
   executed: Order[];
 }
 ```
+
+Note: You can also import the following hooks and functions from the library:
+
+- `useCurrency` (to get the currency entity to be traded by address)
+- `useUSDCValue` (to get fiat value given a CurrencyAmount)
+- `useCurrencyBalances` (to get account balances for given Currencies)
+- `useTradeExactIn` (to get a trade using an input amount)
+- `useTradeExactOut` (to get a trade using an output amount)
+- `tryParseAmount` (to try to parse a user entered amount for a given token)
 
 ### Need help? Want to add a new handler?
 

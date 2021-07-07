@@ -8,6 +8,7 @@ import ListsUpdater from "./state/glists/updater";
 import MulticallUpdater from "./state/gmulticall/updater";
 import TransactionUpdater from "./state/gtransactions/updater";
 import { clearAllTransactions } from "./state/gtransactions/actions";
+import { tryParseAmount } from "./state/gorder/hooks";
 import {
   useGelatoLimitOrders,
   useGelatoLimitOrdersHandlers,
@@ -17,6 +18,10 @@ import GelatoLimitOrderPanel from "./components/GelatoLimitOrder";
 import GelatoLimitOrdersHistoryPanel from "./components/LimitOrdersHistory";
 import { Web3Provider } from "./web3";
 import useGasPrice from "./hooks/useGasPrice";
+import { useUSDCValue } from "./hooks/useUSDCPrice";
+import { useCurrency } from "./hooks/Tokens";
+import { useCurrencyBalances } from "./hooks/Balances";
+import { useTradeExactOut, useTradeExactIn } from "./hooks/useTrade";
 import ThemeProvider, { ThemedGlobalStyle } from "./theme";
 
 export function GelatoProvider({
@@ -82,4 +87,10 @@ export {
   gelatoReducers,
   GELATO_PERSISTED_KEYS,
   clearAllTransactions,
+  useUSDCValue,
+  useCurrency,
+  useCurrencyBalances,
+  useTradeExactOut,
+  useTradeExactIn,
+  tryParseAmount,
 };
