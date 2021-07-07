@@ -180,6 +180,15 @@ export default function LimitOrder() {
 
 See complete integration example [here](https://github.com/gelatodigital/limit-orders-lib/tree/master/packages/limit-orders-react/src/components/GelatoLimitOrder/index.tsx#L81).
 
+Note: You can also import the following hooks and functions from the library:
+
+- `useCurrency` (to get the currency entity to be traded by address)
+- `useUSDCValue` (to get fiat value given a CurrencyAmount)
+- `useCurrencyBalances` (to get account balances for given Currencies)
+- `useTradeExactIn` (to get a trade using an input amount)
+- `useTradeExactOut` (to get a trade using an output amount)
+- `tryParseAmount` (to try to parse a user entered amount for a given token)
+
 ### Types
 
 ```typescript
@@ -217,15 +226,6 @@ useGelatoLimitOrdersHistory(): {
   executed: Order[];
 }
 ```
-
-Note: You can also import the following hooks and functions from the library:
-
-- `useCurrency` (to get the currency entity to be traded by address)
-- `useUSDCValue` (to get fiat value given a CurrencyAmount)
-- `useCurrencyBalances` (to get account balances for given Currencies)
-- `useTradeExactIn` (to get a trade using an input amount)
-- `useTradeExactOut` (to get a trade using an output amount)
-- `tryParseAmount` (to try to parse a user entered amount for a given token)
 
 ### Need help? Want to add a new handler?
 
