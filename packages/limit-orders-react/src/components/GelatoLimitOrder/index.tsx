@@ -113,6 +113,14 @@ export default function GelatoLimitOrder() {
 
   const isValid = !inputError;
 
+  const [activeTab, setActiveTab] = useState<"sell" | "buy">("sell");
+  const handleActiveTab = (tab: "sell" | "buy") => {
+    if (activeTab === tab) return;
+
+    handleRateType();
+    setActiveTab(tab);
+  };
+
   const handleTypeInput = useCallback(
     (value: string) => {
       handleInput(Field.INPUT, value);
@@ -266,7 +274,7 @@ export default function GelatoLimitOrder() {
   return (
     <Fragment>
       <AppBody>
-        <SwapHeader />
+        <SwapHeader handleActiveTab={handleActiveTab} activeTab={activeTab} />
         <Wrapper id="limit-order-page">
           <ConfirmSwapModal
             isOpen={showConfirm}
@@ -301,11 +309,10 @@ export default function GelatoLimitOrder() {
                 showCommonBases={true}
                 id="limit-order-currency-input"
               />
-              <ArrowWrapper clickable>
+              <ArrowWrapper clickable={false}>
                 {rateType === Rate.MUL ? (
                   <X
                     size="16"
-                    onClick={handleRateType}
                     color={
                       currencies.input && currencies.output
                         ? theme.text1
@@ -315,7 +322,6 @@ export default function GelatoLimitOrder() {
                 ) : (
                   <Divide
                     size="16"
-                    onClick={handleRateType}
                     color={
                       currencies.input && currencies.output
                         ? theme.text1

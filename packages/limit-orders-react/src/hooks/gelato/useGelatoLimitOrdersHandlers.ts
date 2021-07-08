@@ -4,7 +4,6 @@ import {
   ChainId,
   GelatoLimitOrders,
   Order,
-  utils,
 } from "@gelatonetwork/limit-orders-lib";
 import {
   useDerivedOrderInfo,
@@ -43,7 +42,7 @@ export interface GelatoLimitOrdersHandlers {
 }
 
 export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandlers {
-  const { chainId, library, account, handler } = useWeb3();
+  const { chainId, library, account, handler, addOrderToDB } = useWeb3();
 
   const gelatoLimitOrders = useMemo(() => {
     try {
@@ -62,12 +61,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     }
   }, [chainId, library, handler]);
 
-  const {
-    currencies,
-    parsedAmounts,
-    formattedAmounts,
-    rawAmounts,
-  } = useDerivedOrderInfo();
+  const { currencies, parsedAmounts, formattedAmounts, rawAmounts } =
+    useDerivedOrderInfo();
 
   const addTransaction = useTransactionAdder();
 
@@ -75,12 +70,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gasPrice = useGasPrice();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
@@ -118,17 +109,14 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       throw new Error("No signer");
     }
 
-    const {
-      witness,
-      payload,
-      order,
-    } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-      inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
-      outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
-      rawAmounts.input,
-      rawAmounts.output,
-      account
-    );
+    const { witness, payload, order } =
+      await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+        inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
+        outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
+        rawAmounts.input,
+        rawAmounts.output,
+        account
+      );
 
     const tx = await gelatoLimitOrders.signer.sendTransaction({
       to: payload.to,
@@ -138,6 +126,15 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     });
 
     const now = Math.round(Date.now() / 1000);
+
+    if (addOrderToDB)
+      await addOrderToDB(account, {
+        ...order,
+        createdTxHash: tx?.hash.toLowerCase(),
+        witness,
+        status: "open",
+        updatedAt: now.toString(),
+      } as Order);
 
     addTransaction(tx, {
       summary: `Order submission: Swap ${formattedAmounts.input} ${
@@ -169,6 +166,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     rateType,
     account,
     gasPrice,
+    addOrderToDB,
   ]);
 
   const handleLimitOrderCancellation = useCallback(
