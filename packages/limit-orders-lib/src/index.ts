@@ -1,5 +1,3 @@
-import { utils } from "ethers";
-
 export { GelatoLimitOrders, isValidChainIdAndHandler } from "./limit-orders";
 
 export * from "./types";
