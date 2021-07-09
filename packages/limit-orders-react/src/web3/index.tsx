@@ -9,7 +9,11 @@ interface Web3State {
   chainId: number | undefined;
   handler?: Handler;
   toggleWalletModal?: () => void;
-  addOrderToDB?: (account: string, order: Order) => Promise<boolean>;
+  addOrderToDB?: (
+    chainId: number,
+    account: string,
+    order: Order
+  ) => Promise<boolean>;
 }
 
 interface Web3ProviderProps {
@@ -19,7 +23,11 @@ interface Web3ProviderProps {
   chainId: number | undefined;
   handler?: Handler;
   toggleWalletModal?: () => void;
-  addOrderToDB?: (account: string, order: Order) => Promise<boolean>;
+  addOrderToDB?: (
+    chainId: number,
+    account: string,
+    order: Order
+  ) => Promise<boolean>;
 }
 
 const initialWeb3State: Web3State = {

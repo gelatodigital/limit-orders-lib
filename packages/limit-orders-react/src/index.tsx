@@ -43,7 +43,11 @@ export function GelatoProvider({
   useDefaultTheme?: boolean;
   useDarkMode?: boolean;
   children?: React.ReactNode;
-  addOrderToDB?: (account: string, order: Order) => Promise<boolean>;
+  addOrderToDB?: (
+    chainId: number,
+    account: string,
+    order: Order
+  ) => Promise<boolean>;
 }) {
   return useDefaultTheme ? (
     <ThemeProvider useDarkMode={useDarkMode}>

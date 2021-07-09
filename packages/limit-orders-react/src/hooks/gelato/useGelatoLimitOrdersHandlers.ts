@@ -128,7 +128,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     const now = Math.round(Date.now() / 1000);
 
     if (addOrderToDB)
-      await addOrderToDB(account, {
+      await addOrderToDB(chainId, account, {
         ...order,
         createdTxHash: tx?.hash.toLowerCase(),
         witness,
