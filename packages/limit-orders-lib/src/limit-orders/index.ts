@@ -53,6 +53,7 @@ export class GelatoLimitOrders {
   private _gelatoLimitOrders: GelatoLimitOrdersContract;
   private _moduleAddress: string;
   private _subgraphUrl: string;
+  private _abiEncoder: utils.AbiCoder;
   private _handlerAddress?: string;
   private _handler?: Handler;
 
@@ -124,8 +125,10 @@ export class GelatoLimitOrders {
     this._moduleAddress = GELATO_LIMIT_ORDERS_MODULE_ADDRESS[this._chainId];
     this._handler = handler;
     this._handlerAddress = handler
-      ? HANDLERS_ADDRESSES[this._chainId][handler]
+      ? HANDLERS_ADDRESSES[this._chainId][handler]?.toLowerCase()
       : undefined;
+
+    this._abiEncoder = new utils.AbiCoder();
   }
 
   public async encodeLimitOrderSubmission(
@@ -153,58 +156,61 @@ export class GelatoLimitOrders {
     minReturnToBeParsed: BigNumberish,
     owner: string
   ): Promise<TransactionDataWithSecret> {
-    const secret = utils.hexlify(utils.randomBytes(13)).replace("0x", "");
-    const fullSecret = `0x4200696e652e66696e616e63652020d83ddc09${secret}`;
-    try {
-      const { privateKey: secret, address: witness } = new Wallet(fullSecret);
+    const randomSecret = utils.hexlify(utils.randomBytes(13)).replace("0x", "");
+    const fullSecret = `0x4200696e652e66696e616e63652020d83ddc09${randomSecret}`;
 
-      const { minReturn } = !isEthereumChain(this._chainId)
-        ? this.getFeeAndSlippageAdjustedMinReturn(minReturnToBeParsed)
-        : { minReturn: minReturnToBeParsed };
+    const { privateKey: secret, address: witness } = new Wallet(fullSecret);
 
-      const payload = await this._encodeSubmitData(
-        inputToken,
-        outputToken,
-        owner,
-        witness,
-        inputAmount,
-        minReturn,
-        secret
-      );
+    const { minReturn } = !isEthereumChain(this._chainId)
+      ? this.getFeeAndSlippageAdjustedMinReturn(minReturnToBeParsed)
+      : { minReturn: minReturnToBeParsed };
 
-      const encodedData = this._handlerAddress
-        ? new utils.AbiCoder().encode(
-            ["address", "uint256", "address"],
-            [outputToken, minReturn, this._handlerAddress]
-          )
-        : new utils.AbiCoder().encode(
-            ["address", "uint256"],
-            [outputToken, minReturn]
-          );
+    const payload = await this._encodeSubmitData(
+      inputToken,
+      outputToken,
+      owner,
+      witness,
+      inputAmount,
+      minReturn,
+      secret
+    );
 
-      return {
-        payload,
-        secret,
-        witness,
-        order: {
-          module: this._moduleAddress.toLowerCase(),
+    const encodedData = this._handlerAddress
+      ? this._abiEncoder.encode(
+          ["address", "uint256", "address"],
+          [outputToken, minReturn, this._handlerAddress]
+        )
+      : this._abiEncoder.encode(
+          ["address", "uint256"],
+          [outputToken, minReturn]
+        );
+
+    return {
+      payload,
+      secret,
+      witness,
+      order: {
+        id: this._getKey({
+          module: this._moduleAddress,
+          inputToken,
+          owner,
+          witness,
           data: encodedData,
-          inputToken: inputToken.toLowerCase(),
-          outputToken: outputToken.toLowerCase(),
-          owner: owner.toLowerCase(),
-          witness: witness.toLowerCase(),
-          inputAmount: inputAmount.toString(),
-          minReturn: minReturnToBeParsed.toString(),
-          adjustedMinReturn: minReturn.toString(),
-          inputData: payload.data.toString(),
-          secret: secret.toLowerCase(),
-          handler: this._handlerAddress ?? undefined,
-        },
-      };
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
+        } as Order),
+        module: this._moduleAddress.toLowerCase(),
+        data: encodedData,
+        inputToken: inputToken.toLowerCase(),
+        outputToken: outputToken.toLowerCase(),
+        owner: owner.toLowerCase(),
+        witness: witness.toLowerCase(),
+        inputAmount: inputAmount.toString(),
+        minReturn: minReturnToBeParsed.toString(),
+        adjustedMinReturn: minReturn.toString(),
+        inputData: payload.data.toString(),
+        secret: secret.toLowerCase(),
+        handler: this._handlerAddress ?? null,
+      },
+    };
   }
 
   public async submitLimitOrder(
@@ -442,56 +448,85 @@ export class GelatoLimitOrders {
   public async getOrders(owner: string): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryOrders(owner, this._chainId);
-    return orders.map((order) => ({
-      ...order,
-      adjustedMinReturn: isEthereumNetwork
-        ? order.minReturn
-        : this.getRawMinReturn(order.minReturn),
-    }));
+    return orders
+      .map((order) => ({
+        ...order,
+        adjustedMinReturn: isEthereumNetwork
+          ? order.minReturn
+          : this.getRawMinReturn(order.minReturn),
+      }))
+      .filter((order) =>
+        this._handler ? order.handler === this._handlerAddress : true
+      );
   }
 
   public async getOpenOrders(owner: string): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryOpenOrders(owner, this._chainId);
-    return orders.map((order) => ({
-      ...order,
-      adjustedMinReturn: isEthereumNetwork
-        ? order.minReturn
-        : this.getRawMinReturn(order.minReturn),
-    }));
+    return orders
+      .map((order) => ({
+        ...order,
+        adjustedMinReturn: isEthereumNetwork
+          ? order.minReturn
+          : this.getRawMinReturn(order.minReturn),
+      }))
+      .filter((order) =>
+        this._handler ? order.handler === this._handlerAddress : true
+      );
   }
 
   public async getPastOrders(owner: string): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryPastOrders(owner, this._chainId);
-    return orders.map((order) => ({
-      ...order,
-      adjustedMinReturn: isEthereumNetwork
-        ? order.minReturn
-        : this.getRawMinReturn(order.minReturn),
-    }));
+    return orders
+      .map((order) => ({
+        ...order,
+        adjustedMinReturn: isEthereumNetwork
+          ? order.minReturn
+          : this.getRawMinReturn(order.minReturn),
+      }))
+      .filter((order) =>
+        this._handler ? order.handler === this._handlerAddress : true
+      );
   }
 
   public async getExecutedOrders(owner: string): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryExecutedOrders(owner, this._chainId);
-    return orders.map((order) => ({
-      ...order,
-      adjustedMinReturn: isEthereumNetwork
-        ? order.minReturn
-        : this.getRawMinReturn(order.minReturn),
-    }));
+    return orders
+      .map((order) => ({
+        ...order,
+        adjustedMinReturn: isEthereumNetwork
+          ? order.minReturn
+          : this.getRawMinReturn(order.minReturn),
+      }))
+      .filter((order) =>
+        this._handler ? order.handler === this._handlerAddress : true
+      );
   }
 
   public async getCancelledOrders(owner: string): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryCancelledOrders(owner, this._chainId);
-    return orders.map((order) => ({
-      ...order,
-      adjustedMinReturn: isEthereumNetwork
-        ? order.minReturn
-        : this.getRawMinReturn(order.minReturn),
-    }));
+    return orders
+      .map((order) => ({
+        ...order,
+        adjustedMinReturn: isEthereumNetwork
+          ? order.minReturn
+          : this.getRawMinReturn(order.minReturn),
+      }))
+      .filter((order) =>
+        this._handler ? order.handler === this._handlerAddress : true
+      );
+  }
+
+  private _getKey(order: Order): string {
+    return utils.keccak256(
+      this._abiEncoder.encode(
+        ["address", "address", "address", "address", "bytes"],
+        [order.module, order.inputToken, order.owner, order.witness, order.data]
+      )
+    );
   }
 
   private async _encodeSubmitData(
@@ -509,11 +544,11 @@ export class GelatoLimitOrders {
       throw new Error("Input token and output token can not be equal");
 
     const encodedData = this._handlerAddress
-      ? new utils.AbiCoder().encode(
+      ? this._abiEncoder.encode(
           ["address", "uint256", "address"],
           [outputToken, minReturn, this._handlerAddress]
         )
-      : new utils.AbiCoder().encode(
+      : this._abiEncoder.encode(
           ["address", "uint256"],
           [outputToken, minReturn]
         );

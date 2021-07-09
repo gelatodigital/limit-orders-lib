@@ -52,6 +52,7 @@ export interface Order {
 }
 
 export interface PartialOrder {
+  id: string;
   owner: string;
   inputToken: string;
   outputToken: string;
@@ -63,5 +64,5 @@ export interface PartialOrder {
   inputAmount: string;
   data: string;
   inputData: string;
-  handler?: string;
+  handler: string | null;
 }
