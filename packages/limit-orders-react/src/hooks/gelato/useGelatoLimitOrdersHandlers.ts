@@ -127,14 +127,16 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
     const now = Math.round(Date.now() / 1000);
 
-    if (addOrderToDB)
-      await addOrderToDB(chainId, account, {
-        ...order,
-        createdTxHash: tx?.hash.toLowerCase(),
-        witness,
-        status: "open",
-        updatedAt: now.toString(),
-      } as Order);
+    try {
+      if (addOrderToDB)
+        await addOrderToDB(chainId, account, {
+          ...order,
+          createdTxHash: tx?.hash.toLowerCase(),
+          witness,
+          status: "open",
+          updatedAt: now.toString(),
+        } as Order);
+    } catch (e) {}
 
     addTransaction(tx, {
       summary: `Order submission: Swap ${formattedAmounts.input} ${
