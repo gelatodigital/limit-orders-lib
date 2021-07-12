@@ -615,7 +615,7 @@ export class GelatoLimitOrders {
         ]
       );
       value = constants.Zero;
-      to = inputToken;
+      to = this._erc20OrderRouter.address;
     }
 
     return { data, value, to };
