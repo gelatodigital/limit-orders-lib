@@ -58,6 +58,7 @@ export default createReducer(initialState, (builder) =>
           type,
           addedTime: now(),
         };
+
         transactions[chainId] = txs;
         if (order) saveOrder(chainId, from, order, true);
       }

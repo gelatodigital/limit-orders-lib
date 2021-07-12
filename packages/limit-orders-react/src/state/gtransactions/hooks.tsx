@@ -43,6 +43,7 @@ export function useTransactionAdder(): (
       if (!hash) {
         throw Error("No transaction hash found.");
       }
+
       dispatch(
         addTransaction({
           hash,

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { FC, ReactNode } from "react";
 import { Web3Provider as Web3ProviderEthers } from "@ethersproject/providers";
-import { Handler, Order } from "@gelatonetwork/limit-orders-lib";
+import { Handler } from "@gelatonetwork/limit-orders-lib";
 
 interface Web3State {
   library: Web3ProviderEthers | undefined;
@@ -9,11 +9,6 @@ interface Web3State {
   chainId: number | undefined;
   handler?: Handler;
   toggleWalletModal?: () => void;
-  addOrderToDB?: (
-    chainId: number,
-    account: string,
-    order: Order
-  ) => Promise<boolean>;
 }
 
 interface Web3ProviderProps {
@@ -23,11 +18,6 @@ interface Web3ProviderProps {
   chainId: number | undefined;
   handler?: Handler;
   toggleWalletModal?: () => void;
-  addOrderToDB?: (
-    chainId: number,
-    account: string,
-    order: Order
-  ) => Promise<boolean>;
 }
 
 const initialWeb3State: Web3State = {
@@ -36,7 +26,6 @@ const initialWeb3State: Web3State = {
   account: undefined,
   handler: undefined,
   toggleWalletModal: undefined,
-  addOrderToDB: undefined,
 };
 
 const Web3Context = createContext<Web3State>({} as Web3State);
@@ -50,7 +39,6 @@ export const Web3Provider: FC<Web3ProviderProps> = ({
   account,
   handler,
   toggleWalletModal,
-  addOrderToDB,
 }: Web3ProviderProps) => {
   const [state, setState] = useState<Web3State>(initialWeb3State);
 
@@ -61,9 +49,8 @@ export const Web3Provider: FC<Web3ProviderProps> = ({
       account,
       handler,
       toggleWalletModal,
-      addOrderToDB,
     });
-  }, [library, chainId, account, handler, toggleWalletModal, addOrderToDB]);
+  }, [library, chainId, account, handler, toggleWalletModal]);
 
   return (
     <Web3Context.Provider

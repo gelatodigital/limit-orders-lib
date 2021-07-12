@@ -34,7 +34,6 @@ export function GelatoProvider({
   toggleWalletModal,
   useDefaultTheme = true,
   useDarkMode = true,
-  addOrderToDB,
 }: {
   chainId: number | undefined;
   library: any | undefined;
@@ -44,11 +43,6 @@ export function GelatoProvider({
   useDefaultTheme?: boolean;
   useDarkMode?: boolean;
   children?: React.ReactNode;
-  addOrderToDB?: (
-    chainId: number,
-    account: string,
-    order: Order
-  ) => Promise<boolean>;
 }) {
   return useDefaultTheme ? (
     <ThemeProvider useDarkMode={useDarkMode}>
@@ -58,7 +52,6 @@ export function GelatoProvider({
         account={account}
         handler={handler}
         toggleWalletModal={toggleWalletModal}
-        addOrderToDB={addOrderToDB}
       >
         <ThemedGlobalStyle />
         <ListsUpdater />
@@ -75,7 +68,6 @@ export function GelatoProvider({
       account={account}
       handler={handler}
       toggleWalletModal={toggleWalletModal}
-      addOrderToDB={addOrderToDB}
     >
       <ListsUpdater />
       <ApplicationUpdater />

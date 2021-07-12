@@ -37,7 +37,7 @@ export interface GelatoLimitOrdersHandlers {
 }
 
 export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandlers {
-  const { chainId, account, addOrderToDB } = useWeb3();
+  const { chainId, account } = useWeb3();
 
   const gelatoLimitOrders = useGelatoLimitOrdersLib();
 
@@ -107,17 +107,6 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
     const now = Math.round(Date.now() / 1000);
 
-    try {
-      if (addOrderToDB)
-        await addOrderToDB(chainId, account, {
-          ...order,
-          createdTxHash: tx?.hash.toLowerCase(),
-          witness,
-          status: "open",
-          updatedAt: now.toString(),
-        } as Order);
-    } catch (e) {}
-
     addTransaction(tx, {
       summary: `Order submission: Swap ${formattedAmounts.input} ${
         inputCurrency.symbol
@@ -148,7 +137,6 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     rateType,
     account,
     gasPrice,
-    addOrderToDB,
   ]);
 
   const handleLimitOrderCancellation = useCallback(
