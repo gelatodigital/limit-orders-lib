@@ -22,6 +22,7 @@ import {
   getExplorerLink,
 } from "../../../utils/getExplorerLink";
 import TradePrice from "../../order/TradePrice";
+import useGelatoLimitOrdersLib from "../../../hooks/gelato/useGelatoLimitOrdersLib";
 
 const handleColorType = (status: string, theme: DefaultTheme) => {
   switch (status) {
@@ -183,10 +184,9 @@ export default function OrderCard({ order }: { order: Order }) {
     setShowCurrentPriceInverted,
   ] = useState<boolean>(true);
 
-  const {
-    handleLimitOrderCancellation,
-    library: gelatoLibrary,
-  } = useGelatoLimitOrdersHandlers();
+  const { handleLimitOrderCancellation } = useGelatoLimitOrdersHandlers();
+
+  const gelatoLibrary = useGelatoLimitOrdersLib();
 
   const inputToken = useCurrency(order.inputToken);
   const outputToken = useCurrency(order.outputToken);
@@ -206,7 +206,7 @@ export default function OrderCard({ order }: { order: Order }) {
         : gelatoLibrary && chainId && order.minReturn
         ? isEthereumChain(chainId)
           ? order.minReturn
-          : gelatoLibrary.getRawMinReturn(order.minReturn)
+          : gelatoLibrary.getAdjustedMinReturn(order.minReturn)
         : undefined,
     [chainId, gelatoLibrary, order.adjustedMinReturn, order.minReturn]
   );

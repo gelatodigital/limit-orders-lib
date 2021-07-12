@@ -2,7 +2,7 @@ import { MaxUint256 } from "@ethersproject/constants";
 import { TransactionResponse } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 
-import { CurrencyAmount, Percent, Currency } from "@uniswap/sdk-core";
+import { CurrencyAmount, Currency } from "@uniswap/sdk-core";
 import { useCallback, useMemo } from "react";
 import {
   useTransactionAdder,
@@ -11,6 +11,7 @@ import {
 import { useTokenContract } from "./useContract";
 import { useWeb3 } from "../web3";
 import { useTokenAllowance } from "./useTokenAllowance";
+import useGelatoLimitOrdersLib from "./gelato/useGelatoLimitOrdersLib";
 
 export enum ApprovalState {
   UNKNOWN = "UNKNOWN",
@@ -130,10 +131,9 @@ export function useApproveCallback(
 export function useApproveCallbackFromInputCurrencyAmount(
   currencyAmountIn: CurrencyAmount<Currency> | undefined
 ) {
-  const { chainId } = useWeb3();
-
+  const gelatoLibrary = useGelatoLimitOrdersLib();
   return useApproveCallback(
     currencyAmountIn,
-    chainId === 3 ? "0x9c06FF386779cC2269d482bceCF2378a4fF5cB90" : undefined
+    gelatoLibrary?.erc20OrderRouter.address ?? undefined
   );
 }

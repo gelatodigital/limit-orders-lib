@@ -1,10 +1,5 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { useCallback, useMemo } from "react";
-import {
-  ChainId,
-  GelatoLimitOrders,
-  Order,
-} from "@gelatonetwork/limit-orders-lib";
+import { useCallback } from "react";
+import { GelatoLimitOrders, Order } from "@gelatonetwork/limit-orders-lib";
 import {
   useDerivedOrderInfo,
   useOrderActionHandlers,
@@ -19,6 +14,7 @@ import { useWeb3 } from "../../web3";
 import { useTransactionAdder } from "../../state/gtransactions/hooks";
 import useGasPrice from "../useGasPrice";
 import { BigNumber } from "ethers";
+import useGelatoLimitOrdersLib from "./useGelatoLimitOrdersLib";
 
 export interface GelatoLimitOrdersHandlers {
   handleLimitOrderSubmission: () => Promise<string | undefined>;
@@ -38,31 +34,19 @@ export interface GelatoLimitOrdersHandlers {
   ) => void;
   handleSwitchTokens: () => void;
   handleRateType: () => void;
-  library: GelatoLimitOrders | undefined;
 }
 
 export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandlers {
-  const { chainId, library, account, handler, addOrderToDB } = useWeb3();
+  const { chainId, account, addOrderToDB } = useWeb3();
 
-  const gelatoLimitOrders = useMemo(() => {
-    try {
-      return chainId && library
-        ? new GelatoLimitOrders(
-            chainId as ChainId,
-            library?.getSigner(),
-            handler
-          )
-        : undefined;
-    } catch (error) {
-      console.error(
-        `Could not instantiate GelatoLimitOrders: ${error.message}`
-      );
-      return undefined;
-    }
-  }, [chainId, library, handler]);
+  const gelatoLimitOrders = useGelatoLimitOrdersLib();
 
-  const { currencies, parsedAmounts, formattedAmounts, rawAmounts } =
-    useDerivedOrderInfo();
+  const {
+    currencies,
+    parsedAmounts,
+    formattedAmounts,
+    rawAmounts,
+  } = useDerivedOrderInfo();
 
   const addTransaction = useTransactionAdder();
 
@@ -70,8 +54,12 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gasPrice = useGasPrice();
 
-  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
-    useOrderActionHandlers();
+  const {
+    onSwitchTokens,
+    onCurrencySelection,
+    onUserInput,
+    onChangeRateType,
+  } = useOrderActionHandlers();
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
@@ -109,14 +97,17 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       throw new Error("No signer");
     }
 
-    const { witness, payload, order } =
-      await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-        inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
-        outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
-        rawAmounts.input,
-        rawAmounts.output,
-        account
-      );
+    const {
+      witness,
+      payload,
+      order,
+    } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+      inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
+      outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
+      rawAmounts.input,
+      rawAmounts.output,
+      account
+    );
 
     const tx = await gelatoLimitOrders.signer.sendTransaction({
       to: payload.to,
@@ -295,6 +286,5 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     handleCurrencySelection,
     handleSwitchTokens,
     handleRateType,
-    library: gelatoLimitOrders,
   };
 }
