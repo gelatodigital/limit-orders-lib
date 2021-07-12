@@ -147,7 +147,10 @@ export class GelatoLimitOrders {
     slippage: string;
     gelatoFee: string;
   };
-  getRawMinReturn(minReturn: BigNumberish, extraSlippageBPS?: number): string;
+  getAdjustedMinReturn(
+    minReturn: BigNumberish,
+    extraSlippageBPS?: number
+  ): string;
   getExecutionPrice(
     inputAmount: BigNumberish,
     inputDecimals: number,
