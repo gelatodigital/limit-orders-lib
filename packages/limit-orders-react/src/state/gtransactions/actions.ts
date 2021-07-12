@@ -12,14 +12,15 @@ export interface SerializableTransactionReceipt {
   status?: number;
 }
 
-export type TransactionType = "submission" | "cancellation";
+export type TransactionType = "submission" | "cancellation" | "approval";
 
 export const addTransaction = createAction<{
   chainId: number;
   hash: string;
   from: string;
   type: TransactionType;
-  order: Order;
+  order?: Order;
+  approval?: { tokenAddress: string; spender: string };
   summary?: string;
 }>("gtransactions/addTransaction");
 export const clearAllTransactions = createAction<{ chainId: number }>(

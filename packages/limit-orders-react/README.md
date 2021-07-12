@@ -193,7 +193,6 @@ Note: You can also import the following hooks and functions from the library:
 
 ```typescript
 useGelatoLimitOrders(): {
-  library: GelatoLimitOrders | undefined;
   handlers: GelatoLimitOrdersHandlers;
   derivedOrderInfo: DerivedOrderInfo;
   orderState: OrderState;
@@ -217,7 +216,6 @@ useGelatoLimitOrdersHandlers(): {
   ) => void;
   handleSwitchTokens: () => void;
   handleRateType: () => void;
-  library: GelatoLimitOrders | undefined;
 }
 
 useGelatoLimitOrdersHistory(): {
@@ -225,6 +223,9 @@ useGelatoLimitOrdersHistory(): {
   cancelled: { pending: Order[]; confirmed: Order[] };
   executed: Order[];
 }
+
+useGelatoLimitOrdersLib(): GelatoLimitOrders | undefined;
+
 ```
 
 ### Need help? Want to add a new handler?
