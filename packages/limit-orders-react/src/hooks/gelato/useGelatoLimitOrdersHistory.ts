@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Order } from "@gelatonetwork/limit-orders-lib";
+import {
+  ChainId,
+  GelatoLimitOrders,
+  Order,
+  utils,
+} from "@gelatonetwork/limit-orders-lib";
 import { useWeb3 } from "../../web3";
 import { getLSOrders, saveOrder } from "../../utils/localStorageOrders";
 import useInterval from "../useInterval";
 import { useSelector } from "react-redux";
 import { AppState } from "../../state";
-import useGelatoLimitOrdersLib from "./useGelatoLimitOrdersLib";
 
 export interface GelatoLimitOrdersHistory {
   open: { pending: Order[]; confirmed: Order[] };
@@ -17,9 +21,24 @@ function newOrdersFirst(a: Order, b: Order) {
 }
 
 export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory {
-  const { account, chainId } = useWeb3();
+  const { account, chainId, library, handler } = useWeb3();
 
-  const gelatoLimitOrders = useGelatoLimitOrdersLib();
+  const gelatoLimitOrders = useMemo(() => {
+    try {
+      return chainId && library
+        ? new GelatoLimitOrders(
+            chainId as ChainId,
+            library?.getSigner(),
+            handler
+          )
+        : undefined;
+    } catch (error) {
+      console.error(
+        `Could not instantiate GelatoLimitOrders: ${error.message}`
+      );
+      return undefined;
+    }
+  }, [chainId, library, handler]);
 
   const [openOrders, setOpenOrders] = useState<{
     pending: Order[];

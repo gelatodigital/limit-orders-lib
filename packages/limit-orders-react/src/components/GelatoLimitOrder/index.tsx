@@ -8,28 +8,17 @@ import {
 import { Trade } from "@uniswap/v2-sdk";
 import { AdvancedSwapDetails } from "../order/AdvancedSwapDetails";
 import UnsupportedCurrencyFooter from "../order/UnsupportedCurrencyFooter";
-import { MouseoverTooltip, MouseoverTooltipContent } from "../Tooltip";
-import React, { useCallback, useState, Fragment, useEffect } from "react";
-import {
-  ArrowDown,
-  Info,
-  Divide,
-  X,
-  CheckCircle,
-  HelpCircle,
-} from "react-feather";
+import { MouseoverTooltipContent } from "../Tooltip";
+import React, { useCallback, useState, Fragment } from "react";
+import { ArrowDown, Info, Divide, X } from "react-feather";
 import { Text } from "rebass";
 import styled from "styled-components";
-import {
-  ButtonConfirmed,
-  ButtonError,
-  ButtonLight,
-  ButtonPrimary,
-} from "../Button";
+import { ButtonError, ButtonLight, ButtonPrimary } from "../Button";
 import { GreyCard } from "../Card";
 import { AutoColumn } from "../Column";
 import CurrencyInputPanel from "../CurrencyInputPanel";
-import Row, { AutoRow, RowFixed } from "../Row";
+import Row, { RowFixed } from "../Row";
+import confirmPriceImpactWithoutFee from "../order/confirmPriceImpactWithoutFee";
 import ConfirmSwapModal from "../order/ConfirmSwapModal";
 import {
   ArrowWrapper,
@@ -53,13 +42,6 @@ import { useWeb3 } from "../../web3";
 import useTheme from "../../hooks/useTheme";
 import useGasOverhead from "../../hooks/useGasOverhead";
 import PoweredByGelato from "../../assets/svg/poweredbygelato_transparent.svg";
-import {
-  ApprovalState,
-  useApproveCallbackFromInputCurrencyAmount,
-} from "../../hooks/useApproveCallback";
-import useIsArgentWallet from "../../hooks/useIsArgentWallet";
-import Loader from "../Loader";
-import CurrencyLogo from "../CurrencyLogo";
 
 const StyledInfo = styled(Info)`
   opacity: 0.4;
@@ -176,21 +158,6 @@ export default function GelatoLimitOrder() {
     txHash: undefined,
   });
 
-  const [
-    approvalState,
-    approveCallback,
-  ] = useApproveCallbackFromInputCurrencyAmount(parsedAmounts.input);
-
-  // check if user has gone through approval process, used to show two step buttons, reset on token change
-  const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false);
-
-  // mark when a user has submitted an approval, reset onTokenSelection for input field
-  useEffect(() => {
-    if (approvalState === ApprovalState.PENDING) {
-      setApprovalSubmitted(true);
-    }
-  }, [approvalState, approvalSubmitted]);
-
   const allowedSlippage = new Percent(40, 10_000);
   const userHasSpecifiedInputOutput = Boolean(
     (independentField === Field.INPUT || independentField === Field.OUTPUT) &&
@@ -214,6 +181,10 @@ export default function GelatoLimitOrder() {
 
   const handleSwap = useCallback(() => {
     if (!handleLimitOrderSubmission) {
+      return;
+    }
+
+    if (priceImpact && !confirmPriceImpactWithoutFee(priceImpact)) {
       return;
     }
 
@@ -244,7 +215,7 @@ export default function GelatoLimitOrder() {
           txHash: undefined,
         });
       });
-  }, [handleLimitOrderSubmission, tradeToConfirm, showConfirm]);
+  }, [priceImpact, handleLimitOrderSubmission, tradeToConfirm, showConfirm]);
 
   const [showInverted, setShowInverted] = useState<boolean>(false);
 
@@ -299,19 +270,6 @@ export default function GelatoLimitOrder() {
     realExecutionPrice,
     realExecutionPriceAsString,
   } = useGasOverhead(parsedAmounts.input, parsedAmounts.output, rateType);
-
-  const isArgentWallet = useIsArgentWallet();
-
-  const showApproveFlow =
-    !isArgentWallet &&
-    !inputError &&
-    (approvalState === ApprovalState.NOT_APPROVED ||
-      approvalState === ApprovalState.PENDING ||
-      (approvalSubmitted && approvalState === ApprovalState.APPROVED));
-
-  const handleApprove = useCallback(async () => {
-    await approveCallback();
-  }, [approveCallback]);
 
   return (
     <Fragment>
@@ -467,83 +425,16 @@ export default function GelatoLimitOrder() {
                     )}
                   </TYPE.main>
                 </GreyCard>
-              ) : showApproveFlow ? (
-                <AutoRow style={{ flexWrap: "nowrap", width: "100%" }}>
-                  <AutoColumn style={{ width: "100%" }} gap="12px">
-                    <ButtonConfirmed
-                      onClick={handleApprove}
-                      disabled={
-                        approvalState !== ApprovalState.NOT_APPROVED ||
-                        approvalSubmitted
-                      }
-                      width="100%"
-                      altDisabledStyle={approvalState === ApprovalState.PENDING} // show solid button while waiting
-                      confirmed={approvalState === ApprovalState.APPROVED}
-                    >
-                      <AutoRow
-                        justify="space-between"
-                        style={{ flexWrap: "nowrap" }}
-                      >
-                        <span style={{ display: "flex", alignItems: "center" }}>
-                          <CurrencyLogo
-                            currency={currencies.input}
-                            size={"20px"}
-                            style={{ marginRight: "8px", flexShrink: 0 }}
-                          />
-                          {/* we need to shorten this string on mobile */}
-                          {approvalState === ApprovalState.APPROVED
-                            ? `You can now use your ${currencies.input?.symbol} to place orders.`
-                            : `Allow the Gelato Limit Orders to use your 
-                              ${currencies.input?.symbol}`}
-                        </span>
-                        {approvalState === ApprovalState.PENDING ? (
-                          <Loader stroke="white" />
-                        ) : approvalSubmitted &&
-                          approvalState === ApprovalState.APPROVED ? (
-                          <CheckCircle size="20" color={theme.green1} />
-                        ) : (
-                          <MouseoverTooltip
-                            text={`You must give the Gelato Limit Orders smart contracts
-                                permission to use your 
-                                ${currencies.input?.symbol}. You only have to do
-                                this once per token.`}
-                          >
-                            <HelpCircle
-                              size="20"
-                              color={"white"}
-                              style={{ marginLeft: "8px" }}
-                            />
-                          </MouseoverTooltip>
-                        )}
-                      </AutoRow>
-                    </ButtonConfirmed>
-                    <ButtonError
-                      onClick={() => {
-                        setSwapState({
-                          tradeToConfirm: trade,
-                          attemptingTxn: false,
-                          swapErrorMessage: undefined,
-                          showConfirm: true,
-                          txHash: undefined,
-                        });
-                      }}
-                      id="limit-order-button"
-                      disabled={
-                        !isValid || approvalState !== ApprovalState.APPROVED
-                      }
-                      error={false}
-                    >
-                      <Text fontSize={20} fontWeight={500}>
-                        {inputError ? inputError : `Place order`}
-                      </Text>
-                    </ButtonError>
-                  </AutoColumn>
-                </AutoRow>
               ) : (
+                // priceImpact?.greaterThan("0") ? (
+                //   <GreyCard style={{ textAlign: "center" }}>
+                //     <TYPE.main mb="4px">{`Only possible to place orders above market rate`}</TYPE.main>
+                //   </GreyCard>
+                // ) :
                 <ButtonError
                   onClick={() => {
                     setSwapState({
-                      tradeToConfirm: trade,
+                      tradeToConfirm: trade as any,
                       attemptingTxn: false,
                       swapErrorMessage: undefined,
                       showConfirm: true,

@@ -5,7 +5,6 @@ import { CurrencyAmount } from "@uniswap/sdk-core";
 import { formatUnits } from "ethers/lib/utils";
 import React, { useMemo } from "react";
 import { useGelatoLimitOrders } from "../../hooks/gelato";
-import useGelatoLimitOrdersLib from "../../hooks/gelato/useGelatoLimitOrdersLib";
 import useGasOverhead from "../../hooks/useGasOverhead";
 import useTheme from "../../hooks/useTheme";
 import { Rate } from "../../state/gorder/actions";
@@ -19,11 +18,10 @@ export function AdvancedSwapDetails() {
   const theme = useTheme();
   const { chainId } = useWeb3();
   const {
+    library,
     derivedOrderInfo: { parsedAmounts, rawAmounts },
     orderState: { rateType },
   } = useGelatoLimitOrders();
-
-  const library = useGelatoLimitOrdersLib();
 
   const { gasPrice, realExecutionPriceAsString } = useGasOverhead(
     parsedAmounts.input,
