@@ -1,6 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { Order } from "@gelatonetwork/limit-orders-lib";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { useWeb3 } from "../../web3";
@@ -15,6 +15,7 @@ export function useTransactionAdder(): (
     summary?: string;
     order?: Order;
     type: TransactionType;
+    approval?: { tokenAddress: string; spender: string };
   }
 ) => void {
   const { chainId, account } = useWeb3();
@@ -27,15 +28,16 @@ export function useTransactionAdder(): (
         summary,
         type,
         order,
+        approval,
       }: {
         summary?: string;
         order?: Order;
         type: TransactionType;
+        approval?: { tokenAddress: string; spender: string };
       } = { type: "submission" }
     ) => {
       if (!account) return;
       if (!chainId) return;
-      if (!order) return;
 
       const { hash } = response;
       if (!hash) {
@@ -48,6 +50,7 @@ export function useTransactionAdder(): (
           order,
           chainId,
           type,
+          approval,
           summary,
         })
       );
@@ -81,4 +84,33 @@ export function useIsTransactionPending(transactionHash?: string): boolean {
  */
 export function isTransactionRecent(tx: TransactionDetails): boolean {
   return new Date().getTime() - tx.addedTime < 86_400_000;
+}
+
+// returns whether a token has a pending approval transaction
+export function useHasPendingApproval(
+  tokenAddress: string | undefined,
+  spender: string | undefined
+): boolean {
+  const allTransactions = useAllTransactions();
+  return useMemo(
+    () =>
+      typeof tokenAddress === "string" &&
+      typeof spender === "string" &&
+      Object.keys(allTransactions).some((hash) => {
+        const tx = allTransactions[hash];
+        if (!tx) return false;
+        if (tx.receipt) {
+          return false;
+        } else {
+          const approval = tx.approval;
+          if (!approval) return false;
+          return (
+            approval.spender === spender &&
+            approval.tokenAddress === tokenAddress &&
+            isTransactionRecent(tx)
+          );
+        }
+      }),
+    [allTransactions, spender, tokenAddress]
+  );
 }

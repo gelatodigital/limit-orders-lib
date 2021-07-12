@@ -97,6 +97,10 @@ export class GelatoLimitOrders {
     return this._gelatoLimitOrders;
   }
 
+  get erc20OrderRouter(): ERC20OrderRouter {
+    return this._erc20OrderRouter;
+  }
+
   constructor(chainId: ChainId, signerOrProvider?: Signer, handler?: Handler) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {
       throw new Error("Invalid chainId and handler");
@@ -134,10 +138,21 @@ export class GelatoLimitOrders {
       : undefined;
 
     this._abiEncoder = new utils.AbiCoder();
-    this._erc20OrderRouter = new Contract(
-      GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
-      ERC20OrderRouter__factory.createInterface()
-    ) as ERC20OrderRouter;
+
+    this._erc20OrderRouter = this._signer
+      ? ERC20OrderRouter__factory.connect(
+          GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
+          this._signer
+        )
+      : this._provider
+      ? ERC20OrderRouter__factory.connect(
+          GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
+          this._provider
+        )
+      : (new Contract(
+          GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
+          ERC20OrderRouter__factory.createInterface()
+        ) as ERC20OrderRouter);
   }
 
   public async encodeLimitOrderSubmission(
