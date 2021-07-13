@@ -103,7 +103,7 @@ export default function LimitOrdersHistory() {
 
   const allOpenOrders = useMemo(
     () => [...open.pending, ...open.confirmed, ...cancelled.pending],
-    [open.pending, open.confirmed, cancelled.pending]
+    [open.pending, cancelled.pending, open.confirmed]
   );
 
   const allCancelledOrders = useMemo(() => cancelled.confirmed, [

@@ -180,8 +180,9 @@ export class GelatoLimitOrders {
     minReturnToBeParsed: BigNumberish,
     owner: string
   ): Promise<TransactionDataWithSecret> {
-    const randomSecret = utils.hexlify(utils.randomBytes(13)).replace("0x", "");
-    const fullSecret = `0x4200696e652e66696e616e63652020d83ddc09${randomSecret}`;
+    const randomSecret = utils.hexlify(utils.randomBytes(24)).replace("0x", "");
+    // 0x67656c61746f6e6574776f726b = gelatonetwork in hex
+    const fullSecret = `0x67656c61746f6e6574776f726b${randomSecret}`;
 
     const { privateKey: secret, address: witness } = new Wallet(fullSecret);
 
@@ -334,6 +335,18 @@ export class GelatoLimitOrders {
       order.witness,
       order.data,
       { gasPrice, gasLimit: 500000 }
+    );
+  }
+
+  public async approveTokenAmount(
+    inputToken: string,
+    amount: BigNumberish
+  ): Promise<ContractTransaction> {
+    if (!this._signer) throw new Error("No signer");
+
+    return ERC20__factory.connect(inputToken, this._signer).approve(
+      this._erc20OrderRouter.address,
+      amount
     );
   }
 

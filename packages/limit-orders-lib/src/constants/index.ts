@@ -44,7 +44,7 @@ export const NETWORK_HANDLERS = {
   [CHAIN_ID.FANTOM]: ["spiritswap", "spookyswap"],
 };
 
-export const SUBGRAPH_URL = {
+export const OLD_SUBGRAPH_URL = {
   [CHAIN_ID.MAINNET]:
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders",
   [CHAIN_ID.ROPSTEN]:
@@ -53,6 +53,17 @@ export const SUBGRAPH_URL = {
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-polygon",
   [CHAIN_ID.FANTOM]:
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-fantom",
+};
+
+export const SUBGRAPH_URL = {
+  [CHAIN_ID.MAINNET]:
+    "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-ii",
+  [CHAIN_ID.ROPSTEN]:
+    "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-ropsten",
+  [CHAIN_ID.MATIC]:
+    "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-polygon-ii",
+  [CHAIN_ID.FANTOM]:
+    "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-fantom-ii",
 };
 
 export const GELATO_LIMIT_ORDERS_ADDRESS = {
@@ -70,10 +81,10 @@ export const GELATO_LIMIT_ORDERS_MODULE_ADDRESS = {
 };
 
 export const GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER = {
-  [CHAIN_ID.MAINNET]: "",
+  [CHAIN_ID.MAINNET]: "0x5fb00386558ccc219e51b69d8e963ef20b0c267a",
   [CHAIN_ID.ROPSTEN]: "0x9c06ff386779cc2269d482bcecf2378a4ff5cb90",
-  [CHAIN_ID.MATIC]: "",
-  [CHAIN_ID.FANTOM]: "",
+  [CHAIN_ID.MATIC]: "0x0c2c2963a4353ffd839590f7cb1e783688378814",
+  [CHAIN_ID.FANTOM]: "0x59e61b95f20e940ac777e88fa2dfa0a6a4c40fa0",
 };
 
 export const NATIVE_TOKEN_TICKER = {
