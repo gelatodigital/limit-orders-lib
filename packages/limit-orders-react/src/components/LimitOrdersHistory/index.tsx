@@ -102,7 +102,7 @@ export default function LimitOrdersHistory() {
   const fixedListRef = useRef<FixedSizeList>();
 
   const allOpenOrders = useMemo(
-    () => [...open.pending, ...open.confirmed, ...cancelled.pending],
+    () => [...cancelled.pending, ...open.pending, ...open.confirmed],
     [open.pending, cancelled.pending, open.confirmed]
   );
 
