@@ -180,7 +180,7 @@ export class GelatoLimitOrders {
     minReturnToBeParsed: BigNumberish,
     owner: string
   ): Promise<TransactionDataWithSecret> {
-    const randomSecret = utils.hexlify(utils.randomBytes(24)).replace("0x", "");
+    const randomSecret = utils.hexlify(utils.randomBytes(19)).replace("0x", "");
     // 0x67656c61746f6e6574776f726b = gelatonetwork in hex
     const fullSecret = `0x67656c61746f6e6574776f726b${randomSecret}`;
 
