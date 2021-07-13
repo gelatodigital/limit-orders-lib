@@ -12,6 +12,7 @@ import { useTokenContract } from "./useContract";
 import { useWeb3 } from "../web3";
 import { useTokenAllowance } from "./useTokenAllowance";
 import useGelatoLimitOrdersLib from "./gelato/useGelatoLimitOrdersLib";
+import { GELATO_LIMIT_ORDERS_MODULE_ADDRESS } from "@gelatonetwork/limit-orders-lib/dist/constants";
 
 export enum ApprovalState {
   UNKNOWN = "UNKNOWN",
@@ -132,6 +133,7 @@ export function useApproveCallbackFromInputCurrencyAmount(
   currencyAmountIn: CurrencyAmount<Currency> | undefined
 ) {
   const gelatoLibrary = useGelatoLimitOrdersLib();
+
   return useApproveCallback(
     currencyAmountIn,
     gelatoLibrary?.erc20OrderRouter.address ?? undefined
