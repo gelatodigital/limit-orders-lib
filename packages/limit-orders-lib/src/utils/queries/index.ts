@@ -246,10 +246,9 @@ export const queryCancelledOrders = async (
 const _getUniqueOrdersWithHandler = (allOrders: Order[]): Order[] =>
   [...new Map(allOrders.map((order) => [order.id, order])).values()].map(
     (order) => {
-      const hasHandler = order.data.length === 194;
-
       let handler;
       try {
+        const hasHandler = order.data.length === 194;
         handler = hasHandler ? "0x" + order.data.substr(154, 194) : null;
       } catch (e) {
         handler = null;

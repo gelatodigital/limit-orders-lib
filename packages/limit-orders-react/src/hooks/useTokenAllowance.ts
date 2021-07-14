@@ -15,7 +15,10 @@ export function useTokenAllowance(
   const allowance = useSingleCallResult(
     (contract as unknown) as Contract,
     "allowance",
-    inputs
+    inputs,
+    {
+      blocksPerFetch: 1,
+    }
   ).result;
 
   return useMemo(
