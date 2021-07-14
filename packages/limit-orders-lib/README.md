@@ -5,6 +5,9 @@
 
 Place limit buy and sell orders on Ethereum, Polygon and Fantom using Gelato Network.
 
+> :warning: :warning: :warning: **Warning** :warning: :warning: :warning: :
+> Version 2.0.0 introduced new features and our system changed to an approval/transferFrom flow. You should use the latest version available (>= 2.0.0). If you are using an old version you should update to the latest version immediately. Versions bellow 2.0.0 are being deprecated.
+
 ## [Demo - Sorbet Finance](https://www.sorbet.finance)
 
 ## Installation
@@ -34,9 +37,13 @@ const gelatoLimitOrders = new GelatoLimitOrders(
 );
 ```
 
+Note: Use `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` when referring to native blockchain asset (i.e MATIC, FTM or ETH)
+
 ### Examples
 
 1. Submit a limit order
+
+Note: To submit a order with an ERC20 as input you must first approve the `erc20OrderRouter`. You can get its address via `gelatoLimitOrders.erc20OrderRouter.address` or call `gelatoLimitOrders.approveTokenAmount(inputToken, inputAmount)`.
 
 ```typescript
 // Token to sell
@@ -53,6 +60,8 @@ const minReturn = ethers.utils.parseEther("1", "18");
 
 // Address of user who places the order (must be same as signer address)
 const userAddress = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B";
+
+await gelatoLimitOrders.approveTokenAmount(inputToken, inputAmount);
 
 const tx = await gelatoLimitOrders.submitLimitOrder(
   inputToken,
@@ -74,6 +83,8 @@ const tx = await gelatoLimitOrders.cancelLimitOrder(
 
 Note: to display the minimum amount returned (i.e the output amount of the order) you should always use the `adjustedMinReturn` field of the order.
 
+Note 2: If you instantiated the library by passing an `handler`, all orders fetched will be filtered accordingly. Otherwise, orders will not be filtered.
+
 ```javascript
 const allOrders = await gelatoLimitOrders.getOrders(userAddress);
 ```
@@ -82,16 +93,9 @@ const allOrders = await gelatoLimitOrders.getOrders(userAddress);
 
 ```typescript
 export class GelatoLimitOrders {
-  private _chainId;
-  private _provider;
-  private _signer;
-  private _gelatoLimitOrders;
-  private _moduleAddress;
-  private _subgraphUrl;
-  private _handlerAddress?;
-  private _handler?;
   static slippageBPS: number;
   static gelatoFeeBPS: number;
+
   get chainId(): ChainId;
   get signer(): Signer | undefined;
   get provider(): Provider | undefined;
@@ -100,6 +104,7 @@ export class GelatoLimitOrders {
   get handlerAddress(): string | undefined;
   get moduleAddress(): string;
   get contract(): GelatoLimitOrdersContract;
+  get erc20OrderRouter(): ERC20OrderRouter;
   constructor(chainId: ChainId, signerOrProvider?: Signer, handler?: Handler);
   encodeLimitOrderSubmission(
     inputToken: string,
@@ -131,6 +136,10 @@ export class GelatoLimitOrders {
     checkIsActiveOrder?: boolean,
     gasPrice?: BigNumberish
   ): Promise<ContractTransaction>;
+  approveTokenAmount(
+    inputToken: string,
+    amount: BigNumberish
+  ): Promise<ContractTransaction>;
   isActiveOrder(order: Order): Promise<boolean>;
   getExchangeRate(
     inputValue: BigNumberish,
@@ -147,7 +156,10 @@ export class GelatoLimitOrders {
     slippage: string;
     gelatoFee: string;
   };
-  getRawMinReturn(minReturn: BigNumberish, extraSlippageBPS?: number): string;
+  getAdjustedMinReturn(
+    minReturn: BigNumberish,
+    extraSlippageBPS?: number
+  ): string;
   getExecutionPrice(
     inputAmount: BigNumberish,
     inputDecimals: number,

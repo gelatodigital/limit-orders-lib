@@ -14,6 +14,7 @@ import {
   useGelatoLimitOrdersHandlers,
 } from "./hooks/gelato";
 import useGelatoLimitOrdersHistory from "./hooks/gelato/useGelatoLimitOrdersHistory";
+import useGelatoLimitOrdersLib from "./hooks/gelato/useGelatoLimitOrdersLib";
 import GelatoLimitOrderPanel from "./components/GelatoLimitOrder";
 import GelatoLimitOrdersHistoryPanel from "./components/LimitOrdersHistory";
 import { Web3Provider } from "./web3";
@@ -23,6 +24,10 @@ import { useCurrency } from "./hooks/Tokens";
 import { useCurrencyBalances } from "./hooks/Balances";
 import { useTradeExactOut, useTradeExactIn } from "./hooks/useTrade";
 import ThemeProvider, { ThemedGlobalStyle } from "./theme";
+import {
+  ApprovalState,
+  useApproveCallbackFromInputCurrencyAmount,
+} from "./hooks/useApproveCallback";
 
 export function GelatoProvider({
   chainId,
@@ -33,7 +38,6 @@ export function GelatoProvider({
   toggleWalletModal,
   useDefaultTheme = true,
   useDarkMode = true,
-  addOrderToDB,
 }: {
   chainId: number | undefined;
   library: any | undefined;
@@ -43,11 +47,6 @@ export function GelatoProvider({
   useDefaultTheme?: boolean;
   useDarkMode?: boolean;
   children?: React.ReactNode;
-  addOrderToDB?: (
-    chainId: number,
-    account: string,
-    order: Order
-  ) => Promise<boolean>;
 }) {
   return useDefaultTheme ? (
     <ThemeProvider useDarkMode={useDarkMode}>
@@ -57,7 +56,6 @@ export function GelatoProvider({
         account={account}
         handler={handler}
         toggleWalletModal={toggleWalletModal}
-        addOrderToDB={addOrderToDB}
       >
         <ThemedGlobalStyle />
         <ListsUpdater />
@@ -74,7 +72,6 @@ export function GelatoProvider({
       account={account}
       handler={handler}
       toggleWalletModal={toggleWalletModal}
-      addOrderToDB={addOrderToDB}
     >
       <ListsUpdater />
       <ApplicationUpdater />
@@ -89,6 +86,7 @@ export {
   useGelatoLimitOrders,
   useGelatoLimitOrdersHandlers,
   useGelatoLimitOrdersHistory,
+  useGelatoLimitOrdersLib,
   useGasPrice,
   GelatoLimitOrderPanel,
   GelatoLimitOrdersHistoryPanel,
@@ -101,4 +99,6 @@ export {
   useTradeExactOut,
   useTradeExactIn,
   tryParseAmount,
+  ApprovalState,
+  useApproveCallbackFromInputCurrencyAmount,
 };

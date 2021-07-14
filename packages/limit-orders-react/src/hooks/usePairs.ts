@@ -5,6 +5,8 @@ import { useMultipleContractSingleData } from "../state/gmulticall/hooks";
 import { Currency, CurrencyAmount } from "@uniswap/sdk-core";
 import { Handler } from "@gelatonetwork/limit-orders-lib";
 import { Pair } from "../entities/pair";
+import { useWeb3 } from "../web3";
+import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI);
 
@@ -19,6 +21,8 @@ export function usePairs(
   currencies: [Currency | undefined, Currency | undefined][],
   handler?: Handler
 ): [PairState, Pair | null][] {
+  const { chainId } = useWeb3();
+
   const tokens = useMemo(
     () =>
       currencies.map(([currencyA, currencyB]) => [
@@ -41,7 +45,12 @@ export function usePairs(
   const results = useMultipleContractSingleData(
     pairAddresses,
     PAIR_INTERFACE,
-    "getReserves"
+    "getReserves",
+    undefined,
+    {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      blocksPerFetch: isEthereumChain(chainId!) ? 5 : 60,
+    }
   );
 
   return useMemo(() => {

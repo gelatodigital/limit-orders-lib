@@ -12,6 +12,7 @@ import { Signer } from "@ethersproject/abstract-signer";
 import {
   ETH_ADDRESS,
   GELATO_LIMIT_ORDERS_ADDRESS,
+  GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER,
   GELATO_LIMIT_ORDERS_MODULE_ADDRESS,
   HANDLERS_ADDRESSES,
   NETWORK_HANDLERS,
@@ -20,6 +21,9 @@ import {
   TWO_BPS_GELATO_FEE,
 } from "../constants";
 import {
+  ERC20OrderRouter,
+  ERC20OrderRouter__factory,
+  ERC20__factory,
   GelatoLimitOrders as GelatoLimitOrdersContract,
   GelatoLimitOrders__factory,
 } from "../contracts/types";
@@ -51,6 +55,7 @@ export class GelatoLimitOrders {
   private _provider: Provider | undefined;
   private _signer: Signer | undefined;
   private _gelatoLimitOrders: GelatoLimitOrdersContract;
+  private _erc20OrderRouter: ERC20OrderRouter;
   private _moduleAddress: string;
   private _subgraphUrl: string;
   private _abiEncoder: utils.AbiCoder;
@@ -92,6 +97,10 @@ export class GelatoLimitOrders {
     return this._gelatoLimitOrders;
   }
 
+  get erc20OrderRouter(): ERC20OrderRouter {
+    return this._erc20OrderRouter;
+  }
+
   constructor(chainId: ChainId, signerOrProvider?: Signer, handler?: Handler) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {
       throw new Error("Invalid chainId and handler");
@@ -129,6 +138,21 @@ export class GelatoLimitOrders {
       : undefined;
 
     this._abiEncoder = new utils.AbiCoder();
+
+    this._erc20OrderRouter = this._signer
+      ? ERC20OrderRouter__factory.connect(
+          GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
+          this._signer
+        )
+      : this._provider
+      ? ERC20OrderRouter__factory.connect(
+          GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
+          this._provider
+        )
+      : (new Contract(
+          GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
+          ERC20OrderRouter__factory.createInterface()
+        ) as ERC20OrderRouter);
   }
 
   public async encodeLimitOrderSubmission(
@@ -156,8 +180,9 @@ export class GelatoLimitOrders {
     minReturnToBeParsed: BigNumberish,
     owner: string
   ): Promise<TransactionDataWithSecret> {
-    const randomSecret = utils.hexlify(utils.randomBytes(13)).replace("0x", "");
-    const fullSecret = `0x4200696e652e66696e616e63652020d83ddc09${randomSecret}`;
+    const randomSecret = utils.hexlify(utils.randomBytes(19)).replace("0x", "");
+    // 0x67656c61746f6e6574776f726b = gelatonetwork in hex
+    const fullSecret = `0x67656c61746f6e6574776f726b${randomSecret}`;
 
     const { privateKey: secret, address: witness } = new Wallet(fullSecret);
 
@@ -313,6 +338,18 @@ export class GelatoLimitOrders {
     );
   }
 
+  public async approveTokenAmount(
+    inputToken: string,
+    amount: BigNumberish
+  ): Promise<ContractTransaction> {
+    if (!this._signer) throw new Error("No signer");
+
+    return ERC20__factory.connect(inputToken, this._signer).approve(
+      this._erc20OrderRouter.address,
+      amount
+    );
+  }
+
   public async isActiveOrder(order: Order): Promise<boolean> {
     if (!this._provider) throw new Error("No provider");
     if (!this._gelatoLimitOrders)
@@ -399,7 +436,7 @@ export class GelatoLimitOrders {
     };
   }
 
-  public getRawMinReturn(
+  public getAdjustedMinReturn(
     minReturn: BigNumberish,
     extraSlippageBPS?: number
   ): string {
@@ -414,11 +451,11 @@ export class GelatoLimitOrders {
 
     const fees = gelatoFee.add(slippage);
 
-    const rawMinReturn = BigNumber.from(minReturn)
+    const adjustedMinReturn = BigNumber.from(minReturn)
       .mul(10000)
       .div(BigNumber.from(10000).sub(fees));
 
-    return rawMinReturn.toString();
+    return adjustedMinReturn.toString();
   }
 
   public getExecutionPrice(
@@ -453,7 +490,7 @@ export class GelatoLimitOrders {
         ...order,
         adjustedMinReturn: isEthereumNetwork
           ? order.minReturn
-          : this.getRawMinReturn(order.minReturn),
+          : this.getAdjustedMinReturn(order.minReturn),
       }))
       .filter((order) =>
         this._handler ? order.handler === this._handlerAddress : true
@@ -468,7 +505,7 @@ export class GelatoLimitOrders {
         ...order,
         adjustedMinReturn: isEthereumNetwork
           ? order.minReturn
-          : this.getRawMinReturn(order.minReturn),
+          : this.getAdjustedMinReturn(order.minReturn),
       }))
       .filter((order) =>
         this._handler ? order.handler === this._handlerAddress : true
@@ -483,7 +520,7 @@ export class GelatoLimitOrders {
         ...order,
         adjustedMinReturn: isEthereumNetwork
           ? order.minReturn
-          : this.getRawMinReturn(order.minReturn),
+          : this.getAdjustedMinReturn(order.minReturn),
       }))
       .filter((order) =>
         this._handler ? order.handler === this._handlerAddress : true
@@ -498,7 +535,7 @@ export class GelatoLimitOrders {
         ...order,
         adjustedMinReturn: isEthereumNetwork
           ? order.minReturn
-          : this.getRawMinReturn(order.minReturn),
+          : this.getAdjustedMinReturn(order.minReturn),
       }))
       .filter((order) =>
         this._handler ? order.handler === this._handlerAddress : true
@@ -513,7 +550,7 @@ export class GelatoLimitOrders {
         ...order,
         adjustedMinReturn: isEthereumNetwork
           ? order.minReturn
-          : this.getRawMinReturn(order.minReturn),
+          : this.getAdjustedMinReturn(order.minReturn),
       }))
       .filter((order) =>
         this._handler ? order.handler === this._handlerAddress : true
@@ -536,7 +573,7 @@ export class GelatoLimitOrders {
     witness: string,
     amount: BigNumberish,
     minReturn: BigNumberish,
-    privateKey: string
+    secret: string
   ): Promise<TransactionData> {
     if (!this._provider) throw new Error("No provider");
 
@@ -561,7 +598,7 @@ export class GelatoLimitOrders {
         owner,
         witness,
         encodedData,
-        privateKey
+        secret
       );
       data = this._gelatoLimitOrders.interface.encodeFunctionData(
         "depositEth",
@@ -570,17 +607,28 @@ export class GelatoLimitOrders {
       value = amount;
       to = this._gelatoLimitOrders.address;
     } else {
-      data = await this._gelatoLimitOrders.encodeTokenOrder(
-        this._moduleAddress,
+      const allowance = await ERC20__factory.connect(
         inputToken,
-        owner,
-        witness,
-        encodedData,
-        privateKey,
-        amount
+        this._provider
+      ).allowance(owner, this._erc20OrderRouter.address);
+
+      if (allowance.lt(amount))
+        throw new Error("Insufficient token allowance for placing order");
+
+      data = this._erc20OrderRouter.interface.encodeFunctionData(
+        "depositToken",
+        [
+          amount,
+          this._moduleAddress,
+          inputToken,
+          owner,
+          witness,
+          encodedData,
+          secret,
+        ]
       );
       value = constants.Zero;
-      to = inputToken;
+      to = this._erc20OrderRouter.address;
     }
 
     return { data, value, to };

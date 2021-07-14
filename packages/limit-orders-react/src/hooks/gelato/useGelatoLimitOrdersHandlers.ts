@@ -1,10 +1,5 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { useCallback, useMemo } from "react";
-import {
-  ChainId,
-  GelatoLimitOrders,
-  Order,
-} from "@gelatonetwork/limit-orders-lib";
+import { useCallback } from "react";
+import { Order } from "@gelatonetwork/limit-orders-lib";
 import {
   useDerivedOrderInfo,
   useOrderActionHandlers,
@@ -19,6 +14,7 @@ import { useWeb3 } from "../../web3";
 import { useTransactionAdder } from "../../state/gtransactions/hooks";
 import useGasPrice from "../useGasPrice";
 import { BigNumber } from "ethers";
+import useGelatoLimitOrdersLib from "./useGelatoLimitOrdersLib";
 
 export interface GelatoLimitOrdersHandlers {
   handleLimitOrderSubmission: () => Promise<string | undefined>;
@@ -38,28 +34,12 @@ export interface GelatoLimitOrdersHandlers {
   ) => void;
   handleSwitchTokens: () => void;
   handleRateType: () => void;
-  library: GelatoLimitOrders | undefined;
 }
 
 export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandlers {
-  const { chainId, library, account, handler, addOrderToDB } = useWeb3();
+  const { chainId, account } = useWeb3();
 
-  const gelatoLimitOrders = useMemo(() => {
-    try {
-      return chainId && library
-        ? new GelatoLimitOrders(
-            chainId as ChainId,
-            library?.getSigner(),
-            handler
-          )
-        : undefined;
-    } catch (error) {
-      console.error(
-        `Could not instantiate GelatoLimitOrders: ${error.message}`
-      );
-      return undefined;
-    }
-  }, [chainId, library, handler]);
+  const gelatoLimitOrders = useGelatoLimitOrdersLib();
 
   const { currencies, parsedAmounts, formattedAmounts, rawAmounts } =
     useDerivedOrderInfo();
@@ -127,17 +107,6 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
     const now = Math.round(Date.now() / 1000);
 
-    try {
-      if (addOrderToDB)
-        await addOrderToDB(chainId, account, {
-          ...order,
-          createdTxHash: tx?.hash.toLowerCase(),
-          witness,
-          status: "open",
-          updatedAt: now.toString(),
-        } as Order);
-    } catch (e) {}
-
     addTransaction(tx, {
       summary: `Order submission: Swap ${formattedAmounts.input} ${
         inputCurrency.symbol
@@ -168,7 +137,6 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     rateType,
     account,
     gasPrice,
-    addOrderToDB,
   ]);
 
   const handleLimitOrderCancellation = useCallback(
@@ -295,6 +263,5 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
     handleCurrencySelection,
     handleSwitchTokens,
     handleRateType,
-    library: gelatoLimitOrders,
   };
 }
