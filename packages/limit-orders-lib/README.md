@@ -43,6 +43,8 @@ Note: Use `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` when referring to native 
 
 1. Submit a limit order
 
+Note: To submit a order with an ERC20 as input you must first approve the `erc20OrderRouter`. You can get its address via `gelatoLimitOrders.erc20OrderRouter.address` or call `gelatoLimitOrders.approveTokenAmount(inputToken, inputAmount)`.
+
 ```typescript
 // Token to sell
 const inputToken = "0x6b175474e89094c44da98b954eedeac495271d0f"; // DAI

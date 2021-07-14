@@ -24,6 +24,10 @@ import { useCurrency } from "./hooks/Tokens";
 import { useCurrencyBalances } from "./hooks/Balances";
 import { useTradeExactOut, useTradeExactIn } from "./hooks/useTrade";
 import ThemeProvider, { ThemedGlobalStyle } from "./theme";
+import {
+  ApprovalState,
+  useApproveCallbackFromInputCurrencyAmount,
+} from "./hooks/useApproveCallback";
 
 export function GelatoProvider({
   chainId,
@@ -95,4 +99,6 @@ export {
   useTradeExactOut,
   useTradeExactIn,
   tryParseAmount,
+  ApprovalState,
+  useApproveCallbackFromInputCurrencyAmount,
 };

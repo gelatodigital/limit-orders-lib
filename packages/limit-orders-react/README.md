@@ -191,6 +191,7 @@ Note: You can also import the following hooks and functions from the library:
 - `useTradeExactIn` (to get a trade using an input amount)
 - `useTradeExactOut` (to get a trade using an output amount)
 - `tryParseAmount` (to try to parse a user entered amount for a given token)
+- `ApprovalState` and `useApproveCallbackFromInputCurrencyAmount` (to max approve and verify allowance)
 
 ### Types
 

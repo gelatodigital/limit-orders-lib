@@ -57,7 +57,6 @@ import {
   ApprovalState,
   useApproveCallbackFromInputCurrencyAmount,
 } from "../../hooks/useApproveCallback";
-import useIsArgentWallet from "../../hooks/useIsArgentWallet";
 import Loader from "../Loader";
 import CurrencyLogo from "../CurrencyLogo";
 
@@ -300,10 +299,7 @@ export default function GelatoLimitOrder() {
     realExecutionPriceAsString,
   } = useGasOverhead(parsedAmounts.input, parsedAmounts.output, rateType);
 
-  const isArgentWallet = useIsArgentWallet();
-
   const showApproveFlow =
-    !isArgentWallet &&
     !inputError &&
     (approvalState === ApprovalState.NOT_APPROVED ||
       approvalState === ApprovalState.PENDING ||
@@ -496,7 +492,9 @@ export default function GelatoLimitOrder() {
                             : `Allow the Gelato Limit Orders to use your 
                               ${currencies.input?.symbol}`}
                         </span>
-                        {approvalState === ApprovalState.PENDING ? (
+                        {approvalState === ApprovalState.PENDING ||
+                        (approvalSubmitted &&
+                          approvalState === ApprovalState.NOT_APPROVED) ? (
                           <Loader stroke="white" />
                         ) : approvalSubmitted &&
                           approvalState === ApprovalState.APPROVED ? (
