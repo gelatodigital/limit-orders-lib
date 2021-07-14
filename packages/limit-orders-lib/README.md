@@ -5,9 +5,8 @@
 
 Place limit buy and sell orders on Ethereum, Polygon and Fantom using Gelato Network.
 
-### Warning:
-
-- Version 2.0.0 introduced new features and our system changed to an approval/transferFrom flow. You should use the latest version available (>= 2.0.0). If you are using an old version you should update to the latest version. Versions bellow 2.0.0 will soon be deprecated.
+> :warning: :warning: :warning: **Warning** :warning: :warning: :warning: :
+> Version 2.0.0 introduced new features and our system changed to an approval/transferFrom flow. You should use the latest version available (>= 2.0.0). If you are using an old version you should update to the latest version immediately. Versions bellow 2.0.0 are being deprecated.
 
 ## [Demo - Sorbet Finance](https://www.sorbet.finance)
 

@@ -8,9 +8,8 @@ Use Gelato's react component or hooks to place limit buy and sell orders on Ethe
 - To hook it up in simple and direct way, using our default style, just use our react component (uniswap trade style widget). It's as is as a couple of lines of code.
 - If your want to build your custom UI you can use our react hooks and plug them in into your components. Check the steps below.
 
-### Warning:
-
-- Version 1.0.0 introduced new features and our system changed to an approval/transferFrom flow. You should use the latest version available (>= 1.0.0). If you are using an old version you should update to the latest version. Versions bellow 1.0.0 will soon be deprecated.
+> :warning: :warning: :warning: **Warning** :warning: :warning: :warning: :
+> Version 2.0.0 introduced new features and our system changed to an approval/transferFrom flow. You should use the latest version available (>= 2.0.0). If you are using an old version you should update to the latest version immediately. Versions bellow 2.0.0 are being deprecated.
 
 ## [Demo](https://www.sorbet.finance)
 
