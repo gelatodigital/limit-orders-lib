@@ -3,12 +3,15 @@ import { Contract } from "@ethersproject/contracts";
 import { useMemo } from "react";
 import { useSingleCallResult } from "../state/gmulticall/hooks";
 import { useTokenContract } from "./useContract";
+import { useWeb3 } from "../web3";
+import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 
 export function useTokenAllowance(
   token?: Token,
   owner?: string,
   spender?: string
 ): CurrencyAmount<Token> | undefined {
+  const { chainId } = useWeb3();
   const contract = useTokenContract(token?.address, false);
 
   const inputs = useMemo(() => [owner, spender], [owner, spender]);
@@ -17,7 +20,7 @@ export function useTokenAllowance(
     "allowance",
     inputs,
     {
-      blocksPerFetch: 1,
+      blocksPerFetch: isEthereumChain(chainId ?? 1) ? 1 : 5,
     }
   ).result;
 

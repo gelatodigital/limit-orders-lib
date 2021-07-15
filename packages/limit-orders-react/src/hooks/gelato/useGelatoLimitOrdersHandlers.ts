@@ -17,7 +17,13 @@ import { BigNumber } from "ethers";
 import useGelatoLimitOrdersLib from "./useGelatoLimitOrdersLib";
 
 export interface GelatoLimitOrdersHandlers {
-  handleLimitOrderSubmission: () => Promise<string | undefined>;
+  handleLimitOrderSubmission: (orderToSubmit?: {
+    inputToken: string;
+    outputToken: string;
+    inputAmount: string;
+    outputAmount: string;
+    owner: string;
+  }) => Promise<string | undefined>;
   handleLimitOrderCancellation: (
     order: Order,
     orderDetails?: {
@@ -41,12 +47,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gelatoLimitOrders = useGelatoLimitOrdersLib();
 
-  const {
-    currencies,
-    parsedAmounts,
-    formattedAmounts,
-    rawAmounts,
-  } = useDerivedOrderInfo();
+  const { currencies, parsedAmounts, formattedAmounts, rawAmounts } =
+    useDerivedOrderInfo();
 
   const addTransaction = useTransactionAdder();
 
@@ -54,101 +56,137 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gasPrice = useGasPrice();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
 
-  const handleLimitOrderSubmission = useCallback(async () => {
-    if (!inputCurrency?.wrapped.address) {
-      throw new Error("Invalid input currency");
-    }
+  const handleLimitOrderSubmission = useCallback(
+    async (orderToSubmit?: {
+      inputToken: string;
+      outputToken: string;
+      inputAmount: string;
+      outputAmount: string;
+      owner: string;
+    }) => {
+      if (!gelatoLimitOrders) {
+        throw new Error("Could not reach Gelato Limit Orders library");
+      }
 
-    if (!outputCurrency?.wrapped.address) {
-      throw new Error("Invalid output currency");
-    }
+      if (!chainId) {
+        throw new Error("No chainId");
+      }
 
-    if (!rawAmounts.input) {
-      throw new Error("Invalid input amount");
-    }
+      if (!gelatoLimitOrders?.signer) {
+        throw new Error("No signer");
+      }
 
-    if (!rawAmounts.output) {
-      throw new Error("Invalid output amount");
-    }
+      if (orderToSubmit) {
+        const { witness, payload, order } =
+          await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+            orderToSubmit.inputToken,
+            orderToSubmit.outputToken,
+            orderToSubmit.inputAmount,
+            orderToSubmit.outputAmount,
+            orderToSubmit.owner
+          );
 
-    if (!gelatoLimitOrders) {
-      throw new Error("Could not reach Gelato Limit Orders library");
-    }
+        const tx = await gelatoLimitOrders.signer.sendTransaction({
+          to: payload.to,
+          data: payload.data,
+          value: BigNumber.from(payload.value),
+          gasPrice,
+        });
 
-    if (!chainId) {
-      throw new Error("No chainId");
-    }
+        const now = Math.round(Date.now() / 1000);
 
-    if (!account) {
-      throw new Error("No account");
-    }
+        addTransaction(tx, {
+          summary: `Order submission`,
+          type: "submission",
+          order: {
+            ...order,
+            createdTxHash: tx?.hash.toLowerCase(),
+            witness,
+            status: "open",
+            updatedAt: now.toString(),
+          } as Order,
+        });
 
-    if (!gelatoLimitOrders?.signer) {
-      throw new Error("No signer");
-    }
+        return tx?.hash;
+      } else {
+        if (!inputCurrency?.wrapped.address) {
+          throw new Error("Invalid input currency");
+        }
 
-    const {
-      witness,
-      payload,
-      order,
-    } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-      inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
-      outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
-      rawAmounts.input,
-      rawAmounts.output,
-      account
-    );
+        if (!outputCurrency?.wrapped.address) {
+          throw new Error("Invalid output currency");
+        }
 
-    const tx = await gelatoLimitOrders.signer.sendTransaction({
-      to: payload.to,
-      data: payload.data,
-      value: BigNumber.from(payload.value),
+        if (!rawAmounts.input) {
+          throw new Error("Invalid input amount");
+        }
+
+        if (!rawAmounts.output) {
+          throw new Error("Invalid output amount");
+        }
+
+        if (!account) {
+          throw new Error("No account");
+        }
+
+        const { witness, payload, order } =
+          await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+            inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
+            outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
+            rawAmounts.input,
+            rawAmounts.output,
+            account
+          );
+
+        const tx = await gelatoLimitOrders.signer.sendTransaction({
+          to: payload.to,
+          data: payload.data,
+          value: BigNumber.from(payload.value),
+          gasPrice,
+        });
+
+        const now = Math.round(Date.now() / 1000);
+
+        addTransaction(tx, {
+          summary: `Order submission: Swap ${formattedAmounts.input} ${
+            inputCurrency.symbol
+          } for ${formattedAmounts.output} ${outputCurrency.symbol} when 1 ${
+            rateType === Rate.MUL ? inputCurrency.symbol : outputCurrency.symbol
+          } = ${formattedAmounts.price} ${
+            rateType === Rate.MUL ? outputCurrency.symbol : inputCurrency.symbol
+          }`,
+          type: "submission",
+          order: {
+            ...order,
+            createdTxHash: tx?.hash.toLowerCase(),
+            witness,
+            status: "open",
+            updatedAt: now.toString(),
+          } as Order,
+        });
+
+        return tx?.hash;
+      }
+    },
+    [
+      inputCurrency,
+      outputCurrency,
+      rawAmounts,
+      gelatoLimitOrders,
+      chainId,
+      addTransaction,
+      formattedAmounts,
+      rateType,
+      account,
       gasPrice,
-    });
-
-    const now = Math.round(Date.now() / 1000);
-
-    addTransaction(tx, {
-      summary: `Order submission: Swap ${formattedAmounts.input} ${
-        inputCurrency.symbol
-      } for ${formattedAmounts.output} ${outputCurrency.symbol} when 1 ${
-        rateType === Rate.MUL ? inputCurrency.symbol : outputCurrency.symbol
-      } = ${formattedAmounts.price} ${
-        rateType === Rate.MUL ? outputCurrency.symbol : inputCurrency.symbol
-      }`,
-      type: "submission",
-      order: {
-        ...order,
-        createdTxHash: tx?.hash.toLowerCase(),
-        witness,
-        status: "open",
-        updatedAt: now.toString(),
-      } as Order,
-    });
-
-    return tx?.hash;
-  }, [
-    inputCurrency,
-    outputCurrency,
-    rawAmounts,
-    gelatoLimitOrders,
-    chainId,
-    addTransaction,
-    formattedAmounts,
-    rateType,
-    account,
-    gasPrice,
-  ]);
+    ]
+  );
 
   const handleLimitOrderCancellation = useCallback(
     async (

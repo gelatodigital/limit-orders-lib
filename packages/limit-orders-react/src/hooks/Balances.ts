@@ -74,6 +74,7 @@ export function useTokenBalancesWithLoadingIndicator(
     () => validatedTokens.map((vt) => vt.address),
     [validatedTokens]
   );
+
   const ERC20Interface = new Interface(ERC20ABI) as Erc20Interface;
   const balances = useMultipleContractSingleData(
     validatedTokenAddresses,
@@ -174,10 +175,16 @@ export function useAllTokenBalances(
 ): {
   [tokenAddress: string]: CurrencyAmount<Token> | undefined;
 } {
+  const { account: defaultAccount } = useWeb3();
   const allTokens = useAllTokens();
+
   const allTokensArray = useMemo(() => Object.values(allTokens ?? {}), [
     allTokens,
   ]);
-  const balances = useTokenBalances(account, allTokensArray);
+
+  const balances = useTokenBalances(
+    account ?? defaultAccount ?? undefined,
+    allTokensArray
+  );
   return balances ?? {};
 }

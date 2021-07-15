@@ -203,7 +203,17 @@ useGelatoLimitOrders(): {
 }
 
 useGelatoLimitOrdersHandlers(): {
- handleLimitOrderSubmission: () => Promise<string | undefined>;
+ // If you are using `handleInput` and `handleCurrencySelection` to deal with user inputs you do not need to pass any parameter into `handleLimitOrderSubmission` - the system will be able to recognize the current order state.
+ //Otherwise, if you are not using `handleInput` and `handleCurrencySelection` and want to use our handler to submit your order you can pass as parameter the specific order to be submitted.
+ handleLimitOrderSubmission: (
+   orderToSubmit?: {
+      inputToken: string;
+      outputToken: string;
+      inputAmount: string;
+      outputAmount: string;
+      owner: string;
+    }
+  ) => Promise<string | undefined>;
   handleLimitOrderCancellation: (
     order: Order,
     orderDetails?: {
