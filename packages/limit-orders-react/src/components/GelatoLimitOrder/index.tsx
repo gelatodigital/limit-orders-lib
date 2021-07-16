@@ -59,6 +59,7 @@ import {
 } from "../../hooks/useApproveCallback";
 import Loader from "../Loader";
 import CurrencyLogo from "../CurrencyLogo";
+import { NATIVE } from "../../constants/addresses";
 
 const StyledInfo = styled(Info)`
   opacity: 0.4;
@@ -247,8 +248,12 @@ export default function GelatoLimitOrder() {
       }
 
       handleLimitOrderSubmission({
-        inputToken: currencies.input?.wrapped.address,
-        outputToken: currencies.output?.wrapped.address,
+        inputToken: currencies.input?.isNative
+          ? NATIVE
+          : currencies.input?.wrapped.address,
+        outputToken: currencies.output?.isNative
+          ? NATIVE
+          : currencies.output?.wrapped.address,
         inputAmount: rawAmounts.input,
         outputAmount: rawAmounts.output,
         owner: account,
