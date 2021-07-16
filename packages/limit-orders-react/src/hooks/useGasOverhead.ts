@@ -17,7 +17,7 @@ export default function useGasOverhead(
   outputAmount: CurrencyAmount<Currency> | undefined,
   rateType: Rate
 ): {
-  realExecutionPrice: Price<Currency, Currency> | undefined;
+  realExecutionPrice: Price<Currency, Currency> | undefined | null;
   realExecutionPriceAsString: string | undefined;
   gasPrice: number | undefined;
 } {
@@ -58,7 +58,7 @@ export default function useGasOverhead(
       !realInputAmount ||
       !outputAmount
     )
-      return undefined;
+      return null;
 
     if (gasCostInInputTokens.outputAmount.greaterThan(inputAmount.asFraction))
       return undefined;

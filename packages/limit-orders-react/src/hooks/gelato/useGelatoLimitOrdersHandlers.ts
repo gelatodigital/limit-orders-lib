@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { Order } from "@gelatonetwork/limit-orders-lib";
+import { TransactionResponse } from "@ethersproject/abstract-provider";
 import {
   useDerivedOrderInfo,
   useOrderActionHandlers,
@@ -23,7 +24,7 @@ export interface GelatoLimitOrdersHandlers {
     inputAmount: string;
     outputAmount: string;
     owner: string;
-  }) => Promise<string | undefined>;
+  }) => Promise<TransactionResponse>;
   handleLimitOrderCancellation: (
     order: Order,
     orderDetails?: {
@@ -32,7 +33,7 @@ export interface GelatoLimitOrdersHandlers {
       inputAmount: string;
       outputAmount: string;
     }
-  ) => Promise<string | undefined>;
+  ) => Promise<TransactionResponse>;
   handleInput: (field: Field, value: string) => void;
   handleCurrencySelection: (
     field: Field.INPUT | Field.OUTPUT,
@@ -47,12 +48,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gelatoLimitOrders = useGelatoLimitOrdersLib();
 
-  const {
-    currencies,
-    parsedAmounts,
-    formattedAmounts,
-    rawAmounts,
-  } = useDerivedOrderInfo();
+  const { currencies, parsedAmounts, formattedAmounts, rawAmounts } =
+    useDerivedOrderInfo();
 
   const addTransaction = useTransactionAdder();
 
@@ -60,12 +57,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gasPrice = useGasPrice();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const inputCurrency = currencies.input;
   const outputCurrency = currencies.output;
@@ -91,17 +84,14 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       }
 
       if (orderToSubmit) {
-        const {
-          witness,
-          payload,
-          order,
-        } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-          orderToSubmit.inputToken,
-          orderToSubmit.outputToken,
-          orderToSubmit.inputAmount,
-          orderToSubmit.outputAmount,
-          orderToSubmit.owner
-        );
+        const { witness, payload, order } =
+          await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+            orderToSubmit.inputToken,
+            orderToSubmit.outputToken,
+            orderToSubmit.inputAmount,
+            orderToSubmit.outputAmount,
+            orderToSubmit.owner
+          );
 
         const tx = await gelatoLimitOrders.signer.sendTransaction({
           to: payload.to,
@@ -124,7 +114,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
           } as Order,
         });
 
-        return tx?.hash;
+        return tx;
       } else {
         if (!inputCurrency?.wrapped.address) {
           throw new Error("Invalid input currency");
@@ -146,17 +136,14 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
           throw new Error("No account");
         }
 
-        const {
-          witness,
-          payload,
-          order,
-        } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-          inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
-          outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
-          rawAmounts.input,
-          rawAmounts.output,
-          account
-        );
+        const { witness, payload, order } =
+          await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+            inputCurrency?.isNative ? NATIVE : inputCurrency.wrapped.address,
+            outputCurrency?.isNative ? NATIVE : outputCurrency.wrapped.address,
+            rawAmounts.input,
+            rawAmounts.output,
+            account
+          );
 
         const tx = await gelatoLimitOrders.signer.sendTransaction({
           to: payload.to,
@@ -185,7 +172,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
           } as Order,
         });
 
-        return tx?.hash;
+        return tx;
       }
     },
     [
@@ -255,7 +242,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
         },
       });
 
-      return tx?.hash;
+      return tx;
     },
     [gelatoLimitOrders, chainId, account, gasPrice, addTransaction]
   );

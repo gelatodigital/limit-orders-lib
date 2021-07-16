@@ -225,7 +225,7 @@ export default function GelatoLimitOrder() {
     });
 
     handleLimitOrderSubmission()
-      .then((hash) => {
+      .then(({ hash }) => {
         setSwapState({
           attemptingTxn: false,
           tradeToConfirm,
@@ -384,7 +384,7 @@ export default function GelatoLimitOrder() {
                 showRate={true}
                 isInvertedRate={rateType === Rate.MUL ? false : true}
                 gasPrice={gasPrice}
-                realExecutionPrice={realExecutionPrice}
+                realExecutionPrice={realExecutionPrice ?? undefined}
                 realExecutionPriceAsString={realExecutionPriceAsString}
               />
               <ArrowWrapper clickable>

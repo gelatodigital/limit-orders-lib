@@ -213,7 +213,7 @@ useGelatoLimitOrdersHandlers(): {
       outputAmount: string;
       owner: string;
     }
-  ) => Promise<string | undefined>;
+  ) => Promise<TransactionResponse>;
   handleLimitOrderCancellation: (
     order: Order,
     orderDetails?: {
@@ -222,7 +222,7 @@ useGelatoLimitOrdersHandlers(): {
       inputAmount: string;
       outputAmount: string;
     }
-  ) => Promise<string | undefined>;
+  ) => Promise<TransactionResponse>;
   handleInput: (field: Field, value: string) => void;
   handleCurrencySelection: (
     field: Field.INPUT | Field.OUTPUT,

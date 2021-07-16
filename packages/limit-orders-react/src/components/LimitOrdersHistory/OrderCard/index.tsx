@@ -13,6 +13,7 @@ import { CurrencyAmount, Price } from "@uniswap/sdk-core";
 import ConfirmCancellationModal from "../ConfirmCancellationModal";
 import { useTradeExactIn } from "../../../hooks/useTrade";
 import { Dots } from "../../order/styleds";
+import { Rate } from "../../../state/gorder/actions";
 import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 import { useWeb3 } from "../../../web3";
 import { ButtonGray } from "../../Button";
@@ -23,6 +24,11 @@ import {
 } from "../../../utils/getExplorerLink";
 import TradePrice from "../../order/TradePrice";
 import useGelatoLimitOrdersLib from "../../../hooks/gelato/useGelatoLimitOrdersLib";
+import useGasOverhead from "../../../hooks/useGasOverhead";
+import { MouseoverTooltip } from "../../Tooltip";
+import { TYPE } from "../../../theme";
+import HoverInlineText from "../../HoverInlineText";
+import { formatUnits } from "ethers/lib/utils";
 
 const handleColorType = (status: string, theme: DefaultTheme) => {
   switch (status) {
@@ -180,6 +186,10 @@ export default function OrderCard({ order }: { order: Order }) {
     setShowExecutionPriceInverted,
   ] = useState<boolean>(false);
   const [
+    showEthereumExecutionPriceInverted,
+    setShowEthereumExecutionPriceInverted,
+  ] = useState<boolean>(true);
+  const [
     showCurrentPriceInverted,
     setShowCurrentPriceInverted,
   ] = useState<boolean>(true);
@@ -199,16 +209,24 @@ export default function OrderCard({ order }: { order: Order }) {
     [inputToken, order.inputAmount]
   );
 
+  const isEthereum = isEthereumChain(chainId ?? 1);
+
   const rawMinReturn = useMemo(
     () =>
       order.adjustedMinReturn
         ? order.adjustedMinReturn
         : gelatoLibrary && chainId && order.minReturn
-        ? isEthereumChain(chainId)
+        ? isEthereum
           ? order.minReturn
           : gelatoLibrary.getAdjustedMinReturn(order.minReturn)
         : undefined,
-    [chainId, gelatoLibrary, order.adjustedMinReturn, order.minReturn]
+    [
+      chainId,
+      gelatoLibrary,
+      order.adjustedMinReturn,
+      order.minReturn,
+      isEthereum,
+    ]
   );
 
   const outputAmount = useMemo(
@@ -218,6 +236,11 @@ export default function OrderCard({ order }: { order: Order }) {
         : undefined,
     [outputToken, rawMinReturn]
   );
+
+  const {
+    gasPrice,
+    realExecutionPrice: ethereumExecutionPrice,
+  } = useGasOverhead(inputAmount, outputAmount, Rate.MUL);
 
   const executionPrice = useMemo(
     () =>
@@ -285,7 +308,7 @@ export default function OrderCard({ order }: { order: Order }) {
         : undefined;
 
     handleLimitOrderCancellation(order, orderDetails)
-      .then((hash) => {
+      .then(({ hash }) => {
         setCancellationState({
           attemptingTxn: false,
           showConfirm,
@@ -425,7 +448,12 @@ export default function OrderCard({ order }: { order: Order }) {
             </RowBetween>
           </OrderRow>
         </Aligner>
-        <Aligner style={{ marginTop: "-2px" }}>
+        <Aligner
+          style={{
+            marginTop: "-2px",
+            marginBottom: order.status === "open" ? "1px" : "20px",
+          }}
+        >
           <OrderRow>
             <RowBetween>
               <Text
@@ -450,31 +478,66 @@ export default function OrderCard({ order }: { order: Order }) {
             </RowBetween>
           </OrderRow>
         </Aligner>
-        <Aligner style={{ marginTop: "-10px" }}>
-          <OrderRow>
-            <RowBetween>
-              <Text
-                fontWeight={400}
-                fontSize={12}
-                color={theme.text1}
-                style={{ marginRight: "4px", marginTop: "2px" }}
-              >
-                Execution price:
-              </Text>
-              {executionPrice ? (
-                <TradePrice
-                  price={executionPrice}
-                  showInverted={showExecutionPriceInverted}
-                  setShowInverted={setShowExecutionPriceInverted}
-                  fontWeight={500}
+
+        {order.status === "open" ? (
+          <Aligner style={{ marginTop: "-10px" }}>
+            <OrderRow>
+              <RowBetween>
+                <Text
+                  fontWeight={400}
                   fontSize={12}
-                />
-              ) : (
-                <Dots />
-              )}
-            </RowBetween>
-          </OrderRow>
-        </Aligner>
+                  color={theme.text1}
+                  style={{ marginRight: "4px", marginTop: "2px" }}
+                >
+                  Execution price:
+                </Text>
+                {executionPrice ? (
+                  isEthereum ? (
+                    <>
+                      <MouseoverTooltip
+                        text={`The execution price takes into account the gas necessary to execute your order and guarantees that your desired rate is fulfilled, so that the minimum you receive is ${
+                          outputAmount ? outputAmount.toSignificant(4) : "-"
+                        } ${
+                          outputAmount?.currency.symbol ?? ""
+                        }. It fluctuates according to gas prices. Current gas price: ${parseFloat(
+                          gasPrice ? formatUnits(gasPrice, "gwei") : "-"
+                        ).toFixed(0)} GWEI.`}
+                      >
+                        {ethereumExecutionPrice ? (
+                          <TradePrice
+                            price={ethereumExecutionPrice}
+                            showInverted={showEthereumExecutionPriceInverted}
+                            setShowInverted={
+                              setShowEthereumExecutionPriceInverted
+                            }
+                            fontWeight={500}
+                            fontSize={12}
+                          />
+                        ) : ethereumExecutionPrice === undefined ? (
+                          <TYPE.body fontSize={14} color={theme.text2}>
+                            <HoverInlineText text={"never executes"} />
+                          </TYPE.body>
+                        ) : (
+                          <Dots />
+                        )}
+                      </MouseoverTooltip>
+                    </>
+                  ) : (
+                    <TradePrice
+                      price={executionPrice}
+                      showInverted={showExecutionPriceInverted}
+                      setShowInverted={setShowExecutionPriceInverted}
+                      fontWeight={500}
+                      fontSize={12}
+                    />
+                  )
+                ) : (
+                  <Dots />
+                )}
+              </RowBetween>
+            </OrderRow>
+          </Aligner>
+        ) : null}
       </Container>
     </OrderPanel>
   );
