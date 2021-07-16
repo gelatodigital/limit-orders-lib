@@ -110,6 +110,7 @@ export default function GelatoLimitOrder() {
       trade,
       formattedAmounts,
       inputError,
+      rawAmounts,
     },
     orderState: { independentField, rateType },
   } = useGelatoLimitOrders();
@@ -134,7 +135,7 @@ export default function GelatoLimitOrder() {
   const handleActiveTab = (tab: "sell" | "buy") => {
     if (activeTab === tab) return;
 
-    handleRateType();
+    handleRateType(rateType, currencies, parsedAmounts);
     setActiveTab(tab);
   };
 
@@ -224,26 +225,71 @@ export default function GelatoLimitOrder() {
       txHash: undefined,
     });
 
-    handleLimitOrderSubmission()
-      .then(({ hash }) => {
-        setSwapState({
-          attemptingTxn: false,
-          tradeToConfirm,
-          showConfirm,
-          swapErrorMessage: undefined,
-          txHash: hash,
-        });
+    try {
+      if (!currencies.input?.wrapped.address) {
+        throw new Error("Invalid input currency");
+      }
+
+      if (!currencies.output?.wrapped.address) {
+        throw new Error("Invalid output currency");
+      }
+
+      if (!rawAmounts.input) {
+        throw new Error("Invalid input amount");
+      }
+
+      if (!rawAmounts.output) {
+        throw new Error("Invalid output amount");
+      }
+
+      if (!account) {
+        throw new Error("No account");
+      }
+
+      handleLimitOrderSubmission({
+        inputToken: currencies.input?.wrapped.address,
+        outputToken: currencies.output?.wrapped.address,
+        inputAmount: rawAmounts.input,
+        outputAmount: rawAmounts.output,
+        owner: account,
       })
-      .catch((error) => {
-        setSwapState({
-          attemptingTxn: false,
-          tradeToConfirm,
-          showConfirm,
-          swapErrorMessage: error.message,
-          txHash: undefined,
+        .then(({ hash }) => {
+          setSwapState({
+            attemptingTxn: false,
+            tradeToConfirm,
+            showConfirm,
+            swapErrorMessage: undefined,
+            txHash: hash,
+          });
+        })
+        .catch((error) => {
+          setSwapState({
+            attemptingTxn: false,
+            tradeToConfirm,
+            showConfirm,
+            swapErrorMessage: error.message,
+            txHash: undefined,
+          });
         });
+    } catch (error) {
+      setSwapState({
+        attemptingTxn: false,
+        tradeToConfirm,
+        showConfirm,
+        swapErrorMessage: error.message,
+        txHash: undefined,
       });
-  }, [handleLimitOrderSubmission, tradeToConfirm, showConfirm]);
+    }
+  }, [
+    handleLimitOrderSubmission,
+    tradeToConfirm,
+    showConfirm,
+    currencies.input?.wrapped.address,
+    currencies.output?.wrapped.address,
+    rawAmounts.input,
+    rawAmounts.output,
+    account,
+  ]);
 
   const [showInverted, setShowInverted] = useState<boolean>(false);
 

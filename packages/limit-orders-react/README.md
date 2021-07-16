@@ -192,6 +192,7 @@ Note: You can also import the following hooks and functions from the library:
 - `useTradeExactOut` (to get a trade using an output amount)
 - `tryParseAmount` (to try to parse a user entered amount for a given token)
 - `ApprovalState` and `useApproveCallbackFromInputCurrencyAmount` (to max approve and verify allowance)
+- `useTransactionAdder` (to add published transaction)
 
 ### Types
 
@@ -203,17 +204,13 @@ useGelatoLimitOrders(): {
 }
 
 useGelatoLimitOrdersHandlers(): {
- // If you are using `handleInput` and `handleCurrencySelection` to deal with user inputs you do not need to pass any parameter into `handleLimitOrderSubmission` - the system will be able to recognize the current order state.
- //Otherwise, if you are not using `handleInput` and `handleCurrencySelection` and want to use our handler to submit your order you can pass as parameter the specific order to be submitted.
- handleLimitOrderSubmission: (
-   orderToSubmit?: {
-      inputToken: string;
-      outputToken: string;
-      inputAmount: string;
-      outputAmount: string;
-      owner: string;
-    }
-  ) => Promise<TransactionResponse>;
+  handleLimitOrderSubmission: (orderToSubmit: {
+    inputToken: string;
+    outputToken: string;
+    inputAmount: string;
+    outputAmount: string;
+    owner: string;
+  }) => Promise<TransactionResponse>;
   handleLimitOrderCancellation: (
     order: Order,
     orderDetails?: {
@@ -229,16 +226,14 @@ useGelatoLimitOrdersHandlers(): {
     currency: Currency
   ) => void;
   handleSwitchTokens: () => void;
-  handleRateType: () => void;
-}
-
-useGelatoLimitOrdersHistory(): {
-  open: { pending: Order[]; confirmed: Order[] };
-  cancelled: { pending: Order[]; confirmed: Order[] };
-  executed: Order[];
-}
-
-useGelatoLimitOrdersLib(): GelatoLimitOrders | undefined;
+  handleRateType: (
+    rateType: Rate,
+    currencies: { input: Currency | undefined; output: Currency | undefined },
+    parsedAmounts: {
+      input: CurrencyAmount<Currency> | undefined;
+      output: CurrencyAmount<Currency> | undefined;
+    }
+  ) => void;
 
 ```
 
