@@ -146,6 +146,13 @@ export default function LimitOrder() {
 
 Using the gelato hooks all logic and state updates are encapsulated and all your have to do is plug them into your application.
 
+Hooks available:
+
+- `useGelatoLimitOrders()`
+- `useGelatoLimitOrdersHandlers()`
+- `useGelatoLimitOrdersHistory()`
+- `useGelatoLimitOrdersLib()`
+
 ```tsx
 import React from "react";
 import {
@@ -234,7 +241,15 @@ useGelatoLimitOrdersHandlers(): {
       output: CurrencyAmount<Currency> | undefined;
     }
   ) => void;
+}
 
+useGelatoLimitOrdersHistory(): {
+  open: { pending: Order[]; confirmed: Order[] };
+  cancelled: { pending: Order[]; confirmed: Order[] };
+  executed: Order[];
+}
+
+useGelatoLimitOrdersLib(): GelatoLimitOrders | undefined
 ```
 
 ### Need help? Want to add a new handler?
