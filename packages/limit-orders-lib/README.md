@@ -111,20 +111,26 @@ export class GelatoLimitOrders {
     outputToken: string,
     inputAmount: BigNumberish,
     minReturn: BigNumberish,
-    owner: string
+    owner: string,
+    // If inputToken is an ERC20, compare allowance with inputAmount. defaults to `true`
+    checkAllowance?: boolean
   ): Promise<TransactionData>;
   encodeLimitOrderSubmissionWithSecret(
     inputToken: string,
     outputToken: string,
     inputAmount: BigNumberish,
     minReturn: BigNumberish,
-    owner: string
+    owner: string,
+    // If inputToken is an ERC20, compare allowance with inputAmount. defaults to `true`
+    checkAllowance?: boolean
   ): Promise<TransactionDataWithSecret>;
   submitLimitOrder(
     inputToken: string,
     outputToken: string,
     inputAmount: BigNumberish,
     minReturn: BigNumberish,
+    // If inputToken is an ERC20, compare allowance with inputAmount. defaults to `true`
+    checkAllowance?: boolean,
     gasPrice?: BigNumberish
   ): Promise<ContractTransaction>;
   encodeLimitOrderCancellation(
@@ -167,11 +173,31 @@ export class GelatoLimitOrders {
     outputDecimals: number,
     isInverted?: boolean
   ): string;
-  getOrders(owner: string): Promise<Order[]>;
-  getOpenOrders(owner: string): Promise<Order[]>;
-  getPastOrders(owner: string): Promise<Order[]>;
-  getExecutedOrders(owner: string): Promise<Order[]>;
-  getCancelledOrders(owner: string): Promise<Order[]>;
+  getOrders(
+    owner: string,
+    // includeOrdersWithNullHandler defaults to `false`
+    includeOrdersWithNullHandler?: boolean
+  ): Promise<Order[]>;
+  getOpenOrders(
+    owner: string,
+    // includeOrdersWithNullHandler defaults to `false`
+    includeOrdersWithNullHandler?: boolean
+  ): Promise<Order[]>;
+  getPastOrders(
+    owner: string,
+    // includeOrdersWithNullHandler defaults to `false`
+    includeOrdersWithNullHandler?: boolean
+  ): Promise<Order[]>;
+  getExecutedOrders(
+    owner: string,
+    // includeOrdersWithNullHandler defaults to `false`
+    includeOrdersWithNullHandler?: boolean
+  ): Promise<Order[]>;
+  getCancelledOrders(
+    owner: string,
+    // includeOrdersWithNullHandler defaults to `false`
+    includeOrdersWithNullHandler?: boolean
+  ): Promise<Order[]>;
 }
 export declare type ChainId = 1 | 3 | 137 | 250;
 

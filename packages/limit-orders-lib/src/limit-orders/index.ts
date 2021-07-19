@@ -160,14 +160,16 @@ export class GelatoLimitOrders {
     outputToken: string,
     inputAmount: BigNumberish,
     minReturn: BigNumberish,
-    owner: string
+    owner: string,
+    checkAllowance = true
   ): Promise<TransactionData> {
     const { payload } = await this.encodeLimitOrderSubmissionWithSecret(
       inputToken,
       outputToken,
       inputAmount,
       minReturn,
-      owner
+      owner,
+      checkAllowance
     );
 
     return payload;
@@ -178,7 +180,8 @@ export class GelatoLimitOrders {
     outputToken: string,
     inputAmount: BigNumberish,
     minReturnToBeParsed: BigNumberish,
-    owner: string
+    owner: string,
+    checkAllowance = true
   ): Promise<TransactionDataWithSecret> {
     const randomSecret = utils.hexlify(utils.randomBytes(19)).replace("0x", "");
     // 0x67656c61746f6e6574776f726b = gelatonetwork in hex
@@ -197,7 +200,8 @@ export class GelatoLimitOrders {
       witness,
       inputAmount,
       minReturn,
-      secret
+      secret,
+      checkAllowance
     );
 
     const encodedData = this._handlerAddress
@@ -243,6 +247,7 @@ export class GelatoLimitOrders {
     outputToken: string,
     inputAmount: BigNumberish,
     minReturn: BigNumberish,
+    checkAllowance = true,
     gasPrice?: BigNumberish
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
@@ -254,7 +259,8 @@ export class GelatoLimitOrders {
       outputToken,
       inputAmount,
       minReturn,
-      owner
+      owner,
+      checkAllowance
     );
 
     return this._signer.sendTransaction({
@@ -482,7 +488,10 @@ export class GelatoLimitOrders {
     }
   }
 
-  public async getOrders(owner: string): Promise<Order[]> {
+  public async getOrders(
+    owner: string,
+    includeOrdersWithNullHandler = false
+  ): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryOrders(owner, this._chainId);
     return orders
@@ -492,12 +501,19 @@ export class GelatoLimitOrders {
           ? order.minReturn
           : this.getAdjustedMinReturn(order.minReturn),
       }))
-      .filter((order) =>
-        this._handler ? order.handler === this._handlerAddress : true
-      );
+      .filter((order) => {
+        if (this._handler && !order.handler) {
+          return includeOrdersWithNullHandler ? true : false;
+        } else {
+          return this._handler ? order.handler === this._handlerAddress : true;
+        }
+      });
   }
 
-  public async getOpenOrders(owner: string): Promise<Order[]> {
+  public async getOpenOrders(
+    owner: string,
+    includeOrdersWithNullHandler = false
+  ): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryOpenOrders(owner, this._chainId);
     return orders
@@ -507,12 +523,19 @@ export class GelatoLimitOrders {
           ? order.minReturn
           : this.getAdjustedMinReturn(order.minReturn),
       }))
-      .filter((order) =>
-        this._handler ? order.handler === this._handlerAddress : true
-      );
+      .filter((order) => {
+        if (this._handler && !order.handler) {
+          return includeOrdersWithNullHandler ? true : false;
+        } else {
+          return this._handler ? order.handler === this._handlerAddress : true;
+        }
+      });
   }
 
-  public async getPastOrders(owner: string): Promise<Order[]> {
+  public async getPastOrders(
+    owner: string,
+    includeOrdersWithNullHandler = false
+  ): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryPastOrders(owner, this._chainId);
     return orders
@@ -522,12 +545,19 @@ export class GelatoLimitOrders {
           ? order.minReturn
           : this.getAdjustedMinReturn(order.minReturn),
       }))
-      .filter((order) =>
-        this._handler ? order.handler === this._handlerAddress : true
-      );
+      .filter((order) => {
+        if (this._handler && !order.handler) {
+          return includeOrdersWithNullHandler ? true : false;
+        } else {
+          return this._handler ? order.handler === this._handlerAddress : true;
+        }
+      });
   }
 
-  public async getExecutedOrders(owner: string): Promise<Order[]> {
+  public async getExecutedOrders(
+    owner: string,
+    includeOrdersWithNullHandler = false
+  ): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryExecutedOrders(owner, this._chainId);
     return orders
@@ -537,12 +567,19 @@ export class GelatoLimitOrders {
           ? order.minReturn
           : this.getAdjustedMinReturn(order.minReturn),
       }))
-      .filter((order) =>
-        this._handler ? order.handler === this._handlerAddress : true
-      );
+      .filter((order) => {
+        if (this._handler && !order.handler) {
+          return includeOrdersWithNullHandler ? true : false;
+        } else {
+          return this._handler ? order.handler === this._handlerAddress : true;
+        }
+      });
   }
 
-  public async getCancelledOrders(owner: string): Promise<Order[]> {
+  public async getCancelledOrders(
+    owner: string,
+    includeOrdersWithNullHandler = false
+  ): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryCancelledOrders(owner, this._chainId);
     return orders
@@ -552,9 +589,13 @@ export class GelatoLimitOrders {
           ? order.minReturn
           : this.getAdjustedMinReturn(order.minReturn),
       }))
-      .filter((order) =>
-        this._handler ? order.handler === this._handlerAddress : true
-      );
+      .filter((order) => {
+        if (this._handler && !order.handler) {
+          return includeOrdersWithNullHandler ? true : false;
+        } else {
+          return this._handler ? order.handler === this._handlerAddress : true;
+        }
+      });
   }
 
   private _getKey(order: Order): string {
@@ -573,7 +614,8 @@ export class GelatoLimitOrders {
     witness: string,
     amount: BigNumberish,
     minReturn: BigNumberish,
-    secret: string
+    secret: string,
+    checkAllowance: boolean
   ): Promise<TransactionData> {
     if (!this._provider) throw new Error("No provider");
 
@@ -607,13 +649,15 @@ export class GelatoLimitOrders {
       value = amount;
       to = this._gelatoLimitOrders.address;
     } else {
-      const allowance = await ERC20__factory.connect(
-        inputToken,
-        this._provider
-      ).allowance(owner, this._erc20OrderRouter.address);
+      if (checkAllowance) {
+        const allowance = await ERC20__factory.connect(
+          inputToken,
+          this._provider
+        ).allowance(owner, this._erc20OrderRouter.address);
 
-      if (allowance.lt(amount))
-        throw new Error("Insufficient token allowance for placing order");
+        if (allowance.lt(amount))
+          throw new Error("Insufficient token allowance for placing order");
+      }
 
       data = this._erc20OrderRouter.interface.encodeFunctionData(
         "depositToken",
