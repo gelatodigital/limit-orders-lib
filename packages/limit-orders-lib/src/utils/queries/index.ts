@@ -244,8 +244,10 @@ export const queryCancelledOrders = async (
 };
 
 const _getUniqueOrdersWithHandler = (allOrders: Order[]): Order[] =>
-  [...new Map(allOrders.map((order) => [order.id, order])).values()].map(
-    (order) => {
+  [...new Map(allOrders.map((order) => [order.id, order])).values()]
+    // sort by `updatedAt` asc so that the most recent one will be used
+    .sort((a, b) => parseFloat(a.updatedAt) - parseFloat(b.updatedAt))
+    .map((order) => {
       let handler;
       try {
         const hasHandler = order.data.length === 194;
@@ -255,5 +257,4 @@ const _getUniqueOrdersWithHandler = (allOrders: Order[]): Order[] =>
       }
 
       return { ...order, handler };
-    }
-  );
+    });

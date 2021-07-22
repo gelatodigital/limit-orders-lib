@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Order } from "@gelatonetwork/limit-orders-lib";
 import { useWeb3 } from "../../web3";
-import { getLSOrders, saveOrder } from "../../utils/localStorageOrders";
+import {
+  getLSOrders,
+  getUniqueOrders,
+  saveOrder,
+} from "../../utils/localStorageOrders";
 import useInterval from "../useInterval";
 import { useSelector } from "react-redux";
 import { AppState } from "../../state";
@@ -16,7 +20,9 @@ function newOrdersFirst(a: Order, b: Order) {
   return Number(b.updatedAt) - Number(a.updatedAt);
 }
 
-export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory {
+export default function useGelatoLimitOrdersHistory(
+  includeOrdersWithNullHandler = false
+): GelatoLimitOrdersHistory {
   const { account, chainId } = useWeb3();
 
   const gelatoLimitOrders = useGelatoLimitOrdersLib();
@@ -35,15 +41,15 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
     (state) => state.gtransactions
   ) as any;
 
-  const transactions = useMemo(() => (chainId ? state[chainId] ?? {} : {}), [
-    chainId,
-    state,
-  ]);
+  const transactions = useMemo(
+    () => (chainId ? state[chainId] ?? {} : {}),
+    [chainId, state]
+  );
 
   const fetchOpenOrders = useCallback(() => {
     if (gelatoLimitOrders && account && chainId)
       gelatoLimitOrders
-        .getOpenOrders(account.toLowerCase())
+        .getOpenOrders(account.toLowerCase(), includeOrdersWithNullHandler)
         .then(async (orders) => {
           const ordersLS = getLSOrders(chainId, account);
 
@@ -87,15 +93,15 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
               .sort(newOrdersFirst),
           });
         })
-        .catch(() => {
-          console.error("Error fetching open orders");
+        .catch((e) => {
+          console.error("Error fetching open orders", e);
         });
-  }, [gelatoLimitOrders, account, chainId]);
+  }, [gelatoLimitOrders, account, chainId, includeOrdersWithNullHandler]);
 
   const fetchCancelledOrders = useCallback(() => {
     if (gelatoLimitOrders && account && chainId)
       gelatoLimitOrders
-        .getCancelledOrders(account.toLowerCase())
+        .getCancelledOrders(account.toLowerCase(), includeOrdersWithNullHandler)
         .then(async (orders) => {
           const ordersLS = getLSOrders(chainId, account);
 
@@ -129,13 +135,13 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
             pending: pendingCancelledOrdersLS.sort(newOrdersFirst),
           });
         })
-        .catch(() => console.error("Error fetching cancelled orders"));
-  }, [gelatoLimitOrders, account, chainId]);
+        .catch((e) => console.error("Error fetching cancelled orders", e));
+  }, [gelatoLimitOrders, account, chainId, includeOrdersWithNullHandler]);
 
   const fetchExecutedOrders = useCallback(() => {
     if (gelatoLimitOrders && account && chainId)
       gelatoLimitOrders
-        .getExecutedOrders(account.toLowerCase())
+        .getExecutedOrders(account.toLowerCase(), includeOrdersWithNullHandler)
         .then(async (orders) => {
           const ordersLS = getLSOrders(chainId, account);
 
@@ -160,8 +166,8 @@ export default function useGelatoLimitOrdersHistory(): GelatoLimitOrdersHistory 
 
           setExecutedOrders(executedOrdersLS.sort(newOrdersFirst));
         })
-        .catch(() => console.error("Error executing open orders"));
-  }, [gelatoLimitOrders, account, chainId]);
+        .catch((e) => console.error("Error fetching executed orders", e));
+  }, [gelatoLimitOrders, account, chainId, includeOrdersWithNullHandler]);
 
   useEffect(() => {
     fetchOpenOrders();

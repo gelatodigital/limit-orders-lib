@@ -233,17 +233,11 @@ useGelatoLimitOrdersHandlers(): {
     currency: Currency
   ) => void;
   handleSwitchTokens: () => void;
-  handleRateType: (
-    rateType: Rate,
-    currencies: { input: Currency | undefined; output: Currency | undefined },
-    parsedAmounts: {
-      input: CurrencyAmount<Currency> | undefined;
-      output: CurrencyAmount<Currency> | undefined;
-    }
-  ) => void;
+  handleRateType: (rateType: Rate, price?: Price<Currency, Currency>) => void;
 }
 
-useGelatoLimitOrdersHistory(): {
+// includeOrdersWithNullHandler defaults to false
+useGelatoLimitOrdersHistory(includeOrdersWithNullHandler?: boolean): {
   open: { pending: Order[]; confirmed: Order[] };
   cancelled: { pending: Order[]; confirmed: Order[] };
   executed: Order[];

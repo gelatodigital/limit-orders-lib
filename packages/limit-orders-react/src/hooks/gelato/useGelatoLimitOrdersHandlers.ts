@@ -3,7 +3,7 @@ import { Order } from "@gelatonetwork/limit-orders-lib";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { useOrderActionHandlers } from "../../state/gorder/hooks";
 import { Field } from "../../types";
-import { Currency, CurrencyAmount } from "@uniswap/sdk-core";
+import { Currency, CurrencyAmount, Price } from "@uniswap/sdk-core";
 import { Rate } from "../../state/gorder/actions";
 import JSBI from "jsbi";
 import { useWeb3 } from "../../web3";
@@ -35,14 +35,7 @@ export interface GelatoLimitOrdersHandlers {
     currency: Currency
   ) => void;
   handleSwitchTokens: () => void;
-  handleRateType: (
-    rateType: Rate,
-    currencies: { input: Currency | undefined; output: Currency | undefined },
-    parsedAmounts: {
-      input: CurrencyAmount<Currency> | undefined;
-      output: CurrencyAmount<Currency> | undefined;
-    }
-  ) => void;
+  handleRateType: (rateType: Rate, price?: Price<Currency, Currency>) => void;
 }
 
 export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandlers {
@@ -54,12 +47,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gasPrice = useGasPrice();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const handleLimitOrderSubmission = useCallback(
     async (orderToSubmit: {
@@ -81,17 +70,14 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
         throw new Error("No signer");
       }
 
-      const {
-        witness,
-        payload,
-        order,
-      } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-        orderToSubmit.inputToken,
-        orderToSubmit.outputToken,
-        orderToSubmit.inputAmount,
-        orderToSubmit.outputAmount,
-        orderToSubmit.owner
-      );
+      const { witness, payload, order } =
+        await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+          orderToSubmit.inputToken,
+          orderToSubmit.outputToken,
+          orderToSubmit.inputAmount,
+          orderToSubmit.outputAmount,
+          orderToSubmit.owner
+        );
 
       const tx = await gelatoLimitOrders.signer.sendTransaction({
         to: payload.to,
@@ -196,44 +182,13 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
   }, [onSwitchTokens]);
 
   const handleRateType = useCallback(
-    async (
-      rateType: Rate,
-      currencies: { input: Currency | undefined; output: Currency | undefined },
-      parsedAmounts: {
-        input: CurrencyAmount<Currency> | undefined;
-        output: CurrencyAmount<Currency> | undefined;
-      }
-    ) => {
+    async (rateType: Rate, price?: Price<Currency, Currency>) => {
       if (rateType === Rate.MUL) {
-        const flipped =
-          parsedAmounts.input && parsedAmounts.output && currencies.output
-            ? parsedAmounts.input
-                ?.divide(parsedAmounts.output.asFraction)
-                ?.multiply(
-                  JSBI.exponentiate(
-                    JSBI.BigInt(10),
-                    JSBI.BigInt(currencies.output.decimals)
-                  )
-                )
-                ?.toSignificant(6)
-            : undefined;
+        if (price) onUserInput(Field.PRICE, price.invert().toSignificant(6));
         onChangeRateType(Rate.DIV);
-        if (flipped) onUserInput(Field.PRICE, flipped);
       } else {
-        const flipped =
-          parsedAmounts.input && parsedAmounts.output && currencies.input
-            ? parsedAmounts.output
-                ?.divide(parsedAmounts.input.asFraction)
-                ?.multiply(
-                  JSBI.exponentiate(
-                    JSBI.BigInt(10),
-                    JSBI.BigInt(currencies.input.decimals)
-                  )
-                )
-                ?.toSignificant(6)
-            : undefined;
+        if (price) onUserInput(Field.PRICE, price.toSignificant(6));
         onChangeRateType(Rate.MUL);
-        if (flipped) onUserInput(Field.PRICE, flipped);
       }
     },
     [onChangeRateType, onUserInput]
