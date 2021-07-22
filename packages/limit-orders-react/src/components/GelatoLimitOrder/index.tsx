@@ -112,23 +112,30 @@ export default function GelatoLimitOrder() {
       formattedAmounts,
       inputError,
       rawAmounts,
+      price,
     },
     orderState: { independentField, rateType },
   } = useGelatoLimitOrders();
 
   const fiatValueInput = useUSDCValue(parsedAmounts.input);
-  const fiatValueOutput = useUSDCValue(parsedAmounts.output);
+
   const desiredRateInCurrencyAmount = tryParseAmount(
     trade?.outputAmount.toSignificant(6),
     currencies.output
   );
 
   const fiatValueDesiredRate = useUSDCValue(desiredRateInCurrencyAmount);
-  const priceImpact = computeFiatValuePriceImpact(
-    fiatValueInput,
-    fiatValueOutput
-  );
-  const currentMarketRate = trade?.executionPrice.toSignificant(6) ?? undefined;
+
+  const currentMarketRate = trade?.executionPrice ?? undefined;
+
+  const pct =
+    currentMarketRate && price
+      ? price.subtract(currentMarketRate).divide(currentMarketRate)
+      : undefined;
+
+  const percentageRateDifference = pct
+    ? new Percent(pct.numerator, pct.denominator)
+    : undefined;
 
   const isValid = !inputError;
 
@@ -136,10 +143,9 @@ export default function GelatoLimitOrder() {
   const handleActiveTab = (tab: "sell" | "buy") => {
     if (activeTab === tab) return;
 
-    handleRateType(rateType, currencies, parsedAmounts);
+    handleRateType(rateType, price);
     setActiveTab(tab);
   };
-
   const handleTypeInput = useCallback(
     (value: string) => {
       handleInput(Field.INPUT, value);
@@ -290,7 +296,9 @@ export default function GelatoLimitOrder() {
     tradeToConfirm,
     showConfirm,
     currencies.input?.wrapped.address,
+    currencies.input?.isNative,
     currencies.output?.wrapped.address,
+    currencies.output?.isNative,
     rawAmounts.input,
     rawAmounts.output,
     account,
@@ -421,7 +429,6 @@ export default function GelatoLimitOrder() {
               </ArrowWrapper>
               <CurrencyInputPanel
                 value={formattedAmounts.price}
-                currentMarketRate={currentMarketRate}
                 showMaxButton={showMaxButton}
                 currency={currencies.input}
                 onUserInput={handleTypeDesiredRate}
@@ -460,12 +467,12 @@ export default function GelatoLimitOrder() {
                 }
                 showMaxButton={false}
                 hideBalance={false}
-                fiatValue={fiatValueOutput ?? undefined}
-                priceImpact={priceImpact}
+                priceImpact={percentageRateDifference}
                 currency={currencies.output}
                 onCurrencySelect={handleOutputSelect}
                 otherCurrency={currencies.input}
                 showCommonBases={true}
+                rateType={rateType}
                 id="limit-order-currency-output"
               />
             </div>

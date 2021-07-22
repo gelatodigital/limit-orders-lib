@@ -28,6 +28,8 @@ import DropDown from "../../assets/images/dropdown.svg";
 import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 import { Pair } from "../../entities/pair";
 import TradePrice from "../order/TradePrice";
+import { RatePercentage } from "./RatePercentage";
+import { Rate } from "../../state/gorder/actions";
 
 const InputPanel = styled.div<{ hideInput?: boolean }>`
   ${({ theme }) => theme.flexColumnNoWrap}
@@ -186,11 +188,11 @@ interface CurrencyInputPanelProps {
   locked?: boolean;
   showCurrencySelector?: boolean;
   showRate?: boolean;
-  currentMarketRate?: string;
   isInvertedRate?: boolean;
   realExecutionPrice?: Price<Currency, Currency> | undefined;
   realExecutionPriceAsString?: string | undefined;
   gasPrice?: number;
+  rateType?: Rate;
 }
 
 export default function CurrencyInputPanel({
@@ -215,6 +217,7 @@ export default function CurrencyInputPanel({
   isInvertedRate = false,
   realExecutionPrice,
   realExecutionPriceAsString,
+  rateType,
   ...rest
 }: CurrencyInputPanelProps) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -244,15 +247,6 @@ export default function CurrencyInputPanel({
         : undefined,
     [currency, isInvertedRate, otherCurrency, value]
   );
-
-  // const currentMarketRateExplainer =
-  //   currency && otherCurrency && currentMarketRate
-  //     ? `1 ${
-  //         isInvertedRate ? otherCurrency?.symbol : currency?.symbol
-  //       } = ~${currentMarketRate} ${
-  //         isInvertedRate ? currency?.symbol : otherCurrency?.symbol
-  //       }`
-  //     : undefined;
 
   const realExecutionRateExplainer = useMemo(
     () =>
@@ -392,7 +386,17 @@ export default function CurrencyInputPanel({
               ) : (
                 "-"
               )}
-              <FiatValue fiatValue={fiatValue} priceImpact={priceImpact} />
+              {!rateType ? (
+                <FiatValue fiatValue={fiatValue} priceImpact={priceImpact} />
+              ) : (
+                //  Only show on output panel
+                <RatePercentage
+                  priceImpact={priceImpact}
+                  rateType={rateType}
+                  inputCurrency={otherCurrency}
+                  outputCurrency={currency}
+                />
+              )}
             </RowBetween>
           </FiatRow>
         )}
@@ -449,69 +453,6 @@ export default function CurrencyInputPanel({
                 )}
               </RowBetween>
             </FiatRow>
-            {/* <FiatRow>
-              <RowBetween>
-                {currency && otherCurrency ? (
-                  <TYPE.body
-                    onClick={onMax}
-                    color={theme.text2}
-                    fontWeight={400}
-                    fontSize={14}
-                    style={{ display: "inline", cursor: "pointer" }}
-                  >
-                    {"Current market rate"}
-                  </TYPE.body>
-                ) : (
-                  "-"
-                )}
-                <MouseoverTooltip
-                  text={
-                    currentMarketRateExplainer ? currentMarketRateExplainer : ""
-                  }
-                >
-                  <TYPE.body
-                    fontSize={14}
-                    color={currentMarketRate ? theme.text2 : theme.text4}
-                  >
-                    {currentMarketRate ? "~" : ""}
-                    <HoverInlineText
-                      text={currentMarketRate ? currentMarketRate : "-"}
-                    />
-                  </TYPE.body>
-                </MouseoverTooltip>
-              </RowBetween>
-            </FiatRow> */}
-            {/* <FiatRow>
-              <RowBetween>
-                {currency && otherCurrency ? (
-                  <TYPE.body
-                    onClick={onMax}
-                    color={theme.text2}
-                    fontWeight={400}
-                    fontSize={14}
-                    style={{ display: "inline", cursor: "pointer" }}
-                  >
-                    {"Current gas price"}
-                  </TYPE.body>
-                ) : (
-                  "-"
-                )}
-                <TYPE.body
-                  fontSize={14}
-                  color={fiatValue ? theme.text2 : theme.text4}
-                >
-                  <HoverInlineText
-                    text={
-                      gasPrice
-                        ? parseFloat(formatUnits(gasPrice, "gwei")).toFixed(0) +
-                          " GWEI"
-                        : "-"
-                    }
-                  />
-                  {" GWEI"}
-                </TYPE.body>
-              </RowBetween>
-            </FiatRow> */}
           </Fragment>
         )}
       </Container>

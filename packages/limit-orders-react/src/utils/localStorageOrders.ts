@@ -14,7 +14,7 @@ export function getLSOrders(chainId: number, account: string, pending = false) {
 
   const orders = get<Order[]>(key);
 
-  return orders ?? [];
+  return orders ? getUniqueOrders(orders) : [];
 }
 
 export function saveOrder(
@@ -86,10 +86,20 @@ export function confirmOrderCancellation(
     const orders = get<Order[]>(ordersKey);
     if (orders) {
       const ordersToSave = removeOrder(chainId, account, confirmedOrder);
-      ordersToSave.push({ ...confirmedOrder, cancelledTxHash: cancelHash });
+      ordersToSave.push({
+        ...confirmedOrder,
+        cancelledTxHash: cancelHash,
+        updatedAt: Date.now().toString(),
+      });
       set(ordersKey, ordersToSave);
     } else {
-      set(ordersKey, [{ ...confirmedOrder, cancelledTxHash: cancelHash }]);
+      set(ordersKey, [
+        {
+          ...confirmedOrder,
+          cancelledTxHash: cancelHash,
+          updatedAt: Date.now().toString(),
+        },
+      ]);
     }
   }
 }
@@ -117,10 +127,29 @@ export function confirmOrderSubmission(
         ...confirmedOrder,
         createdTxHash: creationHash,
       });
-      ordersToSave.push({ ...confirmedOrder, createdTxHash: creationHash });
+      ordersToSave.push({
+        ...confirmedOrder,
+        createdTxHash: creationHash,
+        updatedAt: Date.now().toString(),
+      });
       set(ordersKey, ordersToSave);
     } else {
-      set(ordersKey, [{ ...confirmedOrder, createdTxHash: creationHash }]);
+      set(ordersKey, [
+        {
+          ...confirmedOrder,
+          createdTxHash: creationHash,
+          updatedAt: Date.now().toString(),
+        },
+      ]);
     }
   }
 }
+
+export const getUniqueOrders = (allOrders: Order[]): Order[] => [
+  ...new Map(
+    allOrders
+      // sort by `updatedAt` asc so that the most recent one will be used
+      .sort((a, b) => parseFloat(a.updatedAt) - parseFloat(b.updatedAt))
+      .map((order) => [order.id, order])
+  ).values(),
+];

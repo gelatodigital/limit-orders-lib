@@ -1,6 +1,13 @@
 import JSBI from "jsbi";
 import { parseUnits } from "@ethersproject/units";
-import { Currency, CurrencyAmount, Price, TradeType } from "@uniswap/sdk-core";
+import {
+  Currency,
+  CurrencyAmount,
+  NativeCurrency,
+  Price,
+  Token,
+  TradeType,
+} from "@uniswap/sdk-core";
 import { Trade } from "@uniswap/v2-sdk";
 import { useCallback, useMemo } from "react";
 import { useCurrency } from "../../hooks/Tokens";
@@ -25,7 +32,7 @@ export function applyExchangeRateTo(
   inputCurrency: Currency,
   outputCurrency: Currency,
   isInverted: boolean
-): string | undefined {
+): CurrencyAmount<NativeCurrency | Token> | undefined {
   const parsedInputAmount = tryParseAmount(
     inputValue,
     isInverted ? outputCurrency : inputCurrency
@@ -45,7 +52,6 @@ export function applyExchangeRateTo(
             )
           )
           ?.divide(parsedExchangeRate.asFraction)
-          .toSignificant(6)
       : undefined;
   } else {
     return parsedExchangeRate && parsedInputAmount
@@ -57,7 +63,6 @@ export function applyExchangeRateTo(
               JSBI.BigInt(outputCurrency.decimals)
             )
           )
-          .toSignificant(6)
       : undefined;
   }
 }
@@ -196,7 +201,7 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
 
   const isExactIn: boolean = independentField === Field.INPUT;
   const isDesiredRateUpdate = independentField === Field.PRICE;
-  const desiredRateApplied =
+  const desiredRateAppliedAsCurrencyAmount =
     isDesiredRateUpdate && inputValue && inputCurrency && outputCurrency
       ? applyExchangeRateTo(
           inputValue,
@@ -205,6 +210,15 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
           outputCurrency,
           rateType === Rate.MUL ? false : true
         )
+      : undefined;
+
+  const desiredRateApplied =
+    isDesiredRateUpdate &&
+    inputValue &&
+    inputCurrency &&
+    outputCurrency &&
+    desiredRateAppliedAsCurrencyAmount
+      ? desiredRateAppliedAsCurrencyAmount?.toSignificant(6)
       : typedValue;
 
   const parsedAmount = tryParseAmount(
@@ -233,9 +247,7 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     handler
   );
 
-  const trade = useMemo(() => {
-    return isExactIn ? bestTradeExactIn : bestTradeExactOut;
-  }, [isExactIn, bestTradeExactIn, bestTradeExactOut]);
+  const trade = isExactIn ? bestTradeExactIn : bestTradeExactOut;
 
   const inputAmount = useMemo(() => {
     return tryParseAmount(inputValue, inputCurrency ?? undefined);
@@ -267,14 +279,6 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     inputError = inputError ?? "Order not allowed";
   }
 
-  if (!parsedAmount) {
-    inputError = inputError ?? "Enter an amount";
-  }
-
-  if (!currencies.input || !currencies.output) {
-    inputError = inputError ?? "Select a token";
-  }
-
   const parsedAmounts = useMemo(
     () => ({
       input: independentField === Field.INPUT ? parsedAmount : inputAmount,
@@ -284,48 +288,43 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     [independentField, parsedAmount, inputAmount, trade]
   );
 
-  if (
-    !parsedAmounts.output &&
-    isDesiredRateUpdate &&
-    inputAmount &&
-    parsedAmount &&
-    inputCurrency &&
-    outputCurrency
-  ) {
-    const outAmount = inputAmount
-      .multiply(parsedAmount.asFraction)
-      .divide(
-        JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(inputCurrency.decimals))
-      );
-    parsedAmounts.output = CurrencyAmount.fromFractionalAmount(
-      outputCurrency,
-      outAmount.numerator,
-      outAmount.denominator
-    );
+  if (!parsedAmounts.output && desiredRateAppliedAsCurrencyAmount) {
+    parsedAmounts.output = desiredRateAppliedAsCurrencyAmount;
+  }
+
+  if (!parsedAmounts.input || !parsedAmounts.output) {
+    inputError = inputError ?? "Enter an amount";
+  }
+
+  if (!currencies.input || !currencies.output) {
+    inputError = inputError ?? "Select a token";
   }
 
   const price = useMemo(() => {
     if (!parsedAmounts.input || !parsedAmounts.output) return undefined;
 
-    const priceGiven = new Price({
+    return new Price({
       baseAmount: parsedAmounts.input,
       quoteAmount: parsedAmounts.output,
     });
-
-    return rateType === Rate.MUL ? priceGiven : priceGiven.invert();
-  }, [parsedAmounts.input, parsedAmounts.output, rateType]);
+  }, [parsedAmounts.input, parsedAmounts.output]);
 
   if (price && trade) {
     if (
-      (rateType === Rate.MUL &&
-        (price.lessThan(trade.executionPrice.asFraction) ||
-          price.equalTo(trade.executionPrice.asFraction))) ||
-      (rateType === Rate.DIV &&
-        (price.greaterThan(trade.executionPrice.invert().asFraction) ||
-          price.equalTo(trade.executionPrice.invert().asFraction)))
+      rateType === Rate.MUL &&
+      (price.lessThan(trade.executionPrice.asFraction) ||
+        price.equalTo(trade.executionPrice.asFraction))
     )
       inputError =
-        inputError ?? "Only possible to place orders above market rate";
+        inputError ?? "Only possible to place sell orders above market rate";
+
+    if (
+      rateType === Rate.DIV &&
+      (price.invert().greaterThan(trade.executionPrice.invert().asFraction) ||
+        price.invert().equalTo(trade.executionPrice.invert().asFraction))
+    )
+      inputError =
+        inputError ?? "Only possible to place buy orders bellow market rate";
   }
 
   // compare input to balance
@@ -345,7 +344,9 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     price:
       independentField === Field.PRICE
         ? typedValue
-        : price?.toSignificant(6) ?? "",
+        : rateType === Rate.MUL
+        ? price?.toSignificant(6) ?? ""
+        : price?.invert().toSignificant(6) ?? "",
   };
 
   const rawAmounts = useMemo(

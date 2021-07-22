@@ -20,7 +20,7 @@ const BA_LIST =
   "https://raw.githubusercontent.com/The-Blockchain-Association/sec-notice-list/master/ba-sec-list.json";
 
 const QUICKSWAP_LIST =
-  "https://unpkg.com/quickswap-default-token-list@1.0.55/build/quickswap-default.tokenlist.json";
+  "https://unpkg.com/quickswap-default-token-list@1.0.79/build/quickswap-default.tokenlist.json";
 
 export const UNSUPPORTED_LIST_URLS: string[] = [BA_LIST];
 
