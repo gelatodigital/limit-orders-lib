@@ -6,6 +6,7 @@ import {
   BigNumberish,
   Contract,
   Wallet,
+  Overrides,
 } from "ethers";
 import { Provider } from "@ethersproject/abstract-provider";
 import { Signer } from "@ethersproject/abstract-signer";
@@ -248,7 +249,7 @@ export class GelatoLimitOrders {
     inputAmount: BigNumberish,
     minReturn: BigNumberish,
     checkAllowance = true,
-    gasPrice?: BigNumberish
+    overrides?: Overrides
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
 
@@ -264,10 +265,10 @@ export class GelatoLimitOrders {
     );
 
     return this._signer.sendTransaction({
+      ...overrides,
       to: txData.to,
       data: txData.data,
       value: BigNumber.from(txData.value),
-      gasPrice,
     });
   }
 
@@ -311,7 +312,7 @@ export class GelatoLimitOrders {
   public async cancelLimitOrder(
     order: Order,
     checkIsActiveOrder?: boolean,
-    gasPrice?: BigNumberish
+    overrides?: Overrides
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
     if (!this._gelatoLimitOrders)
@@ -340,19 +341,21 @@ export class GelatoLimitOrders {
       order.owner,
       order.witness,
       order.data,
-      { gasPrice, gasLimit: 500000 }
+      overrides ?? { gasLimit: 500000 }
     );
   }
 
   public async approveTokenAmount(
     inputToken: string,
-    amount: BigNumberish
+    amount: BigNumberish,
+    overrides?: Overrides
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
 
     return ERC20__factory.connect(inputToken, this._signer).approve(
       this._erc20OrderRouter.address,
-      amount
+      amount,
+      overrides
     );
   }
 

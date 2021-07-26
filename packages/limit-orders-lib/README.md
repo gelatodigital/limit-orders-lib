@@ -131,7 +131,7 @@ export class GelatoLimitOrders {
     minReturn: BigNumberish,
     // If inputToken is an ERC20, compare allowance with inputAmount. defaults to `true`
     checkAllowance?: boolean,
-    gasPrice?: BigNumberish
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
   encodeLimitOrderCancellation(
     order: Order,
@@ -140,11 +140,12 @@ export class GelatoLimitOrders {
   cancelLimitOrder(
     order: Order,
     checkIsActiveOrder?: boolean,
-    gasPrice?: BigNumberish
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
   approveTokenAmount(
     inputToken: string,
-    amount: BigNumberish
+    amount: BigNumberish,
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
   isActiveOrder(order: Order): Promise<boolean>;
   getExchangeRate(
