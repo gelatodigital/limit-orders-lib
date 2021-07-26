@@ -3,8 +3,6 @@ import React, { useMemo } from "react";
 import useTheme from "../../hooks/useTheme";
 import { Rate } from "../../state/gorder/actions";
 import { TYPE } from "../../theme";
-import { warningSeverity } from "../../utils/prices";
-import HoverInlineText from "../HoverInlineText";
 
 export function RatePercentage({
   priceImpact,
@@ -20,10 +18,13 @@ export function RatePercentage({
   const theme = useTheme();
   const priceImpactColor = useMemo(() => {
     if (!priceImpact) return undefined;
-    if (priceImpact.equalTo("0")) return theme.text4;
-    if (priceImpact.greaterThan("0")) return theme.green1;
+
+    const pi = rateType === Rate.MUL ? priceImpact : priceImpact?.multiply(-1);
+
+    if (pi.equalTo("0")) return theme.text4;
+    if (pi.greaterThan("0")) return theme.green1;
     return theme.red1;
-  }, [priceImpact, theme.green1, theme.red1, theme.text4]);
+  }, [priceImpact, rateType, theme.green1, theme.red1, theme.text4]);
 
   return (
     <TYPE.body fontSize={12} color={theme.text4}>
@@ -32,12 +33,16 @@ export function RatePercentage({
           {rateType === Rate.MUL
             ? `Sell ${inputCurrency?.symbol ?? "-"} ${priceImpact.toSignificant(
                 3
-              )}% ${priceImpact.lessThan("0") ? "bellow" : "above"}  market`
-            : `Buy ${outputCurrency?.symbol ?? "-"} ${priceImpact.toSignificant(
-                3
-              )}% ${priceImpact.lessThan("0") ? "above" : "bellow"} market`}
+              )}% ${priceImpact.lessThan("0") ? "below" : "above"} market`
+            : `Buy ${outputCurrency?.symbol ?? "-"} ${priceImpact
+                .multiply(-1)
+                .toSignificant(3)}% ${
+                priceImpact.lessThan("0") ? "above" : "below"
+              } market`}
         </span>
-      ) : null}
+      ) : (
+        "-"
+      )}
     </TYPE.body>
   );
 }

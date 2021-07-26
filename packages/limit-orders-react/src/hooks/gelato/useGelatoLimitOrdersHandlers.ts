@@ -1,15 +1,14 @@
 import { useCallback } from "react";
 import { Order } from "@gelatonetwork/limit-orders-lib";
+import { BigNumber, Overrides } from "ethers";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { useOrderActionHandlers } from "../../state/gorder/hooks";
 import { Field } from "../../types";
-import { Currency, CurrencyAmount, Price } from "@uniswap/sdk-core";
+import { Currency, Price } from "@uniswap/sdk-core";
 import { Rate } from "../../state/gorder/actions";
-import JSBI from "jsbi";
 import { useWeb3 } from "../../web3";
 import { useTransactionAdder } from "../../state/gtransactions/hooks";
 import useGasPrice from "../useGasPrice";
-import { BigNumber } from "ethers";
 import useGelatoLimitOrdersLib from "./useGelatoLimitOrdersLib";
 
 export interface GelatoLimitOrdersHandlers {
@@ -19,6 +18,7 @@ export interface GelatoLimitOrdersHandlers {
     inputAmount: string;
     outputAmount: string;
     owner: string;
+    overrides?: Overrides;
   }) => Promise<TransactionResponse>;
   handleLimitOrderCancellation: (
     order: Order,
@@ -27,7 +27,8 @@ export interface GelatoLimitOrdersHandlers {
       outputTokenSymbol: string;
       inputAmount: string;
       outputAmount: string;
-    }
+    },
+    overrides?: Overrides
   ) => Promise<TransactionResponse>;
   handleInput: (field: Field, value: string) => void;
   handleCurrencySelection: (
@@ -47,21 +48,20 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gasPrice = useGasPrice();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const handleLimitOrderSubmission = useCallback(
-    async (orderToSubmit: {
-      inputToken: string;
-      outputToken: string;
-      inputAmount: string;
-      outputAmount: string;
-      owner: string;
-    }) => {
+    async (
+      orderToSubmit: {
+        inputToken: string;
+        outputToken: string;
+        inputAmount: string;
+        outputAmount: string;
+        owner: string;
+      },
+      overrides?: Overrides
+    ) => {
       if (!gelatoLimitOrders) {
         throw new Error("Could not reach Gelato Limit Orders library");
       }
@@ -74,23 +74,20 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
         throw new Error("No signer");
       }
 
-      const {
-        witness,
-        payload,
-        order,
-      } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-        orderToSubmit.inputToken,
-        orderToSubmit.outputToken,
-        orderToSubmit.inputAmount,
-        orderToSubmit.outputAmount,
-        orderToSubmit.owner
-      );
+      const { witness, payload, order } =
+        await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+          orderToSubmit.inputToken,
+          orderToSubmit.outputToken,
+          orderToSubmit.inputAmount,
+          orderToSubmit.outputAmount,
+          orderToSubmit.owner
+        );
 
       const tx = await gelatoLimitOrders.signer.sendTransaction({
+        ...(overrides ?? { gasPrice }),
         to: payload.to,
         data: payload.data,
         value: BigNumber.from(payload.value),
-        gasPrice,
       });
 
       const now = Math.round(Date.now() / 1000);
@@ -120,7 +117,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
         outputTokenSymbol: string;
         inputAmount: string;
         outputAmount: string;
-      }
+      },
+      overrides?: Overrides
     ) => {
       if (!gelatoLimitOrders) {
         throw new Error("Could not reach Gelato Limit Orders library");
@@ -145,7 +143,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       const tx = await gelatoLimitOrders.cancelLimitOrder(
         orderToCancel,
         checkIfOrderExists,
-        gasPrice
+        overrides ?? { gasPrice, gasLimit: 600000 }
       );
 
       const now = Math.round(Date.now() / 1000);

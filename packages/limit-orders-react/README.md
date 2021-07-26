@@ -211,13 +211,17 @@ useGelatoLimitOrders(): {
 }
 
 useGelatoLimitOrdersHandlers(): {
-  handleLimitOrderSubmission: (orderToSubmit: {
-    inputToken: string;
-    outputToken: string;
-    inputAmount: string;
-    outputAmount: string;
-    owner: string;
-  }) => Promise<TransactionResponse>;
+  handleLimitOrderSubmission: (
+    orderToSubmit: {
+      inputToken: string;
+      outputToken: string;
+      inputAmount: string;
+      outputAmount: string;
+      owner: string;
+    },
+    overrides?: Overrides
+  ) => Promise<TransactionResponse>;
+
   handleLimitOrderCancellation: (
     order: Order,
     orderDetails?: {
@@ -225,14 +229,19 @@ useGelatoLimitOrdersHandlers(): {
       outputTokenSymbol: string;
       inputAmount: string;
       outputAmount: string;
-    }
+    },
+    overrides?: Overrides
   ) => Promise<TransactionResponse>;
+
   handleInput: (field: Field, value: string) => void;
+
   handleCurrencySelection: (
     field: Field.INPUT | Field.OUTPUT,
     currency: Currency
   ) => void;
+
   handleSwitchTokens: () => void;
+
   handleRateType: (rateType: Rate, price?: Price<Currency, Currency>) => void;
 }
 
