@@ -89,7 +89,6 @@ export function confirmOrderCancellation(
       ordersToSave.push({
         ...confirmedOrder,
         cancelledTxHash: cancelHash,
-        updatedAt: Date.now().toString(),
       });
       set(ordersKey, ordersToSave);
     } else {
@@ -97,7 +96,6 @@ export function confirmOrderCancellation(
         {
           ...confirmedOrder,
           cancelledTxHash: cancelHash,
-          updatedAt: Date.now().toString(),
         },
       ]);
     }
@@ -130,7 +128,6 @@ export function confirmOrderSubmission(
       ordersToSave.push({
         ...confirmedOrder,
         createdTxHash: creationHash,
-        updatedAt: Date.now().toString(),
       });
       set(ordersKey, ordersToSave);
     } else {
@@ -138,7 +135,6 @@ export function confirmOrderSubmission(
         {
           ...confirmedOrder,
           createdTxHash: creationHash,
-          updatedAt: Date.now().toString(),
         },
       ]);
     }
