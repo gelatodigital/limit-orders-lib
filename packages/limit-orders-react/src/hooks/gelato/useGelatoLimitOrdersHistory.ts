@@ -41,10 +41,10 @@ export default function useGelatoLimitOrdersHistory(
     (state) => state.gtransactions
   ) as any;
 
-  const transactions = useMemo(
-    () => (chainId ? state[chainId] ?? {} : {}),
-    [chainId, state]
-  );
+  const transactions = useMemo(() => (chainId ? state[chainId] ?? {} : {}), [
+    chainId,
+    state,
+  ]);
 
   const fetchOpenOrders = useCallback(() => {
     if (gelatoLimitOrders && account && chainId)

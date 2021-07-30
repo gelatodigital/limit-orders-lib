@@ -324,7 +324,7 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
         price.invert().equalTo(trade.executionPrice.invert().asFraction))
     )
       inputError =
-        inputError ?? "Only possible to place buy orders bellow market rate";
+        inputError ?? "Only possible to place buy orders below market rate";
   }
 
   // compare input to balance
