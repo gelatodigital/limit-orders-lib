@@ -56,7 +56,7 @@ const outputToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // ETH
 const inputAmount = ethers.utils.parseUnits("2000", "18");
 
 // Minimum amount of outTOken which the users wants to receive back
-const minReturn = ethers.utils.parseEther("1", "18");
+const minReturn = ethers.utils.parseEther("1");
 
 // Address of user who places the order (must be same as signer address)
 const userAddress = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B";
