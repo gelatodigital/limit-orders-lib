@@ -105,7 +105,7 @@ export const NATIVE_TOKEN_NAME = {
   [CHAIN_ID.MAINNET]: "Ether",
   [CHAIN_ID.ROPSTEN]: "Ether",
   [CHAIN_ID.MATIC]: "Matic",
-  [CHAIN_ID.MATIC]: "Fantom",
+  [CHAIN_ID.FANTOM]: "Fantom",
 };
 
 export const NATIVE_WRAPPED_TOKEN_ADDRESS = {
