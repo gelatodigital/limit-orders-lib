@@ -41,10 +41,10 @@ export default function useGelatoLimitOrdersHistory(
     (state) => state.gtransactions
   ) as any;
 
-  const transactions = useMemo(() => (chainId ? state[chainId] ?? {} : {}), [
-    chainId,
-    state,
-  ]);
+  const transactions = useMemo(
+    () => (chainId ? state[chainId] ?? {} : {}),
+    [chainId, state]
+  );
 
   const fetchOpenOrders = useCallback(() => {
     if (gelatoLimitOrders && account && chainId)
@@ -56,8 +56,7 @@ export default function useGelatoLimitOrdersHistory(
           orders.forEach((order: Order) => {
             const orderExists = ordersLS.find(
               (confOrder) =>
-                confOrder.createdTxHash.toLowerCase() ===
-                order.createdTxHash.toLowerCase()
+                confOrder.id.toLowerCase() === order.id.toLowerCase()
             );
 
             if (
@@ -82,8 +81,7 @@ export default function useGelatoLimitOrdersHistory(
                   .filter((pendingOrder) => pendingOrder.status === "cancelled")
                   .find(
                     (pendingOrder) =>
-                      pendingOrder.createdTxHash.toLowerCase() ===
-                      order.createdTxHash.toLowerCase()
+                      pendingOrder.id.toLowerCase() === order.id.toLowerCase()
                   );
                 return orderCancelled ? false : true;
               })
@@ -95,6 +93,28 @@ export default function useGelatoLimitOrdersHistory(
         })
         .catch((e) => {
           console.error("Error fetching open orders", e);
+          const openOrdersLS = getLSOrders(chainId, account).filter(
+            (order) => order.status === "open"
+          );
+
+          const pendingOrdersLS = getLSOrders(chainId, account, true);
+
+          setOpenOrders({
+            confirmed: openOrdersLS
+              .filter((order: Order) => {
+                const orderCancelled = pendingOrdersLS
+                  .filter((pendingOrder) => pendingOrder.status === "cancelled")
+                  .find(
+                    (pendingOrder) =>
+                      pendingOrder.id.toLowerCase() === order.id.toLowerCase()
+                  );
+                return orderCancelled ? false : true;
+              })
+              .sort(newOrdersFirst),
+            pending: pendingOrdersLS
+              .filter((order) => order.status === "open")
+              .sort(newOrdersFirst),
+          });
         });
   }, [gelatoLimitOrders, account, chainId, includeOrdersWithNullHandler]);
 
@@ -108,8 +128,7 @@ export default function useGelatoLimitOrdersHistory(
           orders.forEach((order: Order) => {
             const orderExists = ordersLS.find(
               (confOrder) =>
-                confOrder.createdTxHash.toLowerCase() ===
-                order.createdTxHash.toLowerCase()
+                confOrder.id.toLowerCase() === order.id.toLowerCase()
             );
             if (
               !orderExists ||
@@ -135,7 +154,24 @@ export default function useGelatoLimitOrdersHistory(
             pending: pendingCancelledOrdersLS.sort(newOrdersFirst),
           });
         })
-        .catch((e) => console.error("Error fetching cancelled orders", e));
+        .catch((e) => {
+          console.error("Error fetching cancelled orders", e);
+
+          const cancelledOrdersLS = getLSOrders(chainId, account).filter(
+            (order) => order.status === "cancelled"
+          );
+
+          const pendingCancelledOrdersLS = getLSOrders(
+            chainId,
+            account,
+            true
+          ).filter((order) => order.status === "cancelled");
+
+          setCancelledOrders({
+            confirmed: cancelledOrdersLS.sort(newOrdersFirst),
+            pending: pendingCancelledOrdersLS.sort(newOrdersFirst),
+          });
+        });
   }, [gelatoLimitOrders, account, chainId, includeOrdersWithNullHandler]);
 
   const fetchExecutedOrders = useCallback(() => {
@@ -148,8 +184,7 @@ export default function useGelatoLimitOrdersHistory(
           orders.forEach((order: Order) => {
             const orderExists = ordersLS.find(
               (confOrder) =>
-                confOrder.createdTxHash.toLowerCase() ===
-                order.createdTxHash.toLowerCase()
+                confOrder.id.toLowerCase() === order.id.toLowerCase()
             );
             if (
               !orderExists ||
@@ -166,7 +201,14 @@ export default function useGelatoLimitOrdersHistory(
 
           setExecutedOrders(executedOrdersLS.sort(newOrdersFirst));
         })
-        .catch((e) => console.error("Error fetching executed orders", e));
+        .catch((e) => {
+          console.error("Error fetching executed orders", e);
+          const executedOrdersLS = getLSOrders(chainId, account).filter(
+            (order) => order.status === "executed"
+          );
+
+          setExecutedOrders(executedOrdersLS.sort(newOrdersFirst));
+        });
   }, [gelatoLimitOrders, account, chainId, includeOrdersWithNullHandler]);
 
   useEffect(() => {

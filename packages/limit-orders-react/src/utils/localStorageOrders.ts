@@ -56,9 +56,7 @@ export function removeOrder(
   if (!prev) return [];
 
   const orders = prev.filter(
-    (orderInLS) =>
-      orderInLS.createdTxHash.toLowerCase() !==
-      order.createdTxHash.toLowerCase()
+    (orderInLS) => orderInLS.id.toLowerCase() !== order.id.toLowerCase()
   );
 
   set(key, orders);
