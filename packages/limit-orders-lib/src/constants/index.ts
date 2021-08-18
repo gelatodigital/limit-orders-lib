@@ -27,6 +27,7 @@ export const HANDLERS_ADDRESSES = {
   [CHAIN_ID.FANTOM]: {
     ["spiritswap"]: "0x5fb00386558ccc219e51b69d8e963ef20b0c267a",
     ["spookyswap"]: "0x228ffd7122d202c0cd24330892881c47b0817c7a",
+    ["bombswap"]: "0x87C4Fbd67f6DD8a1B5EFD9879956c728C97afeFe",
   },
 };
 
@@ -41,7 +42,7 @@ export const NETWORK_HANDLERS = {
   [CHAIN_ID.MAINNET]: ["uniswap"],
   [CHAIN_ID.ROPSTEN]: ["uniswap"],
   [CHAIN_ID.MATIC]: ["quickswap"],
-  [CHAIN_ID.FANTOM]: ["spiritswap", "spookyswap"],
+  [CHAIN_ID.FANTOM]: ["spiritswap", "spookyswap", "bombswap"],
 };
 
 export const OLD_SUBGRAPH_URL = {
