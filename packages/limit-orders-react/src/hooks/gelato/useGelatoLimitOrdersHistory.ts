@@ -92,7 +92,7 @@ export default function useGelatoLimitOrdersHistory(
           });
         })
         .catch((e) => {
-          console.error("Error fetching open orders", e);
+          console.error("Error fetching open orders from subgraph", e);
           const openOrdersLS = getLSOrders(chainId, account).filter(
             (order) => order.status === "open"
           );
@@ -155,7 +155,7 @@ export default function useGelatoLimitOrdersHistory(
           });
         })
         .catch((e) => {
-          console.error("Error fetching cancelled orders", e);
+          console.error("Error fetching cancelled orders from subgraph", e);
 
           const cancelledOrdersLS = getLSOrders(chainId, account).filter(
             (order) => order.status === "cancelled"
@@ -202,7 +202,7 @@ export default function useGelatoLimitOrdersHistory(
           setExecutedOrders(executedOrdersLS.sort(newOrdersFirst));
         })
         .catch((e) => {
-          console.error("Error fetching executed orders", e);
+          console.error("Error fetching executed orders from subgraph", e);
           const executedOrdersLS = getLSOrders(chainId, account).filter(
             (order) => order.status === "executed"
           );

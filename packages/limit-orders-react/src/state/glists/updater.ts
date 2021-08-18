@@ -4,11 +4,20 @@ import { useFetchListCallback } from "../../hooks/useFetchListCallback";
 import useInterval from "../../hooks/useInterval";
 import useIsWindowVisible from "../../hooks/useIsWindowVisible";
 import { useWeb3 } from "../../web3";
+import {
+  DEFAULT_LIST_OF_LISTS_MAINNET,
+  DEFAULT_LIST_OF_LISTS_MATIC,
+} from "../../constants/lists";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "..";
+import { addList, removeList } from "./actions";
 
 export default function Updater(): null {
-  const { library } = useWeb3();
+  const { library, chainId } = useWeb3();
 
   const isWindowVisible = useIsWindowVisible();
+
+  const dispatch = useDispatch<AppDispatch>();
 
   // get all loaded lists, and the active urls
   const lists = useAllLists();
@@ -39,6 +48,65 @@ export default function Updater(): null {
       }
     });
   }, [fetchList, library, lists]);
+
+  useEffect(() => {
+    if (!chainId || !library || Object.keys(lists).length) return;
+
+    const urlList =
+      chainId === 137
+        ? DEFAULT_LIST_OF_LISTS_MATIC
+        : DEFAULT_LIST_OF_LISTS_MAINNET;
+
+    urlList.forEach((listURL: string) => {
+      fetchList(library, listURL)
+        .then(() => {
+          dispatch(addList(listURL));
+        })
+        .catch(() => {
+          dispatch(removeList(listURL));
+        });
+    });
+  }, [chainId, dispatch, fetchList, library, lists]);
+
+  useEffect(() => {
+    if (!chainId || !library) return;
+
+    if (Object.keys(lists).length) {
+      if (
+        chainId === 137 &&
+        !Object.keys(lists).includes(
+          DEFAULT_LIST_OF_LISTS_MATIC[DEFAULT_LIST_OF_LISTS_MATIC.length - 1]
+        )
+      ) {
+        DEFAULT_LIST_OF_LISTS_MATIC.forEach((listURL: string) => {
+          fetchList(library, listURL)
+            .then(() => {
+              dispatch(addList(listURL));
+            })
+            .catch(() => {
+              dispatch(removeList(listURL));
+            });
+        });
+      } else if (
+        chainId === 1 &&
+        !Object.keys(lists).includes(
+          DEFAULT_LIST_OF_LISTS_MAINNET[
+            DEFAULT_LIST_OF_LISTS_MAINNET.length - 1
+          ]
+        )
+      ) {
+        DEFAULT_LIST_OF_LISTS_MAINNET.forEach((listURL: string) => {
+          fetchList(library, listURL)
+            .then(() => {
+              dispatch(addList(listURL));
+            })
+            .catch(() => {
+              dispatch(removeList(listURL));
+            });
+        });
+      } else return;
+    }
+  }, [chainId, dispatch, fetchList, library, lists]);
 
   // if any lists from unsupported lists are loaded, check them too (in case new updates since last visit)
   // useEffect(() => {
