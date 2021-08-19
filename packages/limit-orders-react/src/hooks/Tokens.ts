@@ -1,6 +1,6 @@
 import { parseBytes32String } from "@ethersproject/strings";
 import { Currency, Ether, NativeCurrency, Token } from "@uniswap/sdk-core";
-import { arrayify } from "ethers/lib/utils";
+import { arrayify } from "@ethersproject/bytes";
 import { useMemo } from "react";
 import {
   useAllLists,
