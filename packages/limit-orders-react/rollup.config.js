@@ -7,6 +7,7 @@ import image from "@rollup/plugin-image";
 import scss from "rollup-plugin-scss";
 import json from "@rollup/plugin-json";
 import { terser } from "rollup-plugin-terser";
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // this override is needed because Module format cjs does not support top-level await
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -65,6 +66,7 @@ export default {
     scss(),
     json(),
     terser(),
+    visualizer()
   ],
   external: Object.keys(globals),
 };

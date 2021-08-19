@@ -39,3 +39,6 @@ limit-orders-hooks
 yalc.lock
 yalc.sig
 .yalc
+
+# bundle analyzer
+stats.html
