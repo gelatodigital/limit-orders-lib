@@ -28,7 +28,7 @@ import useGasOverhead from "../../../hooks/useGasOverhead";
 import { MouseoverTooltip } from "../../Tooltip";
 import { TYPE } from "../../../theme";
 import HoverInlineText from "../../HoverInlineText";
-import { formatUnits } from "ethers/lib/utils";
+import { formatUnits } from "@ethersproject/units";
 
 const handleColorType = (status: string, theme: DefaultTheme) => {
   switch (status) {

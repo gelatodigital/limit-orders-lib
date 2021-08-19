@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { getAddress } from "ethers/lib/utils";
+import { getAddress } from "@ethersproject/address";
 import { Percent, Currency, TradeType, Token } from "@uniswap/sdk-core";
 import { Trade as V2Trade } from "@uniswap/v2-sdk";
 import { AddressZero } from "@ethersproject/constants";

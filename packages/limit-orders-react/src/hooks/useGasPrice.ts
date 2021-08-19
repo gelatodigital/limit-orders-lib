@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { BigNumber } from "@ethersproject/bignumber";
-import { parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "@ethersproject/units";
 import { useWeb3 } from "../web3";
 import useInterval from "./useInterval";
 import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
