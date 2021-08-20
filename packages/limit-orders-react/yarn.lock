@@ -1751,14 +1751,15 @@
     "@ethersproject/properties" "^5.3.0"
     "@ethersproject/strings" "^5.3.0"
 
-"@gelatonetwork/limit-orders-lib@^2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@gelatonetwork/limit-orders-lib/-/limit-orders-lib-2.0.4.tgz#51f95a26444571f1b9e34b254114cb480693fe2a"
-  integrity sha512-GzVt7PSaWE9lQBkOvZHNO4cuyDldRVFnrHcs/CRhZ310LrJ566pCQqDLLV0Zo2XJ6SSz2DfeWxYVzqlXQj/XYw==
+"@gelatonetwork/limit-orders-lib@^2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@gelatonetwork/limit-orders-lib/-/limit-orders-lib-2.0.6.tgz#386b3b854387dad241cf7f5fb34d1ba0e4377340"
+  integrity sha512-GrsxRv2RIY+B3C501d6AWJwj5vSg+mUZNBoYiGoq1mt3CtzYuXxEmreg1kPh8bZ5TccumVtUO3ZhthJJyhzVSQ==
   dependencies:
     ethers "5.2.0"
     graphql "15.5.0"
     graphql-request "3.4.0"
+    tslib "^2.3.1"
 
 "@jimp/bmp@^0.16.1":
   version "0.16.1"
@@ -6326,6 +6327,11 @@ tslib@^2.0.3, tslib@^2.1.0, tslib@^2.2.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.0.tgz#803b8cdab3e12ba581a4ca41c8839bbb0dacb09e"
   integrity sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==
+
+tslib@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.1.tgz#e8a335add5ceae51aa261d32a490158ef042ef01"
+  integrity sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
 
 tsutils@^3.21.0:
   version "3.21.0"
