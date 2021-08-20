@@ -1,6 +1,6 @@
 {
   "name": "@gelatonetwork/limit-orders-react",
-  "version": "1.0.11-0",
+  "version": "1.0.11",
   "description": "React Library for creating limit orders via Gelato",
   "keywords": [
     "ethereum",
