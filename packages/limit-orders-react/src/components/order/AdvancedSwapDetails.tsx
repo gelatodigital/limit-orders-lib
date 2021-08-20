@@ -2,7 +2,7 @@
 import { GelatoLimitOrders, utils } from "@gelatonetwork/limit-orders-lib";
 import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 import { CurrencyAmount } from "@uniswap/sdk-core";
-import { formatUnits } from "ethers/lib/utils";
+import { formatUnits } from "@ethersproject/units";
 import React, { useMemo } from "react";
 import { useGelatoLimitOrders } from "../../hooks/gelato";
 import useGelatoLimitOrdersLib from "../../hooks/gelato/useGelatoLimitOrdersLib";

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { formatUnits } from "ethers/lib/utils";
+import { formatUnits } from "@ethersproject/units";
 import { useWeb3 } from "../web3";
 import useGasPrice from "./useGasPrice";
 import { useCurrency } from "./Tokens";
