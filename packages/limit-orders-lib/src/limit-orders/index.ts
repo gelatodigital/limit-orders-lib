@@ -15,6 +15,7 @@ import {
   GELATO_LIMIT_ORDERS_ADDRESS,
   GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER,
   GELATO_LIMIT_ORDERS_MODULE_ADDRESS,
+  GELATO_LIMIT_ORDERS_SPECIALIZED_MODULE_BY_HANDLER,
   HANDLERS_ADDRESSES,
   NETWORK_HANDLERS,
   SLIPPAGE_BPS,
@@ -132,11 +133,20 @@ export class GelatoLimitOrders {
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           GelatoLimitOrders__factory.createInterface()
         ) as GelatoLimitOrdersContract);
-    this._moduleAddress = GELATO_LIMIT_ORDERS_MODULE_ADDRESS[this._chainId];
+
     this._handler = handler;
     this._handlerAddress = handler
       ? HANDLERS_ADDRESSES[this._chainId][handler]?.toLowerCase()
       : undefined;
+
+    if (handler) {
+      this._moduleAddress =
+        GELATO_LIMIT_ORDERS_SPECIALIZED_MODULE_BY_HANDLER[this._chainId][
+          handler
+        ] ?? GELATO_LIMIT_ORDERS_MODULE_ADDRESS[this._chainId];
+    } else {
+      this._moduleAddress = GELATO_LIMIT_ORDERS_MODULE_ADDRESS[this._chainId];
+    }
 
     this._abiEncoder = new utils.AbiCoder();
 
