@@ -22,12 +22,13 @@ export const HANDLERS_ADDRESSES = {
   // UniswapV2Router02Handler
   [CHAIN_ID.MATIC]: {
     ["quickswap"]: "0xaccbd2c6ad75ad3394dc5f4b1f606bf111e4eae3",
+    ["paraswap"]: "0xd6236bec202c818e858e71252ffe8957369f2812",
   },
   // UniswapV2Router02Handler
   [CHAIN_ID.FANTOM]: {
     ["spiritswap"]: "0x5fb00386558ccc219e51b69d8e963ef20b0c267a",
     ["spookyswap"]: "0x228ffd7122d202c0cd24330892881c47b0817c7a",
-    ["bombswap"]: "0x87C4Fbd67f6DD8a1B5EFD9879956c728C97afeFe",
+    ["bombswap"]: "0x87c4fbd67f6dd8a1b5efd9879956c728c97afefe",
   },
 };
 
@@ -41,7 +42,7 @@ export const NETWORK_NAME = {
 export const NETWORK_HANDLERS = {
   [CHAIN_ID.MAINNET]: ["uniswap"],
   [CHAIN_ID.ROPSTEN]: ["uniswap"],
-  [CHAIN_ID.MATIC]: ["quickswap"],
+  [CHAIN_ID.MATIC]: ["quickswap", "paraswap"],
   [CHAIN_ID.FANTOM]: ["spiritswap", "spookyswap", "bombswap"],
 };
 
@@ -79,6 +80,24 @@ export const GELATO_LIMIT_ORDERS_MODULE_ADDRESS = {
   [CHAIN_ID.ROPSTEN]: "0x3f3C13b09B601fb6074124fF8D779d2964caBf8B",
   [CHAIN_ID.MATIC]: "0x5A36178E38864F5E724A2DaF5f9cD9bA473f7903",
   [CHAIN_ID.FANTOM]: "0xf2253BF9a0BD002300cFe6f4E630d755669f6DCa",
+};
+
+export const GELATO_LIMIT_ORDERS_SPECIALIZED_MODULE_BY_HANDLER = {
+  [CHAIN_ID.MAINNET]: {
+    ["uniswap"]: "0x037fc8e71445910e1E0bBb2a0896d5e9A7485318",
+  },
+  [CHAIN_ID.ROPSTEN]: {
+    ["uniswap"]: "0x3f3C13b09B601fb6074124fF8D779d2964caBf8B",
+  },
+  [CHAIN_ID.MATIC]: {
+    ["paraswap"]: "0xd6236bec202c818e858e71252ffe8957369f2812",
+    ["quickswap"]: "0x5A36178E38864F5E724A2DaF5f9cD9bA473f7903",
+  },
+  [CHAIN_ID.FANTOM]: {
+    ["spiritswap"]: "0xf2253BF9a0BD002300cFe6f4E630d755669f6DCa",
+    ["spookyswap"]: "0xf2253BF9a0BD002300cFe6f4E630d755669f6DCa",
+    ["bombswap"]: "0xf2253BF9a0BD002300cFe6f4E630d755669f6DCa",
+  },
 };
 
 export const GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER = {
