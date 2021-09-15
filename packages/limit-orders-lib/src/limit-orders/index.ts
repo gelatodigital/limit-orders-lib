@@ -102,7 +102,11 @@ export class GelatoLimitOrders {
     return this._erc20OrderRouter;
   }
 
-  constructor(chainId: ChainId, signerOrProvider?: Signer, handler?: Handler) {
+  constructor(
+    chainId: ChainId,
+    signerOrProvider?: Signer | Provider,
+    handler?: Handler
+  ) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {
       throw new Error("Invalid chainId and handler");
     }

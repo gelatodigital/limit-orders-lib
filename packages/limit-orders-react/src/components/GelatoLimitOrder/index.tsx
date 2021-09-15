@@ -89,7 +89,13 @@ const PoweredByWrapper = styled(PoweredByGelato)<{ size: number }>`
   margin-left: 0.25rem;
 `;
 
-export default function GelatoLimitOrder() {
+interface GelatoLimitOrderProps {
+  showCommonBases?: boolean;
+}
+
+export default function GelatoLimitOrder({
+  showCommonBases = true,
+}: GelatoLimitOrderProps) {
   const { account, toggleWalletModal } = useWeb3();
 
   const theme = useTheme();
@@ -403,7 +409,7 @@ export default function GelatoLimitOrder() {
                 fiatValue={fiatValueInput ?? undefined}
                 onCurrencySelect={handleInputSelect}
                 otherCurrency={currencies.output}
-                showCommonBases={true}
+                showCommonBases={showCommonBases}
                 id="limit-order-currency-input"
               />
               <ArrowWrapper clickable={false}>
@@ -435,7 +441,7 @@ export default function GelatoLimitOrder() {
                 fiatValue={fiatValueDesiredRate ?? undefined}
                 onCurrencySelect={handleInputSelect}
                 otherCurrency={currencies.output}
-                showCommonBases={true}
+                showCommonBases={showCommonBases}
                 id="limit-order-currency-rate"
                 showCurrencySelector={false}
                 hideBalance={true}
@@ -471,7 +477,7 @@ export default function GelatoLimitOrder() {
                 currency={currencies.output}
                 onCurrencySelect={handleOutputSelect}
                 otherCurrency={currencies.input}
-                showCommonBases={true}
+                showCommonBases={showCommonBases}
                 rateType={rateType}
                 id="limit-order-currency-output"
               />

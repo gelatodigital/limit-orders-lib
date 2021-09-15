@@ -8,7 +8,8 @@ export type Handler =
   | "uniswap"
   | "quickswap"
   | "spiritswap"
-  | "bombswap";
+  | "bombswap"
+  | "polydex";
 
 export interface TransactionData {
   to: string;
