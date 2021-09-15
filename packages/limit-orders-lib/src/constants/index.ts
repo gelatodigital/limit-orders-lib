@@ -22,7 +22,7 @@ export const HANDLERS_ADDRESSES = {
   // UniswapV2Router02Handler
   [CHAIN_ID.MATIC]: {
     ["quickswap"]: "0xaccbd2c6ad75ad3394dc5f4b1f606bf111e4eae3",
-    ["paraswap"]: "0xd2290647a99d02d5796fe5dc82fd5048962ddbad",
+    ["paraswap"]: "0xd6236bec202c818e858e71252ffe8957369f2812",
   },
   // UniswapV2Router02Handler
   [CHAIN_ID.FANTOM]: {
@@ -90,7 +90,7 @@ export const GELATO_LIMIT_ORDERS_SPECIALIZED_MODULE_BY_HANDLER = {
     ["uniswap"]: "0x3f3C13b09B601fb6074124fF8D779d2964caBf8B",
   },
   [CHAIN_ID.MATIC]: {
-    ["paraswap"]: "0xd2290647a99d02d5796fe5dc82fd5048962ddbad",
+    ["paraswap"]: "0xd6236bec202c818e858e71252ffe8957369f2812",
     ["quickswap"]: "0x5A36178E38864F5E724A2DaF5f9cD9bA473f7903",
   },
   [CHAIN_ID.FANTOM]: {
