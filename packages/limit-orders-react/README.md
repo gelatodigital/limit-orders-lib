@@ -134,6 +134,7 @@ import {
 export default function LimitOrder() {
   return (
     <>
+      {/*To hide common bases in search modal you can pass into the component `showCommonBases={false}` */}
       <GelatoLimitOrderPanel />
       <GelatoLimitOrdersHistoryPanel />
     </>

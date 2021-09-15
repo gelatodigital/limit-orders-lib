@@ -1,5 +1,5 @@
 import React from "react";
-import { Handler, Order } from "@gelatonetwork/limit-orders-lib";
+import { Handler } from "@gelatonetwork/limit-orders-lib";
 export * from "@gelatonetwork/limit-orders-lib";
 
 import { gelatoReducers, GELATO_PERSISTED_KEYS } from "./state";

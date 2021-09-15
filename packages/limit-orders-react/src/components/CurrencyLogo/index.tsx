@@ -62,7 +62,9 @@ export default function CurrencyLogo({
           ? [getTokenLogoURL(currency.address)]
           : [];
       if (currency instanceof WrappedTokenInfo) {
-        return [...uriLocations, ...defaultUrls];
+        return uriBySymbol
+          ? [...uriLocations, ...defaultUrls, uriBySymbol]
+          : [...uriLocations, ...defaultUrls];
       }
       const tokenUrlsSoFar = uriBySymbol
         ? [uriBySymbol, ...defaultUrls]

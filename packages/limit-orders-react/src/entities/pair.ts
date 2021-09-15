@@ -7,23 +7,11 @@ import {
 } from "@uniswap/sdk-core";
 import invariant from "tiny-invariant";
 import JSBI from "jsbi";
-import {
-  getQuickSwapPairAddress,
-  getSpiritSwapPairAddress,
-  getSpookySwapPairAddress,
-  getUniswapPairAddress,
-} from "../utils/pairs";
-import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
+import { calculatePairAddressByHandler } from "../utils/pairs";
 import {
   InsufficientInputAmountError,
   InsufficientReservesError,
 } from "./errors";
-
-export const UNISWAP_FACTORY_ADDRESS =
-  "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
-
-export const UNISWAP_INIT_CODE_HASH =
-  "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f";
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000);
 
@@ -41,17 +29,7 @@ const calculatePairAddress = (
   tokenB: Token,
   handler?: string
 ): string | undefined => {
-  if (tokenA.chainId === 137 && tokenB.chainId === 137) {
-    return getQuickSwapPairAddress(tokenA, tokenB);
-  } else if (tokenA.chainId === 250 && tokenB.chainId === 250)
-    if (handler) {
-      return handler.toLowerCase() === "spiritswap"
-        ? getSpiritSwapPairAddress(tokenA, tokenB)
-        : getSpookySwapPairAddress(tokenA, tokenB);
-    } else return getSpookySwapPairAddress(tokenA, tokenB);
-  else if (isEthereumChain(tokenA.chainId)) {
-    return getUniswapPairAddress(tokenA, tokenB);
-  } else return undefined;
+  return calculatePairAddressByHandler(tokenA, tokenB, handler);
 };
 
 export class Pair {

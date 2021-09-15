@@ -124,7 +124,7 @@ export const getBaseTokenLogoURLByTokenSymbol = (
     case "WETH":
       return "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png";
     case "QUICK":
-      return "https://raw.githubusercontent.com/sameepsi/quickswap-interface/master/public/favicon.jpeg";
+      return "https://i.imgur.com/8G7QIrR.png";
     case "WBTC":
       return "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png";
     case "WMATIC":
