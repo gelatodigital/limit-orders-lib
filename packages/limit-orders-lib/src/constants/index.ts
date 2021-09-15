@@ -23,7 +23,7 @@ export const HANDLERS_ADDRESSES = {
   // UniswapV2Router02Handler
   [CHAIN_ID.MATIC]: {
     ["quickswap"]: "0xaccbd2c6ad75ad3394dc5f4b1f606bf111e4eae3",
-    ["polydex"]: "0xbd13225f0a45bead8510267b4d6a7c78146be459",
+    ["polydex"]: "0x00fc86d360162e4672ec6B427E12ed36F39f1f53",
   },
   // UniswapV2Router02Handler
   [CHAIN_ID.FANTOM]: {
