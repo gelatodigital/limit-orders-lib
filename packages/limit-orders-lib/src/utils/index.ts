@@ -16,6 +16,8 @@ export const isEthereumChain = (chainId: number): boolean => {
       return true;
     case 3:
       return true;
+    case 5:
+      return true;
     default:
       return false;
   }
