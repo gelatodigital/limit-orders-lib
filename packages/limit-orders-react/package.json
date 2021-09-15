@@ -107,7 +107,7 @@
     "@uniswap/sdk-core": "^3.0.0-alpha.3",
     "@uniswap/token-lists": "^1.0.0-beta.24",
     "@uniswap/v2-sdk": "^3.0.0-alpha.2",
-    "ethers": "5.0.7",
+    "ethers": "^5.4.6",
     "local-storage": "^2.0.0",
     "lodash.flatmap": "^4.5.0",
     "node-vibrant": "^3.1.5",

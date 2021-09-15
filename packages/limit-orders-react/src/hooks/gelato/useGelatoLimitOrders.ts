@@ -1,4 +1,3 @@
-import { GelatoLimitOrders } from "@gelatonetwork/limit-orders-lib";
 import useGelatoLimitOrdersHandlers, {
   GelatoLimitOrdersHandlers,
 } from "./useGelatoLimitOrdersHandlers";
