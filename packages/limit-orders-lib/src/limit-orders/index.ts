@@ -356,11 +356,16 @@ export class GelatoLimitOrders {
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
 
-    return ERC20__factory.connect(inputToken, this._signer).approve(
-      this._erc20OrderRouter.address,
-      amount,
-      overrides
-    );
+    return overrides
+      ? ERC20__factory.connect(inputToken, this._signer).approve(
+          this._erc20OrderRouter.address,
+          amount,
+          overrides
+        )
+      : ERC20__factory.connect(inputToken, this._signer).approve(
+          this._erc20OrderRouter.address,
+          amount
+        );
   }
 
   public async isActiveOrder(order: Order): Promise<boolean> {
