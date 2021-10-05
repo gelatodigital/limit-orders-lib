@@ -25,6 +25,10 @@ const POLYDEX_FACTORY_ADDRESS = "0x5BdD1CD910e3307582F213b33699e676E61deaD9";
 const POLYDEX_INIT_CODE_HASH =
   "0x8cb41b27c88f8934c0773207afb757d84c4baa607990ad4a30505e42438d999a";
 
+const CAFESWAP_FACTORY_ADDRESS = "0x3e708FdbE3ADA63fc94F8F61811196f1302137AD";
+const CAFESWAP_INIT_CODE_HASH =
+  "0x29fc590aa3fac813c6aed55e47ef28208a9ac3951233b0b657353007c68aca4d";
+
 const getSpiritSwapPairAddress = (tokenA: Token, tokenB: Token): string => {
   const tokens = tokenA.sortsBefore(tokenB)
     ? [tokenA, tokenB]
@@ -100,6 +104,21 @@ const getPolydexPairAddress = (tokenA: Token, tokenB: Token): string => {
   );
 };
 
+const getCafeSwapPairAddress = (tokenA: Token, tokenB: Token): string => {
+  const tokens = tokenA.sortsBefore(tokenB)
+    ? [tokenA, tokenB]
+    : [tokenB, tokenA]; // does safety checks
+
+  return getCreate2Address(
+    CAFESWAP_FACTORY_ADDRESS,
+    keccak256(
+      ["bytes"],
+      [pack(["address", "address"], [tokens[0].address, tokens[1].address])]
+    ),
+    CAFESWAP_INIT_CODE_HASH
+  );
+};
+
 export const calculatePairAddressByHandler = (
   tokenA: Token,
   tokenB: Token,
@@ -111,6 +130,8 @@ export const calculatePairAddressByHandler = (
         return getPolydexPairAddress(tokenA, tokenB);
       case "quickswap":
         return getQuickSwapPairAddress(tokenA, tokenB);
+      case "cafeswap":
+        return getCafeSwapPairAddress(tokenA, tokenB);
       default:
         return getQuickSwapPairAddress(tokenA, tokenB);
     }

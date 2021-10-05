@@ -9,7 +9,8 @@ export type Handler =
   | "quickswap"
   | "spiritswap"
   | "bombswap"
-  | "polydex";
+  | "polydex"
+  | "cafeswap";
 
 export interface TransactionData {
   to: string;
