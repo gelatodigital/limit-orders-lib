@@ -11,10 +11,12 @@ import {
 import { Provider } from "@ethersproject/abstract-provider";
 import { Signer } from "@ethersproject/abstract-signer";
 import {
+  CHAIN_ID,
   ETH_ADDRESS,
   GELATO_LIMIT_ORDERS_ADDRESS,
   GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER,
   GELATO_LIMIT_ORDERS_MODULE_ADDRESS,
+  GELATO_LIMIT_ORDERS_MODULE_FLASHBOTS_ADDRESS,
   HANDLERS_ADDRESSES,
   NETWORK_HANDLERS,
   SLIPPAGE_BPS,
@@ -49,6 +51,10 @@ export const isValidChainIdAndHandler = (
   handler: Handler
 ): boolean => {
   return NETWORK_HANDLERS[chainId].includes(handler);
+};
+
+export const isFlashbotsCompatibleChainId = (chainId: ChainId): boolean => {
+  return chainId == CHAIN_ID.MAINNET || chainId == CHAIN_ID.GOERLI;
 };
 
 export class GelatoLimitOrders {
@@ -105,10 +111,18 @@ export class GelatoLimitOrders {
   constructor(
     chainId: ChainId,
     signerOrProvider?: Signer | Provider,
-    handler?: Handler
+    handler?: Handler,
+    isFlashbotsProtected = false
   ) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {
       throw new Error("Invalid chainId and handler");
+    } else if (
+      isFlashbotsProtected &&
+      (handler || !isFlashbotsCompatibleChainId(chainId))
+    ) {
+      throw new Error(
+        "Invalid chainId or handler for Flashbots bundle submission. handler must be empty, and chainId either 1 (mainnet) or 5 (goerli)"
+      );
     }
 
     this._chainId = chainId;
@@ -136,7 +150,9 @@ export class GelatoLimitOrders {
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           GelatoLimitOrders__factory.createInterface()
         ) as GelatoLimitOrdersContract);
-    this._moduleAddress = GELATO_LIMIT_ORDERS_MODULE_ADDRESS[this._chainId];
+    this._moduleAddress = isFlashbotsProtected
+      ? GELATO_LIMIT_ORDERS_MODULE_FLASHBOTS_ADDRESS[this._chainId]
+      : GELATO_LIMIT_ORDERS_MODULE_ADDRESS[this._chainId];
     this._handler = handler;
     this._handlerAddress = handler
       ? HANDLERS_ADDRESSES[this._chainId][handler]?.toLowerCase()
