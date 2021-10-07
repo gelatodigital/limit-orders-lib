@@ -45,7 +45,6 @@ import { useIsSwapUnsupported } from "../../hooks/useIsSwapUnsupported";
 import { useUSDCValue } from "../../hooks/useUSDCPrice";
 import { Field } from "../../state/gorder/actions";
 import { tryParseAmount } from "../../state/gorder/hooks";
-import { computeFiatValuePriceImpact } from "../../utils/computeFiatValuePriceImpact";
 import { maxAmountSpend } from "../../utils/maxAmountSpend";
 import AppBody from "./AppBody";
 import { ExternalLink, TYPE } from "../../theme";
@@ -288,7 +287,7 @@ export default function GelatoLimitOrder({
             txHash: undefined,
           });
         });
-    } catch (error) {
+    } catch (error: any) {
       setSwapState({
         attemptingTxn: false,
         tradeToConfirm,
