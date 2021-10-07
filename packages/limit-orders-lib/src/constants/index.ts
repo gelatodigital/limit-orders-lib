@@ -24,6 +24,7 @@ export const HANDLERS_ADDRESSES = {
   [CHAIN_ID.MATIC]: {
     ["quickswap"]: "0xaccbd2c6ad75ad3394dc5f4b1f606bf111e4eae3",
     ["polydex"]: "0x00fc86d360162e4672ec6B427E12ed36F39f1f53",
+    ["cafeswap"]: "0xd167afcee4e9a89e69646fd3c27e58b61d1b7f97",
   },
   // UniswapV2Router02Handler
   [CHAIN_ID.FANTOM]: {
@@ -44,7 +45,7 @@ export const NETWORK_NAME = {
 export const NETWORK_HANDLERS = {
   [CHAIN_ID.MAINNET]: ["uniswap"],
   [CHAIN_ID.ROPSTEN]: ["uniswap"],
-  [CHAIN_ID.MATIC]: ["quickswap", "polydex"],
+  [CHAIN_ID.MATIC]: ["quickswap", "polydex", "cafeswap"],
   [CHAIN_ID.FANTOM]: ["spiritswap", "spookyswap", "bombswap"],
 };
 
