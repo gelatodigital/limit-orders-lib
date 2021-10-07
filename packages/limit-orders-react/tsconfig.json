@@ -22,7 +22,6 @@
     "jsx": "react-jsx",
     "downlevelIteration": true,
     "allowSyntheticDefaultImports": true,
-    "useUnknownInCatchVariables": false,
 
   },
   "exclude": ["node_modules"],
