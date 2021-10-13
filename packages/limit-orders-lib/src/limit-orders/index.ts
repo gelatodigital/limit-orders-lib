@@ -13,6 +13,7 @@ import { Signer } from "@ethersproject/abstract-signer";
 import {
   CHAIN_ID,
   ETH_ADDRESS,
+  NATIVE_WRAPPED_TOKEN_ADDRESS,
   GELATO_LIMIT_ORDERS_ADDRESS,
   GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER,
   GELATO_LIMIT_ORDERS_MODULE_ADDRESS,
@@ -57,6 +58,17 @@ export const isFlashbotsCompatibleChainId = (chainId: ChainId): boolean => {
   return chainId == CHAIN_ID.MAINNET || chainId == CHAIN_ID.GOERLI;
 };
 
+export const isETHOrWETH = (
+  tokenAddress: string,
+  chainID: ChainId
+): boolean => {
+  const WETH_ADDRESS = NATIVE_WRAPPED_TOKEN_ADDRESS[chainID];
+  return (
+    tokenAddress.toLowerCase() === ETH_ADDRESS.toLowerCase() ||
+    tokenAddress.toLowerCase() === WETH_ADDRESS.toLowerCase()
+  );
+};
+
 export class GelatoLimitOrders {
   private _chainId: ChainId;
   private _provider: Provider | undefined;
@@ -68,6 +80,7 @@ export class GelatoLimitOrders {
   private _abiEncoder: utils.AbiCoder;
   private _handlerAddress?: string;
   private _handler?: Handler;
+  private _isFlashbotsProtected: boolean;
 
   public static slippageBPS = SLIPPAGE_BPS;
   public static gelatoFeeBPS = TWO_BPS_GELATO_FEE;
@@ -108,6 +121,10 @@ export class GelatoLimitOrders {
     return this._erc20OrderRouter;
   }
 
+  get isFlashbotsProtected(): boolean {
+    return this._isFlashbotsProtected;
+  }
+
   constructor(
     chainId: ChainId,
     signerOrProvider?: Signer | Provider,
@@ -121,7 +138,7 @@ export class GelatoLimitOrders {
       (handler || !isFlashbotsCompatibleChainId(chainId))
     ) {
       throw new Error(
-        "Invalid chainId or handler for Flashbots bundle submission. handler must be empty, and chainId either 1 (mainnet) or 5 (goerli)"
+        "Invalid chainId or handler for Flashbots bundle submission. handler must be undefined, and chainId either 1 (mainnet) or 5 (goerli)"
       );
     }
 
@@ -157,6 +174,7 @@ export class GelatoLimitOrders {
     this._handlerAddress = handler
       ? HANDLERS_ADDRESSES[this._chainId][handler]?.toLowerCase()
       : undefined;
+    this._isFlashbotsProtected = isFlashbotsProtected;
 
     this._abiEncoder = new utils.AbiCoder();
 
@@ -272,6 +290,16 @@ export class GelatoLimitOrders {
     overrides?: Overrides
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
+
+    if (
+      this._isFlashbotsProtected &&
+      !isETHOrWETH(inputToken, this._chainId) &&
+      !isETHOrWETH(outputToken, this._chainId)
+    ) {
+      throw new Error(
+        "Flashbots protection requires inputToken or outputToken to be ETH or Wrapped, so that miner fee can be discounted. This requirement will be relaxed in future versions."
+      );
+    }
 
     const owner = await this._signer.getAddress();
 
