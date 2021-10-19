@@ -5,7 +5,7 @@ import { useWeb3 } from "../../web3";
 export default function useGelatoLimitOrdersLib():
   | GelatoLimitOrders
   | undefined {
-  const { chainId, library, handler } = useWeb3();
+  const { chainId, library, handler, isFlashbotsProtected } = useWeb3();
 
   return useMemo(() => {
     try {
@@ -13,7 +13,8 @@ export default function useGelatoLimitOrdersLib():
         ? new GelatoLimitOrders(
             chainId as ChainId,
             library?.getSigner(),
-            handler
+            handler,
+            isFlashbotsProtected
           )
         : undefined;
     } catch (error) {
@@ -22,5 +23,5 @@ export default function useGelatoLimitOrdersLib():
       );
       return undefined;
     }
-  }, [chainId, library, handler]);
+  }, [chainId, library, handler, isFlashbotsProtected]);
 }

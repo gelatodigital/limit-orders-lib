@@ -21,8 +21,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "downlevelIteration": true,
-    "allowSyntheticDefaultImports": true,
-
+    "allowSyntheticDefaultImports": true
   },
   "exclude": ["node_modules"],
   "include": ["./src/**/*.ts", "./src/**/*.tsx"]

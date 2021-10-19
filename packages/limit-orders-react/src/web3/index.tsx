@@ -8,6 +8,7 @@ interface Web3State {
   account: string | undefined | null;
   chainId: number | undefined;
   handler?: Handler;
+  isFlashbotsProtected?: boolean;
   toggleWalletModal?: () => void;
 }
 
@@ -17,6 +18,7 @@ interface Web3ProviderProps {
   account: string | undefined | null;
   chainId: number | undefined;
   handler?: Handler;
+  isFlashbotsProtected?: boolean;
   toggleWalletModal?: () => void;
 }
 
@@ -25,6 +27,7 @@ const initialWeb3State: Web3State = {
   chainId: undefined,
   account: undefined,
   handler: undefined,
+  isFlashbotsProtected: undefined,
   toggleWalletModal: undefined,
 };
 
@@ -38,6 +41,7 @@ export const Web3Provider: FC<Web3ProviderProps> = ({
   chainId,
   account,
   handler,
+  isFlashbotsProtected,
   toggleWalletModal,
 }: Web3ProviderProps) => {
   const [state, setState] = useState<Web3State>(initialWeb3State);
@@ -48,9 +52,17 @@ export const Web3Provider: FC<Web3ProviderProps> = ({
       chainId,
       account,
       handler,
+      isFlashbotsProtected,
       toggleWalletModal,
     });
-  }, [library, chainId, account, handler, toggleWalletModal]);
+  }, [
+    library,
+    chainId,
+    account,
+    handler,
+    isFlashbotsProtected,
+    toggleWalletModal,
+  ]);
 
   return (
     <Web3Context.Provider

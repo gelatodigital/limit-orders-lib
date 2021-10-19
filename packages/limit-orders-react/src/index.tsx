@@ -37,6 +37,7 @@ export function GelatoProvider({
   account,
   handler,
   toggleWalletModal,
+  isFlashbotsProtected = false,
   useDefaultTheme = true,
   useDarkMode = true,
 }: {
@@ -45,6 +46,7 @@ export function GelatoProvider({
   account: string | undefined;
   handler?: Handler;
   toggleWalletModal?: () => void;
+  isFlashbotsProtected?: boolean;
   useDefaultTheme?: boolean;
   useDarkMode?: boolean;
   children?: React.ReactNode;
@@ -56,6 +58,7 @@ export function GelatoProvider({
         library={library}
         account={account}
         handler={handler}
+        isFlashbotsProtected={isFlashbotsProtected}
         toggleWalletModal={toggleWalletModal}
       >
         <ThemedGlobalStyle />
@@ -72,6 +75,7 @@ export function GelatoProvider({
       library={library}
       account={account}
       handler={handler}
+      isFlashbotsProtected={isFlashbotsProtected}
       toggleWalletModal={toggleWalletModal}
     >
       <ListsUpdater />
