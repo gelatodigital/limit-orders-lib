@@ -23,6 +23,7 @@ import { NATIVE } from "../constants/addresses";
 import { useWeb3 } from "../web3";
 import { WFTM_FANTOM } from "../constants/tokens.fantom";
 import { WMATIC_MATIC } from "../constants/tokens.matic";
+import { WBNB_BSC } from "../constants/tokens.bsc";
 
 export const WETH9: { [chainId: number]: Token } = {
   [1]: new Token(
@@ -74,7 +75,9 @@ export class NativeToken extends NativeCurrency {
 
   public get wrapped(): Token {
     const weth9 =
-      this.chainId === 137
+      this.chainId === 56
+        ? WBNB_BSC
+        : this.chainId === 137
         ? WMATIC_MATIC
         : this.chainId === 250
         ? WFTM_FANTOM
