@@ -65,21 +65,17 @@ export const OLD_SUBGRAPH_URL = {
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-polygon",
   [CHAIN_ID.FANTOM]:
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-fantom",
-  [CHAIN_ID.BSC]:
-    "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-bsc",
 };
 
 export const SUBGRAPH_URL = {
   [CHAIN_ID.MAINNET]:
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-ii",
-  [CHAIN_ID.ROPSTEN]:
-    "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-ropsten",
   [CHAIN_ID.MATIC]:
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-polygon-ii",
   [CHAIN_ID.FANTOM]:
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-fantom-ii",
   [CHAIN_ID.BSC]:
-    "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-bsc-ii",
+    "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-bsc",
 };
 
 export const GELATO_LIMIT_ORDERS_ADDRESS = {
@@ -147,14 +143,6 @@ export const NATIVE_WRAPPED_TOKEN_ADDRESS = {
   [CHAIN_ID.MATIC]: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
   [CHAIN_ID.FANTOM]: "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83",
   [CHAIN_ID.BSC]: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-};
-
-export const MULTICALL_ADDRESSES = {
-  [CHAIN_ID.ROPSTEN]: "0xCa731e0f33Afbcfa9363d6F7449d1f5447d10C80",
-  [CHAIN_ID.MAINNET]: "0xCa731e0f33Afbcfa9363d6F7449d1f5447d10C80",
-  [CHAIN_ID.MATIC]: "0xCa731e0f33Afbcfa9363d6F7449d1f5447d10C80",
-  [CHAIN_ID.FANTOM]: "0x5A36178E38864F5E724A2DaF5f9cD9bA473f7903",
-  [CHAIN_ID.BSC]: "",   //TODO:BSC
 };
 
 export const GENERIC_GAS_LIMIT_ORDER_EXECUTION = "400000";
