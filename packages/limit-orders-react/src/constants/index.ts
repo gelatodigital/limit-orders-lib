@@ -126,3 +126,8 @@ export const PINNED_PAIRS: { readonly [chainId: number]: [Token, Token][] } = {
     [DAI, USDT],
   ],
 };
+
+export const MULTICALL_ADDRESSES = {
+  [56]: "0x38c4092b28dAB7F3d98eE6524549571c283cdfA5"
+};
+
