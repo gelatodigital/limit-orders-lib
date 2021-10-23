@@ -12,7 +12,8 @@
     "copy-contracts-types": "cp ./src/contracts/types/*.d.ts ./dist/contracts/types",
     "format": "prettier --write .",
     "generate-contracts-typings": "typechain --target=ethers-v5 --out-dir src/contracts/types ./src/**/abis/*.json",
-    "lint": "eslint --cache ."
+    "lint": "eslint --cache .",
+    "prepare": "yarn build && yarn format && yarn lint"
   },
   "repository": {
     "type": "git",
