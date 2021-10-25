@@ -363,7 +363,9 @@ export function useCurrency(
   const isNativeCurrency = isETH || isMATIC || isFTM || isNative;
   const token = useToken(isNativeCurrency ? undefined : currencyId);
   if (isNativeCurrency && chainId)
-    return chainId === 137
+    return chainId === 56
+      ? new NativeToken(chainId, 18, "BNB", "Binance Coin")
+      : chainId === 137
       ? new NativeToken(chainId, 18, "MATIC", "Matic")
       : chainId === 250
       ? new NativeToken(chainId, 18, "FTM", "Fantom")

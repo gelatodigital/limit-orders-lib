@@ -5,6 +5,7 @@ import { USDC_MATIC } from "../constants/tokens.matic";
 import { USDC_FANTOM } from "../constants/tokens.fantom";
 import { useWeb3 } from "../web3";
 import { useTradeExactOut } from "./useTrade";
+import { USDC_BSC } from "../constants/tokens.bsc";
 
 // USDC amount used when calculating spot price for a given currency.
 // The amount is large enough to filter low liquidity pairs.
@@ -17,6 +18,10 @@ const usdcCurrencyAmountFANTOM = CurrencyAmount.fromRawAmount(
   USDC_FANTOM,
   100_000e6
 );
+const usdcCurrencyAmountBSC = CurrencyAmount.fromRawAmount(
+  USDC_BSC,
+  100_000e6
+);
 
 /**
  * Returns the price in USDC of the input currency
@@ -26,9 +31,12 @@ export default function useUSDCPrice(
   currency?: Currency
 ): Price<Currency, Token> | undefined {
   const { chainId, handler } = useWeb3();
+  console.log("!");
   const v2USDCTrade = useTradeExactOut(
     currency,
-    chainId === 137
+    chainId === 56
+      ? usdcCurrencyAmountBSC
+      : chainId === 137
       ? usdcCurrencyAmountMATIC
       : chainId === 250
       ? usdcCurrencyAmountFANTOM
@@ -41,13 +49,15 @@ export default function useUSDCPrice(
     }
   );
 
+  console.log(v2USDCTrade);
+
   return useMemo(() => {
     if (!currency || !chainId) {
       return undefined;
     }
 
     // return some fake price data for non-mainnet
-    if (chainId !== 1 && chainId !== 137 && chainId !== 250) {
+    if (chainId !== 1 && chainId !== 56 && chainId !== 137 && chainId !== 250) {
       const fakeUSDC = new Token(
         chainId,
         "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
@@ -63,6 +73,7 @@ export default function useUSDCPrice(
       );
     }
 
+    console.log(v2USDCTrade);
     // use v2 price if available, v3 as fallback
     if (v2USDCTrade) {
       const { numerator, denominator } = v2USDCTrade.route.midPrice;

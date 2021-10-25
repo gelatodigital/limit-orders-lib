@@ -7,6 +7,7 @@ export const UNI_ADDRESS = {
   [5]: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
   [4]: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
   [3]: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+  [56]: "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1",
   [137]: "0xb33EaAd8d922B1083446DC23f610c2567fB5180f",
 };
 
@@ -107,6 +108,7 @@ export const UNI: { [chainId: number]: Token } = {
   [4]: new Token(4, UNI_ADDRESS[4], 18, "UNI", "Uniswap"),
   [3]: new Token(3, UNI_ADDRESS[3], 18, "UNI", "Uniswap"),
   [5]: new Token(5, UNI_ADDRESS[5], 18, "UNI", "Uniswap"),
+  [56]: new Token(56, UNI_ADDRESS[56], 18, "UNI", "Uniswap"),
   [137]: new Token(42, UNI_ADDRESS[137], 18, "UNI", "Uniswap"),
 };
 
@@ -130,6 +132,11 @@ export const getBaseTokenLogoURLByTokenSymbol = (
     case "WMATIC":
     case "MATIC":
       return "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0/logo.png";
+    case 'WBNB':
+    case 'BNB':
+      return 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xB8c77482e45F1F44dE1745F52C74426C631bDD52/logo.png';
+    case 'BUSD':
+      return 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x4Fabb145d64652a948d72533023f6E7A623C7C53/logo.png';
     default:
       return undefined;
   }
