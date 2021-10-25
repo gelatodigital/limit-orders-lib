@@ -6,7 +6,6 @@ export default function useGelatoLimitOrdersLib():
   | GelatoLimitOrders
   | undefined {
   const { chainId, library, handler } = useWeb3();
-
   return useMemo(() => {
     try {
       return chainId && library

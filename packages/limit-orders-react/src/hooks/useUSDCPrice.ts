@@ -31,7 +31,6 @@ export default function useUSDCPrice(
   currency?: Currency
 ): Price<Currency, Token> | undefined {
   const { chainId, handler } = useWeb3();
-  console.log("!");
   const v2USDCTrade = useTradeExactOut(
     currency,
     chainId === 56
@@ -48,8 +47,6 @@ export default function useUSDCPrice(
       maxHops: 2,
     }
   );
-
-  console.log(v2USDCTrade);
 
   return useMemo(() => {
     if (!currency || !chainId) {
@@ -73,7 +70,6 @@ export default function useUSDCPrice(
       );
     }
 
-    console.log(v2USDCTrade);
     // use v2 price if available, v3 as fallback
     if (v2USDCTrade) {
       const { numerator, denominator } = v2USDCTrade.route.midPrice;

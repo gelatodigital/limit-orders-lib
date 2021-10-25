@@ -57,7 +57,6 @@ const WETH_ONLY: ChainTokenList = {
   [5]: [WETH9[5]],
   [42]: [WETH9[42]],
   [56]: [WBNB_BSC],
-  [137]: [WETH_MATIC],
   [250]: [WETH_FANTOM],
 };
 // used to construct intermediary pairs for trading

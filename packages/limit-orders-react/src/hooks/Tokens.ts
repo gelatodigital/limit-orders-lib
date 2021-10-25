@@ -357,10 +357,11 @@ export function useCurrency(
   const isETH = currencyId?.toUpperCase() === "ETH";
   const isMATIC = currencyId?.toUpperCase() === "MATIC";
   const isFTM = currencyId?.toUpperCase() === "FTM";
+  const isBNB = currencyId?.toUpperCase() === "BNB";
   const isNative =
     currencyId?.toUpperCase() === "NATIVE" ||
     currencyId?.toLowerCase() === NATIVE.toLowerCase();
-  const isNativeCurrency = isETH || isMATIC || isFTM || isNative;
+  const isNativeCurrency = isETH || isMATIC || isFTM || isBNB || isNative;
   const token = useToken(isNativeCurrency ? undefined : currencyId);
   if (isNativeCurrency && chainId)
     return chainId === 56
