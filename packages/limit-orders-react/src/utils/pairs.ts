@@ -31,7 +31,7 @@ const CAFESWAP_INIT_CODE_HASH =
 
 const PANCAKESWAP_FACTORY_ADDRESS = "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73";
 const PANCAKESWAP_INIT_CODE_HASH =
-  "0x565b352325210f9f955e20886021e6dbf5b263e93ead091defac8c7539bff040";
+  "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5";
 
 const getSpiritSwapPairAddress = (tokenA: Token, tokenB: Token): string => {
   const tokens = tokenA.sortsBefore(tokenB)
