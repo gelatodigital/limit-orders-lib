@@ -18,10 +18,7 @@ const usdcCurrencyAmountFANTOM = CurrencyAmount.fromRawAmount(
   USDC_FANTOM,
   100_000e6
 );
-const usdcCurrencyAmountBSC = CurrencyAmount.fromRawAmount(
-  USDC_BSC,
-  100_000e6
-);
+const usdcCurrencyAmountBSC = CurrencyAmount.fromRawAmount(USDC_BSC, 100_000e6);
 
 /**
  * Returns the price in USDC of the input currency

@@ -132,11 +132,11 @@ export const getBaseTokenLogoURLByTokenSymbol = (
     case "WMATIC":
     case "MATIC":
       return "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0/logo.png";
-    case 'WBNB':
-    case 'BNB':
-      return 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xB8c77482e45F1F44dE1745F52C74426C631bDD52/logo.png';
-    case 'BUSD':
-      return 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x4Fabb145d64652a948d72533023f6E7A623C7C53/logo.png';
+    case "WBNB":
+    case "BNB":
+      return "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xB8c77482e45F1F44dE1745F52C74426C631bDD52/logo.png";
+    case "BUSD":
+      return "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x4Fabb145d64652a948d72533023f6E7A623C7C53/logo.png";
     default:
       return undefined;
   }

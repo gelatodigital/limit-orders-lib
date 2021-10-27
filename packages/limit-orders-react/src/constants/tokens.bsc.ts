@@ -1,6 +1,5 @@
 import { Token } from "@uniswap/sdk-core";
 
-
 export const WBNB_BSC = new Token(
   56,
   "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
@@ -33,11 +32,4 @@ export const USDT_BSC = new Token(
   "Binance-Peg BSC-USD"
 );
 
-
-
-export const BSC_BASES = [
-  WBNB_BSC,
-  BUSD_BSC,
-  USDC_BSC,
-  USDT_BSC,
-];
+export const BSC_BASES = [WBNB_BSC, BUSD_BSC, USDC_BSC, USDT_BSC];
