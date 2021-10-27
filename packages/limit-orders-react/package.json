@@ -34,7 +34,8 @@
     "copy-assets": "cp ./src/react/assets/**/*.png ./dist/src/react/assets",
     "format": "prettier --write .",
     "generate-contracts-typings": "typechain --target=ethers-v5 --outDir src/contracts/types './src/**/abis/*.json'",
-    "lint": "eslint --cache ."
+    "lint": "eslint --cache .",
+    "prepare": "yarn build && yarn format && yarn lint"
   },
   "lint-staged": {
     "*.{js,json,md,ts,yaml,yml}": "yarn format",
