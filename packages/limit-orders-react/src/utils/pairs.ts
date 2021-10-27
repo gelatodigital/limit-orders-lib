@@ -29,6 +29,10 @@ const CAFESWAP_FACTORY_ADDRESS = "0x5eDe3f4e7203Bf1F12d57aF1810448E5dB20f46C";
 const CAFESWAP_INIT_CODE_HASH =
   "0x29fc590aa3fac813c6aed55e47ef28208a9ac3951233b0b657353007c68aca4d";
 
+const PANCAKESWAP_FACTORY_ADDRESS = "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73";
+const PANCAKESWAP_INIT_CODE_HASH =
+  "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5";
+
 const getSpiritSwapPairAddress = (tokenA: Token, tokenB: Token): string => {
   const tokens = tokenA.sortsBefore(tokenB)
     ? [tokenA, tokenB]
@@ -119,6 +123,21 @@ const getCafeSwapPairAddress = (tokenA: Token, tokenB: Token): string => {
   );
 };
 
+const getPancakeSwapPairAddress = (tokenA: Token, tokenB: Token): string => {
+  const tokens = tokenA.sortsBefore(tokenB)
+    ? [tokenA, tokenB]
+    : [tokenB, tokenA]; // does safety checks
+
+  return getCreate2Address(
+    PANCAKESWAP_FACTORY_ADDRESS,
+    keccak256(
+      ["bytes"],
+      [pack(["address", "address"], [tokens[0].address, tokens[1].address])]
+    ),
+    PANCAKESWAP_INIT_CODE_HASH
+  );
+};
+
 export const calculatePairAddressByHandler = (
   tokenA: Token,
   tokenB: Token,
@@ -143,6 +162,13 @@ export const calculatePairAddressByHandler = (
         return getSpookySwapPairAddress(tokenA, tokenB);
       default:
         return getSpookySwapPairAddress(tokenA, tokenB);
+    }
+  } else if (tokenA.chainId === 56 && tokenB.chainId === 56) {
+    switch (handler) {
+      case "pancakeswap":
+        return getPancakeSwapPairAddress(tokenA, tokenB);
+      default:
+        return getPancakeSwapPairAddress(tokenA, tokenB);
     }
   } else if (isEthereumChain(tokenA.chainId)) {
     return getUniswapPairAddress(tokenA, tokenB);

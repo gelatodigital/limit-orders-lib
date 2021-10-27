@@ -27,7 +27,7 @@ import { GelatoLimitOrders, utils } from "@gelatonetwork/limit-orders-lib";
 // Supported networks: Mainnet = 1; Ropsten = 3; Polygon = 137; Fantom = 250
 const chainId = 1;
 const signerOrProvider = await provider.getSigner();
-const handler = "uniswap"; // "spookyswap" | "uniswap" | "quickswap" | "spiritswap" | "bombswap" | "polydex" | "cafeswap";
+const handler = "uniswap"; // "spookyswap" | "uniswap" | "quickswap" | "spiritswap" | "bombswap" | "polydex" | "cafeswap" | "pancakeswap";
 
 const gelatoLimitOrders = new GelatoLimitOrders(
   chainId as ChainId,
@@ -199,7 +199,7 @@ export class GelatoLimitOrders {
     includeOrdersWithNullHandler?: boolean
   ): Promise<Order[]>;
 }
-export declare type ChainId = 1 | 3 | 137 | 250;
+export declare type ChainId = 1 | 3 | 56 | 137 | 250;
 
 export type Handler =
   | "spookyswap"

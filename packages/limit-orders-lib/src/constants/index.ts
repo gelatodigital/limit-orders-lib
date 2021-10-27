@@ -7,6 +7,7 @@ export const CHAIN_ID = {
   MAINNET: 1,
   ROPSTEN: 3,
   GOERLI: 5,
+  BSC: 56,
   MATIC: 137,
   FANTOM: 250,
 };
@@ -32,6 +33,10 @@ export const HANDLERS_ADDRESSES = {
     ["spookyswap"]: "0x228ffd7122d202c0cd24330892881c47b0817c7a",
     ["bombswap"]: "0x87C4Fbd67f6DD8a1B5EFD9879956c728C97afeFe",
   },
+  // UniswapV2Router02Handler
+  [CHAIN_ID.BSC]: {
+    ["pancakeswap"]: "0x88f8CCC064bA2D39cF08D57B6e7504a7B6bE8E4e",
+  },
 };
 
 export const NETWORK_NAME = {
@@ -40,6 +45,7 @@ export const NETWORK_NAME = {
   [CHAIN_ID.GOERLI]: "Goerli",
   [CHAIN_ID.MATIC]: "Polygon (Matic)",
   [CHAIN_ID.FANTOM]: "FANTOM",
+  [CHAIN_ID.BSC]: "Binance Smart Chain",
 };
 
 export const NETWORK_HANDLERS = {
@@ -47,6 +53,7 @@ export const NETWORK_HANDLERS = {
   [CHAIN_ID.ROPSTEN]: ["uniswap"],
   [CHAIN_ID.MATIC]: ["quickswap", "polydex", "cafeswap"],
   [CHAIN_ID.FANTOM]: ["spiritswap", "spookyswap", "bombswap"],
+  [CHAIN_ID.BSC]: ["pancakeswap"],
 };
 
 export const OLD_SUBGRAPH_URL = {
@@ -63,12 +70,12 @@ export const OLD_SUBGRAPH_URL = {
 export const SUBGRAPH_URL = {
   [CHAIN_ID.MAINNET]:
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-ii",
-  [CHAIN_ID.ROPSTEN]:
-    "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-ropsten",
   [CHAIN_ID.MATIC]:
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-polygon-ii",
   [CHAIN_ID.FANTOM]:
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-fantom-ii",
+  [CHAIN_ID.BSC]:
+    "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-bsc",
 };
 
 export const GELATO_LIMIT_ORDERS_ADDRESS = {
@@ -77,6 +84,7 @@ export const GELATO_LIMIT_ORDERS_ADDRESS = {
   [CHAIN_ID.GOERLI]: "0xa0453c6ab71fe3da89640ee2503326bd0899a589",
   [CHAIN_ID.MATIC]: "0x38c4092b28dAB7F3d98eE6524549571c283cdfA5",
   [CHAIN_ID.FANTOM]: "0x05Ad1094Eb6Cde564d732196F6754Ee464896031",
+  [CHAIN_ID.BSC]: "0x0c30D3d66bc7C73A83fdA929888c34dcb24FD599",
 };
 
 export const GELATO_LIMIT_ORDERS_MODULE_ADDRESS = {
@@ -85,6 +93,7 @@ export const GELATO_LIMIT_ORDERS_MODULE_ADDRESS = {
   [CHAIN_ID.GOERLI]: "0xCf8EDB3333Fae73b23f689229F4De6Ac95d1f707",
   [CHAIN_ID.MATIC]: "0x5A36178E38864F5E724A2DaF5f9cD9bA473f7903",
   [CHAIN_ID.FANTOM]: "0xf2253BF9a0BD002300cFe6f4E630d755669f6DCa",
+  [CHAIN_ID.BSC]: "0xb7499a92fc36e9053a4324aFfae59d333635D9c3",
 };
 
 export const GELATO_LIMIT_ORDERS_MODULE_FLASHBOTS_ADDRESS = {
@@ -98,6 +107,7 @@ export const GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER = {
   [CHAIN_ID.GOERLI]: "0x247A1306b6122ba28862b19a95004899db91f1b5",
   [CHAIN_ID.MATIC]: "0x0c2c2963a4353ffd839590f7cb1e783688378814",
   [CHAIN_ID.FANTOM]: "0x59e61b95f20e940ac777e88fa2dfa0a6a4c40fa0",
+  [CHAIN_ID.BSC]: "0x64c7f3c2C19B41a6aD67bb5f4edc8EdbB3284F34",
 };
 
 export const NATIVE_TOKEN_TICKER = {
@@ -106,6 +116,7 @@ export const NATIVE_TOKEN_TICKER = {
   [CHAIN_ID.GOERLI]: "ETH",
   [CHAIN_ID.MATIC]: "MATIC",
   [CHAIN_ID.FANTOM]: "FTM",
+  [CHAIN_ID.BSC]: "BNB",
 };
 
 export const NATIVE_WRAPPED_TOKEN_TICKER = {
@@ -114,6 +125,7 @@ export const NATIVE_WRAPPED_TOKEN_TICKER = {
   [CHAIN_ID.GOERLI]: "WETH",
   [CHAIN_ID.MATIC]: "WMATIC",
   [CHAIN_ID.FANTOM]: "WFTM",
+  [CHAIN_ID.BSC]: "WBNB",
 };
 
 export const NATIVE_TOKEN_NAME = {
@@ -122,6 +134,7 @@ export const NATIVE_TOKEN_NAME = {
   [CHAIN_ID.GOERLI]: "Ether",
   [CHAIN_ID.MATIC]: "Matic",
   [CHAIN_ID.FANTOM]: "Fantom",
+  [CHAIN_ID.BSC]: "Bnb",
 };
 
 export const NATIVE_WRAPPED_TOKEN_ADDRESS = {
@@ -130,13 +143,7 @@ export const NATIVE_WRAPPED_TOKEN_ADDRESS = {
   [CHAIN_ID.GOERLI]: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
   [CHAIN_ID.MATIC]: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
   [CHAIN_ID.FANTOM]: "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83",
-};
-
-export const MULTICALL_ADDRESSES = {
-  [CHAIN_ID.ROPSTEN]: "0xCa731e0f33Afbcfa9363d6F7449d1f5447d10C80",
-  [CHAIN_ID.MAINNET]: "0xCa731e0f33Afbcfa9363d6F7449d1f5447d10C80",
-  [CHAIN_ID.MATIC]: "0xCa731e0f33Afbcfa9363d6F7449d1f5447d10C80",
-  [CHAIN_ID.FANTOM]: "0x5A36178E38864F5E724A2DaF5f9cD9bA473f7903",
+  [CHAIN_ID.BSC]: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
 };
 
 export const GENERIC_GAS_LIMIT_ORDER_EXECUTION = "400000";

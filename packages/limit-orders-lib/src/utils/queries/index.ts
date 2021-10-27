@@ -7,46 +7,28 @@ export const queryOrders = async (
   owner: string,
   chainId: number
 ): Promise<Order[]> => {
-  if (chainId === 3) {
-    try {
-      const data = await request(
-        SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
+  try {
+    const dataFromOldSubgraph = OLD_SUBGRAPH_URL[chainId]
+      ? await request(OLD_SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
           owner: owner.toLowerCase(),
-        }
-      );
-      return _getUniqueOrdersWithHandler(data.orders);
-    } catch (error) {
-      throw new Error("Could not query subgraph for all orders");
-    }
-  } else {
-    try {
-      const dataFromOldSubgraph = await request(
-        OLD_SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
+        })
+      : { orders: [] };
+
+    const dataFromNewSubgraph = SUBGRAPH_URL[chainId]
+      ? await request(SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
           owner: owner.toLowerCase(),
-        }
-      );
+        })
+      : { orders: [] };
 
-      const dataFromNewSubgraph = await request(
-        SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
-          owner: owner.toLowerCase(),
-        }
-      );
+    const allOrders = [
+      ...dataFromOldSubgraph.orders,
+      ...dataFromNewSubgraph.orders,
+    ];
 
-      const allOrders = [
-        ...dataFromOldSubgraph.orders,
-        ...dataFromNewSubgraph.orders,
-      ];
-
-      return _getUniqueOrdersWithHandler(allOrders);
-    } catch (error) {
-      throw new Error("Could not query subgraph for all orders");
-    }
+    return _getUniqueOrdersWithHandler(allOrders);
+  } catch (error) {
+    console.log(error);
+    throw new Error("Could not query subgraph for all orders");
   }
 };
 
@@ -54,51 +36,29 @@ export const queryOpenOrders = async (
   owner: string,
   chainId: number
 ): Promise<Order[]> => {
-  if (chainId === 3) {
-    try {
-      const data = await request(
-        SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
+  try {
+    const dataFromOldSubgraph = OLD_SUBGRAPH_URL[chainId]
+      ? await request(OLD_SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
           owner: owner.toLowerCase(),
-        }
-      );
+        })
+      : { orders: [] };
 
-      return _getUniqueOrdersWithHandler(data.orders).filter(
-        (order) => order.status === "open"
-      );
-    } catch (error) {
-      throw new Error("Could not query subgraph for open orders");
-    }
-  } else {
-    try {
-      const dataFromOldSubgraph = await request(
-        OLD_SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
+    const dataFromNewSubgraph = SUBGRAPH_URL[chainId]
+      ? await request(SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
           owner: owner.toLowerCase(),
-        }
-      );
+        })
+      : { orders: [] };
 
-      const dataFromNewSubgraph = await request(
-        SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
-          owner: owner.toLowerCase(),
-        }
-      );
+    const allOrders = [
+      ...dataFromOldSubgraph.orders,
+      ...dataFromNewSubgraph.orders,
+    ];
 
-      const allOrders = [
-        ...dataFromOldSubgraph.orders,
-        ...dataFromNewSubgraph.orders,
-      ];
-
-      return _getUniqueOrdersWithHandler(allOrders).filter(
-        (order) => order.status === "open"
-      );
-    } catch (error) {
-      throw new Error("Could not query subgraph for open orders");
-    }
+    return _getUniqueOrdersWithHandler(allOrders).filter(
+      (order) => order.status === "open"
+    );
+  } catch (error) {
+    throw new Error("Could not query subgraph for open orders");
   }
 };
 
@@ -106,51 +66,29 @@ export const queryPastOrders = async (
   owner: string,
   chainId: number
 ): Promise<Order[]> => {
-  if (chainId === 3) {
-    try {
-      const data = await request(
-        SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
+  try {
+    const dataFromOldSubgraph = OLD_SUBGRAPH_URL[chainId]
+      ? await request(OLD_SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
           owner: owner.toLowerCase(),
-        }
-      );
+        })
+      : { orders: [] };
 
-      return _getUniqueOrdersWithHandler(data.orders).filter(
-        (order) => order.status !== "open"
-      );
-    } catch (error) {
-      throw new Error("Could not query subgraph for past orders");
-    }
-  } else {
-    try {
-      const dataFromOldSubgraph = await request(
-        OLD_SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
+    const dataFromNewSubgraph = SUBGRAPH_URL[chainId]
+      ? await request(SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
           owner: owner.toLowerCase(),
-        }
-      );
+        })
+      : { orders: [] };
 
-      const dataFromNewSubgraph = await request(
-        SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
-          owner: owner.toLowerCase(),
-        }
-      );
+    const allOrders = [
+      ...dataFromOldSubgraph.orders,
+      ...dataFromNewSubgraph.orders,
+    ];
 
-      const allOrders = [
-        ...dataFromOldSubgraph.orders,
-        ...dataFromNewSubgraph.orders,
-      ];
-
-      return _getUniqueOrdersWithHandler(allOrders).filter(
-        (order) => order.status !== "open"
-      );
-    } catch (error) {
-      throw new Error("Could not query subgraph for past orders");
-    }
+    return _getUniqueOrdersWithHandler(allOrders).filter(
+      (order) => order.status !== "open"
+    );
+  } catch (error) {
+    throw new Error("Could not query subgraph for past orders");
   }
 };
 
@@ -158,51 +96,29 @@ export const queryExecutedOrders = async (
   owner: string,
   chainId: number
 ): Promise<Order[]> => {
-  if (chainId === 3) {
-    try {
-      const data = await request(
-        SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
+  try {
+    const dataFromOldSubgraph = OLD_SUBGRAPH_URL[chainId]
+      ? await request(OLD_SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
           owner: owner.toLowerCase(),
-        }
-      );
+        })
+      : { orders: [] };
 
-      return _getUniqueOrdersWithHandler(data.orders).filter(
-        (order) => order.status === "executed"
-      );
-    } catch (error) {
-      throw new Error("Could not query subgraph for executed orders");
-    }
-  } else {
-    try {
-      const dataFromOldSubgraph = await request(
-        OLD_SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
+    const dataFromNewSubgraph = SUBGRAPH_URL[chainId]
+      ? await request(SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
           owner: owner.toLowerCase(),
-        }
-      );
+        })
+      : { orders: [] };
 
-      const dataFromNewSubgraph = await request(
-        SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
-          owner: owner.toLowerCase(),
-        }
-      );
+    const allOrders = [
+      ...dataFromOldSubgraph.orders,
+      ...dataFromNewSubgraph.orders,
+    ];
 
-      const allOrders = [
-        ...dataFromOldSubgraph.orders,
-        ...dataFromNewSubgraph.orders,
-      ];
-
-      return _getUniqueOrdersWithHandler(allOrders).filter(
-        (order) => order.status === "executed"
-      );
-    } catch (error) {
-      throw new Error("Could not query subgraph for executed orders");
-    }
+    return _getUniqueOrdersWithHandler(allOrders).filter(
+      (order) => order.status === "executed"
+    );
+  } catch (error) {
+    throw new Error("Could not query subgraph for executed orders");
   }
 };
 
@@ -210,49 +126,29 @@ export const queryCancelledOrders = async (
   owner: string,
   chainId: number
 ): Promise<Order[]> => {
-  if (chainId === 3) {
-    try {
-      const data = await request(
-        SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
+  try {
+    const dataFromOldSubgraph = OLD_SUBGRAPH_URL[chainId]
+      ? await request(OLD_SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
           owner: owner.toLowerCase(),
-        }
-      );
-      return _getUniqueOrdersWithHandler(data.orders).filter(
-        (order) => order.status === "cancelled"
-      );
-    } catch (error) {
-      throw new Error("Could not query subgraph for cancelled orders");
-    }
-  } else {
-    try {
-      const dataFromOldSubgraph = await request(
-        OLD_SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
-          owner: owner.toLowerCase(),
-        }
-      );
+        })
+      : { orders: [] };
 
-      const dataFromNewSubgraph = await request(
-        SUBGRAPH_URL[chainId],
-        GET_ALL_ORDERS_BY_OWNER,
-        {
+    const dataFromNewSubgraph = SUBGRAPH_URL[chainId]
+      ? await request(SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
           owner: owner.toLowerCase(),
-        }
-      );
-      const allOrders = [
-        ...dataFromOldSubgraph.orders,
-        ...dataFromNewSubgraph.orders,
-      ];
+        })
+      : { orders: [] };
 
-      return _getUniqueOrdersWithHandler(allOrders).filter(
-        (order) => order.status === "cancelled"
-      );
-    } catch (error) {
-      throw new Error("Could not query subgraph for cancelled orders");
-    }
+    const allOrders = [
+      ...dataFromOldSubgraph.orders,
+      ...dataFromNewSubgraph.orders,
+    ];
+
+    return _getUniqueOrdersWithHandler(allOrders).filter(
+      (order) => order.status === "cancelled"
+    );
+  } catch (error) {
+    throw new Error("Could not query subgraph for cancelled orders");
   }
 };
 

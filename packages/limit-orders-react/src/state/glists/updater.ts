@@ -5,6 +5,7 @@ import useInterval from "../../hooks/useInterval";
 import useIsWindowVisible from "../../hooks/useIsWindowVisible";
 import { useWeb3 } from "../../web3";
 import {
+  DEFAULT_LIST_OF_LISTS_BSC,
   DEFAULT_LIST_OF_LISTS_MAINNET,
   DEFAULT_LIST_OF_LISTS_MATIC,
 } from "../../constants/lists";
@@ -53,7 +54,9 @@ export default function Updater(): null {
     if (!chainId || !library || Object.keys(lists).length) return;
 
     const urlList =
-      chainId === 137
+      chainId === 56
+        ? DEFAULT_LIST_OF_LISTS_BSC
+        : chainId === 137
         ? DEFAULT_LIST_OF_LISTS_MATIC
         : DEFAULT_LIST_OF_LISTS_MAINNET;
 
@@ -73,6 +76,21 @@ export default function Updater(): null {
 
     if (Object.keys(lists).length) {
       if (
+        chainId === 56 &&
+        !Object.keys(lists).includes(
+          DEFAULT_LIST_OF_LISTS_BSC[DEFAULT_LIST_OF_LISTS_BSC.length - 1]
+        )
+      ) {
+        DEFAULT_LIST_OF_LISTS_BSC.forEach((listURL: string) => {
+          fetchList(library, listURL)
+            .then(() => {
+              dispatch(addList(listURL));
+            })
+            .catch(() => {
+              dispatch(removeList(listURL));
+            });
+        });
+      } else if (
         chainId === 137 &&
         !Object.keys(lists).includes(
           DEFAULT_LIST_OF_LISTS_MATIC[DEFAULT_LIST_OF_LISTS_MATIC.length - 1]

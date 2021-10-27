@@ -23,6 +23,9 @@ const BA_LIST =
 const QUICKSWAP_LIST =
   "https://unpkg.com/quickswap-default-token-list@1.0.91/build/quickswap-default.tokenlist.json";
 
+const PANCAKESWAP_LIST = 
+  "https://raw.githubusercontent.com/complusnetwork/default-token-list/master/default-tokenlist-bsc.json";
+
 export const UNSUPPORTED_LIST_URLS: string[] = [BA_LIST];
 
 // lower index == higher priority for token import
@@ -35,13 +38,15 @@ export const DEFAULT_LIST_OF_LISTS_MAINNET: string[] = [
 ];
 
 export const DEFAULT_LIST_OF_LISTS_MATIC: string[] = [QUICKSWAP_LIST];
+export const DEFAULT_LIST_OF_LISTS_BSC: string[] = [PANCAKESWAP_LIST];
 
 // default lists to be 'active' aka searched across
-export const DEFAULT_ACTIVE_LIST_URLS: string[] = [GEMINI_LIST, QUICKSWAP_LIST];
+export const DEFAULT_ACTIVE_LIST_URLS: string[] = [GEMINI_LIST, QUICKSWAP_LIST, PANCAKESWAP_LIST];
 
 export const DEFAULT_ACTIVE_LIST_URLS_BY_CHAIN_ID: {
   [chainId: number]: string[];
 } = {
   [1]: DEFAULT_ACTIVE_LIST_URLS,
+  [56]: [PANCAKESWAP_LIST],
   [137]: [QUICKSWAP_LIST],
 };

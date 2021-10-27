@@ -18,6 +18,7 @@ import {
   WBTC,
   FANTOM_BASES,
 } from "./tokens";
+import { BSC_BASES, WBNB_BSC } from "./tokens.bsc";
 import { WETH_MATIC } from "./tokens.matic";
 
 type ChainTokenList = {
@@ -54,12 +55,14 @@ const WETH_ONLY: ChainTokenList = {
   [4]: [WETH9[4]],
   [5]: [WETH9[5]],
   [42]: [WETH9[42]],
+  [56]: [WBNB_BSC],
   [137]: [WETH_MATIC],
 };
 // used to construct intermediary pairs for trading
 export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   ...WETH_ONLY,
   [1]: [...WETH_ONLY[1], DAI, USDC, USDT, WBTC],
+  [56]: BSC_BASES,
   [137]: MATIC_BASES,
   [250]: FANTOM_BASES,
 };
@@ -93,6 +96,7 @@ export const CUSTOM_BASES: {
 // used for display in the default list when adding liquidity
 export const SUGGESTED_BASES: ChainCurrencyList = {
   [1]: [Ether.onChain(1), DAI, USDC, USDT, WBTC],
+  [56]: BSC_BASES,
   [137]: MATIC_BASES,
   [250]: FANTOM_BASES,
 };

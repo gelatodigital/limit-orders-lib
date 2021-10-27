@@ -1,6 +1,6 @@
 {
   "name": "@gelatonetwork/limit-orders-lib",
-  "version": "2.2.0",
+  "version": "2.2.1-2",
   "description": "Library for creating limit orders via Gelato",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,7 +12,8 @@
     "copy-contracts-types": "cp ./src/contracts/types/*.d.ts ./dist/contracts/types",
     "format": "prettier --write .",
     "generate-contracts-typings": "typechain --target=ethers-v5 --out-dir src/contracts/types ./src/**/abis/*.json",
-    "lint": "eslint --cache ."
+    "lint": "eslint --cache .",
+    "prepare": "yarn build && yarn format && yarn lint"
   },
   "repository": {
     "type": "git",

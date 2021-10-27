@@ -389,7 +389,9 @@ export class GelatoLimitOrders {
       order.owner,
       order.witness,
       order.data,
-      overrides ?? { gasLimit: 500000 }
+      overrides ?? {
+        gasLimit: isEthereumChain(this._chainId) ? 500000 : 1500000,
+      }
     );
   }
 

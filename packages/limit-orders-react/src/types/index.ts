@@ -7,6 +7,7 @@ export enum Field {
 export const NativeCurrency = {
   1: "ETH",
   3: "ETH",
+  56: "BNB",
   137: "MATIC",
 };
 

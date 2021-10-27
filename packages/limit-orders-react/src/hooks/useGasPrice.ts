@@ -6,6 +6,7 @@ import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
 export enum ChainId {
   MAINNET = 1,
   ROPSTEN = 3,
+  BSC = 56,
   MATIC = 137,
   FANTOM = 250,
 }
