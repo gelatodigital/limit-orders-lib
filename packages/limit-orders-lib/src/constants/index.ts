@@ -45,7 +45,7 @@ export const NETWORK_NAME = {
   [CHAIN_ID.GOERLI]: "Goerli",
   [CHAIN_ID.MATIC]: "Polygon (Matic)",
   [CHAIN_ID.FANTOM]: "FANTOM",
-  [CHAIN_ID.BSC]: "Binance Smart Chain",
+  [CHAIN_ID.BSC]: "BSC",
 };
 
 export const NETWORK_HANDLERS = {
