@@ -24,7 +24,7 @@ const QUICKSWAP_LIST =
   "https://unpkg.com/quickswap-default-token-list@1.0.91/build/quickswap-default.tokenlist.json";
 
 const PANCAKESWAP_LIST =
-  "https://gateway.pinata.cloud/ipfs/QmdKy1K5TMzSHncLzUXUJdvKi1tHRmJocDRfmCXxW5mshS";
+  "https://tokens.pancakeswap.finance/pancakeswap-extended.json";
 
 export const UNSUPPORTED_LIST_URLS: string[] = [BA_LIST];
 
