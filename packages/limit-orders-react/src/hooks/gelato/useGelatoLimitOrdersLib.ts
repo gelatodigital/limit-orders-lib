@@ -15,7 +15,7 @@ export default function useGelatoLimitOrdersLib():
         ? new GelatoLimitOrders(
             chainId as ChainId,
             library?.getSigner(),
-            frontrunProtected ? undefined: handler,
+            frontrunProtected ? undefined : handler,
             frontrunProtected
           )
         : undefined;

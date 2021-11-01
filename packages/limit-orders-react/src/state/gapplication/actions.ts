@@ -5,4 +5,6 @@ export const updateBlockNumber = createAction<{
   blockNumber: number;
 }>("gapplication/updateBlockNumber");
 
-export const updateFrontrunProtected = createAction<boolean>("gapplication/frontrunProtected");
+export const updateFrontrunProtected = createAction<boolean>(
+  "gapplication/frontrunProtected"
+);

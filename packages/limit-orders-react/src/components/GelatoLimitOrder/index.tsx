@@ -62,7 +62,7 @@ import { NATIVE } from "../../constants/addresses";
 import { useFrontrunProtected } from "../../state/gapplication/hooks";
 import { updateFrontrunProtected } from "../../state/gapplication/actions";
 import { useDispatch } from "react-redux";
-import Toggle from 'react-styled-toggle';
+import Toggle from "react-styled-toggle";
 import InfoHelper from "../InfoHelper";
 
 const StyledInfo = styled(Info)`
@@ -386,7 +386,6 @@ export default function GelatoLimitOrder({
     await approveCallback();
   }, [approveCallback]);
 
-
   return (
     <Fragment>
       <AppBody>
@@ -504,8 +503,8 @@ export default function GelatoLimitOrder({
                   checked={frontrunProtected}
                   value={""}
                   onChange={() => handleFrontrunToggle()}
-                  labelLeft={''}
-                  labelRight={'Frontrun Protection'}
+                  labelLeft={""}
+                  labelRight={"Frontrun Protection"}
                   height={24}
                   sliderHeight={16}
                   width={44}
@@ -515,7 +514,9 @@ export default function GelatoLimitOrder({
                 <InfoHelper text="With frontrun protection enabled Gelato bots will use flashbots to execute your orders. This feature is still in beta and your order might not be filled." />
               </RowFixed>
             </Row>
-            <Row style={{ justifyContent: !trade ? "center" : "space-between" }}>
+            <Row
+              style={{ justifyContent: !trade ? "center" : "space-between" }}
+            >
               <RowFixed>
                 <ExternalLink href={"https://www.gelato.network"}>
                   <PoweredByWrapper size={126} />

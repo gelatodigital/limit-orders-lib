@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react'
-import styled from 'styled-components/macro'
-import Tooltip from '../Tooltip'
+import React, { useCallback, useState } from "react";
+import styled from "styled-components/macro";
+import Tooltip from "../Tooltip";
 
 const InfoWrapper = styled.div`
   display: flex;
@@ -22,7 +22,7 @@ const InfoWrapper = styled.div`
   :focus {
     opacity: 0.7;
   }
-`
+`;
 
 const LightInfoWrapper = styled.div`
   display: flex;
@@ -43,42 +43,46 @@ const LightInfoWrapper = styled.div`
   :focus {
     opacity: 0.7;
   }
-`
+`;
 
 const ExclamationMark = styled.span`
   font-size: 14px;
-`
+`;
 
 export default function InfoHelper({ text }: { text: string; size?: number }) {
-  const [show, setShow] = useState<boolean>(false)
+  const [show, setShow] = useState<boolean>(false);
 
-  const open = useCallback(() => setShow(true), [setShow])
-  const close = useCallback(() => setShow(false), [setShow])
+  const open = useCallback(() => setShow(true), [setShow]);
+  const close = useCallback(() => setShow(false), [setShow]);
 
   return (
-    <span style={{ marginLeft: 4, display: 'flex', alignItems: 'center' }}>
+    <span style={{ marginLeft: 4, display: "flex", alignItems: "center" }}>
       <Tooltip text={text} show={show}>
         <InfoWrapper onClick={open} onMouseEnter={open} onMouseLeave={close}>
           <ExclamationMark>!</ExclamationMark>
         </InfoWrapper>
       </Tooltip>
     </span>
-  )
+  );
 }
 
 export function LightInfoHelper({ text }: { text: string }) {
-  const [show, setShow] = useState<boolean>(false)
+  const [show, setShow] = useState<boolean>(false);
 
-  const open = useCallback(() => setShow(true), [setShow])
-  const close = useCallback(() => setShow(false), [setShow])
+  const open = useCallback(() => setShow(true), [setShow]);
+  const close = useCallback(() => setShow(false), [setShow]);
 
   return (
     <span style={{ marginLeft: 4 }}>
       <Tooltip text={text} show={show}>
-        <LightInfoWrapper onClick={open} onMouseEnter={open} onMouseLeave={close}>
+        <LightInfoWrapper
+          onClick={open}
+          onMouseEnter={open}
+          onMouseLeave={close}
+        >
           <ExclamationMark>!</ExclamationMark>
         </LightInfoWrapper>
       </Tooltip>
     </span>
-  )
+  );
 }
