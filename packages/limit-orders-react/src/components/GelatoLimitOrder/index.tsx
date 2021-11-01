@@ -59,6 +59,11 @@ import {
 import Loader from "../Loader";
 import CurrencyLogo from "../CurrencyLogo";
 import { NATIVE } from "../../constants/addresses";
+import { useFrontrunProtected } from "../../state/gapplication/hooks";
+import { updateFrontrunProtected } from "../../state/gapplication/actions";
+import { useDispatch } from "react-redux";
+import Toggle from 'react-styled-toggle';
+import InfoHelper from "../InfoHelper";
 
 const StyledInfo = styled(Info)`
   opacity: 0.4;
@@ -100,6 +105,14 @@ export default function GelatoLimitOrder({
   const theme = useTheme();
 
   const recipient = account ?? null;
+
+  const frontrunProtected = useFrontrunProtected();
+
+  const dispatch = useDispatch();
+
+  const handleFrontrunToggle = () => {
+    dispatch(updateFrontrunProtected(!frontrunProtected));
+  };
 
   const {
     handlers: {
@@ -373,6 +386,7 @@ export default function GelatoLimitOrder({
     await approveCallback();
   }, [approveCallback]);
 
+
   return (
     <Fragment>
       <AppBody>
@@ -482,9 +496,26 @@ export default function GelatoLimitOrder({
               />
             </div>
 
-            <Row
-              style={{ justifyContent: !trade ? "center" : "space-between" }}
-            >
+            <Row style={{ justifyContent: "flex-end" }}>
+              <RowFixed>
+                <Toggle
+                  name="flashbots"
+                  disabled={false}
+                  checked={frontrunProtected}
+                  value={""}
+                  onChange={() => handleFrontrunToggle()}
+                  labelLeft={''}
+                  labelRight={'Frontrun Protection'}
+                  height={24}
+                  sliderHeight={16}
+                  width={44}
+                  sliderWidth={16}
+                  translate={22}
+                />
+                <InfoHelper text="With frontrun protection enabled Gelato bots will use flashbots to execute your orders. This feature is still in beta and your order might not be filled." />
+              </RowFixed>
+            </Row>
+            <Row style={{ justifyContent: !trade ? "center" : "space-between" }}>
               <RowFixed>
                 <ExternalLink href={"https://www.gelato.network"}>
                   <PoweredByWrapper size={126} />
