@@ -9,6 +9,7 @@ export enum ChainId {
   BSC = 56,
   MATIC = 137,
   FANTOM = 250,
+  AVAX = 43114,
 }
 
 export default function useGasPrice(): number | undefined {

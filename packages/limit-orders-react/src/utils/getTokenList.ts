@@ -5,6 +5,8 @@ import contenthashToUri from "./contenthashToUri";
 import { parseENSAddress } from "./parseENSAddress";
 import uriToHttp from "./uriToHttp";
 
+schema.definitions.TokenInfo.properties.symbol.pattern =
+  "^[a-zA-Z0-9+.\\-%/\\$]+$";
 const tokenListValidator = new Ajv({ allErrors: true }).compile(schema);
 
 /**
@@ -58,7 +60,9 @@ export default async function getTokenList(
     }
 
     const json = await response.json();
+    console.log(json);
     if (!tokenListValidator(json)) {
+      console.log(tokenListValidator.errors);
       const validationErrors: string =
         tokenListValidator.errors?.reduce<string>((memo, error) => {
           const add = `${error.dataPath} ${error.message ?? ""}`;

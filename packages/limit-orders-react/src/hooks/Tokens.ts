@@ -24,6 +24,7 @@ import { useWeb3 } from "../web3";
 import { WFTM_FANTOM } from "../constants/tokens.fantom";
 import { WMATIC_MATIC } from "../constants/tokens.matic";
 import { WBNB_BSC } from "../constants/tokens.bsc";
+import { WAVAX_AVAX } from "../constants/tokens.avax";
 
 export const WETH9: { [chainId: number]: Token } = {
   [1]: new Token(
@@ -81,6 +82,8 @@ export class NativeToken extends NativeCurrency {
         ? WMATIC_MATIC
         : this.chainId === 250
         ? WFTM_FANTOM
+        : this.chainId === 43114
+        ? WAVAX_AVAX
         : WETH9[this.chainId];
     invariant(!!weth9, "WRAPPED");
     return weth9;
@@ -358,10 +361,12 @@ export function useCurrency(
   const isMATIC = currencyId?.toUpperCase() === "MATIC";
   const isFTM = currencyId?.toUpperCase() === "FTM";
   const isBNB = currencyId?.toUpperCase() === "BNB";
+  const isAVAX = currencyId?.toUpperCase() === "AVAX";
   const isNative =
     currencyId?.toUpperCase() === "NATIVE" ||
     currencyId?.toLowerCase() === NATIVE.toLowerCase();
-  const isNativeCurrency = isETH || isMATIC || isFTM || isBNB || isNative;
+  const isNativeCurrency =
+    isETH || isMATIC || isFTM || isBNB || isAVAX || isNative;
   const token = useToken(isNativeCurrency ? undefined : currencyId);
   if (isNativeCurrency && chainId)
     return chainId === 56
@@ -370,6 +375,8 @@ export function useCurrency(
       ? new NativeToken(chainId, 18, "MATIC", "Matic")
       : chainId === 250
       ? new NativeToken(chainId, 18, "FTM", "Fantom")
+      : chainId === 43114
+      ? new NativeToken(chainId, 18, "AVAX", "Avax")
       : Ether.onChain(chainId);
   else return token;
 }
