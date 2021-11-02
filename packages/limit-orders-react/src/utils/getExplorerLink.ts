@@ -23,6 +23,7 @@ export function getExplorerLink(
   else if (chainId === 56) prefix = `https://bscscan.com`;
   else if (chainId === 137) prefix = `https://polygonscan.com`;
   else if (chainId === 250) prefix = `https://ftmscan.com`;
+  else if (chainId === 43114) prefix = `https://cchain.explorer.avax.network`;
 
   switch (type) {
     case ExplorerDataType.TRANSACTION: {

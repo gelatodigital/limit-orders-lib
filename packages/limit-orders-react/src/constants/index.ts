@@ -18,6 +18,7 @@ import {
   WBTC,
   FANTOM_BASES,
 } from "./tokens";
+import { AVAX_BASES, WAVAX_AVAX } from "./tokens.avax";
 import { BSC_BASES, WBNB_BSC } from "./tokens.bsc";
 import { WETH_MATIC } from "./tokens.matic";
 
@@ -57,6 +58,7 @@ const WETH_ONLY: ChainTokenList = {
   [42]: [WETH9[42]],
   [56]: [WBNB_BSC],
   [137]: [WETH_MATIC],
+  [43114]: [WAVAX_AVAX],
 };
 // used to construct intermediary pairs for trading
 export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
@@ -65,6 +67,7 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   [56]: BSC_BASES,
   [137]: MATIC_BASES,
   [250]: FANTOM_BASES,
+  [43114]: AVAX_BASES,
 };
 export const ADDITIONAL_BASES: {
   [chainId: number]: { [tokenAddress: string]: Token[] };
@@ -99,6 +102,7 @@ export const SUGGESTED_BASES: ChainCurrencyList = {
   [56]: BSC_BASES,
   [137]: MATIC_BASES,
   [250]: FANTOM_BASES,
+  [43114]: AVAX_BASES,
 };
 // used to construct the list of all pairs we consider by default in the frontend
 export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {

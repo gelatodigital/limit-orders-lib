@@ -5,6 +5,8 @@ import contenthashToUri from "./contenthashToUri";
 import { parseENSAddress } from "./parseENSAddress";
 import uriToHttp from "./uriToHttp";
 
+schema.definitions.TokenInfo.properties.symbol.pattern =
+  "^[a-zA-Z0-9+.\\-%/\\$]+$";
 const tokenListValidator = new Ajv({ allErrors: true }).compile(schema);
 
 /**
