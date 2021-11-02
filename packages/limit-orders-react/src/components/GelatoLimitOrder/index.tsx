@@ -495,8 +495,7 @@ export default function GelatoLimitOrder({
               />
             </div>
 
-            {
-              chainId == 1 &&
+            {chainId == 1 && (
               <Row style={{ justifyContent: "flex-end" }}>
                 <RowFixed>
                   <Toggle
@@ -516,7 +515,7 @@ export default function GelatoLimitOrder({
                   <QuestionHelper text="With frontrun protection enabled Gelato bots will use flashbots to execute your orders. This feature is still in beta and your order might not be filled." />
                 </RowFixed>
               </Row>
-            }
+            )}
             <Row
               style={{ justifyContent: !trade ? "center" : "space-between" }}
             >
