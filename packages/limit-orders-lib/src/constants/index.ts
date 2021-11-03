@@ -39,6 +39,13 @@ export const HANDLERS_ADDRESSES = {
   },
 };
 
+export const STOPLOSS_HANDLERS_ADDRESSES = {
+  // QuickSwapStoplossHandler
+  [CHAIN_ID.MATIC]: {
+    ["quickswap_stoploss"]: "0x6EA82C72732389c5149326e048A46Be9F8bec8E8",
+  }
+}
+
 export const NETWORK_NAME = {
   [CHAIN_ID.MAINNET]: "Ethereum",
   [CHAIN_ID.ROPSTEN]: "Ropsten",
@@ -51,7 +58,7 @@ export const NETWORK_NAME = {
 export const NETWORK_HANDLERS = {
   [CHAIN_ID.MAINNET]: ["uniswap"],
   [CHAIN_ID.ROPSTEN]: ["uniswap"],
-  [CHAIN_ID.MATIC]: ["quickswap", "polydex", "cafeswap"],
+  [CHAIN_ID.MATIC]: ["quickswap", "quickswap_stoploss", "polydex", "cafeswap"],
   [CHAIN_ID.FANTOM]: ["spiritswap", "spookyswap", "bombswap"],
   [CHAIN_ID.BSC]: ["pancakeswap"],
 };
@@ -78,7 +85,7 @@ export const SUBGRAPH_URL = {
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-bsc",
 };
 
-export const GELATO_LIMIT_ORDERS_ADDRESS = {
+export const GELATO_CORE_ADDRESS = {
   [CHAIN_ID.MAINNET]: "0x36049D479A97CdE1fC6E2a5D2caE30B666Ebf92B",
   [CHAIN_ID.ROPSTEN]: "0x0e5096D201Fe2985f5C26432A76f145D6e5D1453",
   [CHAIN_ID.GOERLI]: "0xa0453c6ab71fe3da89640ee2503326bd0899a589",
@@ -99,6 +106,10 @@ export const GELATO_LIMIT_ORDERS_MODULE_ADDRESS = {
 export const GELATO_LIMIT_ORDERS_MODULE_FLASHBOTS_ADDRESS = {
   [CHAIN_ID.MAINNET]: "0xbeC333EDE1A0687D2b9624F8C073a54c93ba9777",
   [CHAIN_ID.GOERLI]: "0xCf8EDB3333Fae73b23f689229F4De6Ac95d1f707",
+};
+
+export const GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS = {
+  [CHAIN_ID.MATIC]: "0xE912CD26C4A4cfffc175A297F1328aB23313a1a7",
 };
 
 export const GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER = {

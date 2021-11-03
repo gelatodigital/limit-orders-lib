@@ -5,7 +5,6 @@ import {
   ContractTransaction,
   BigNumberish,
   Contract,
-  Wallet,
   Overrides,
 } from "ethers";
 import { Provider } from "@ethersproject/abstract-provider";
@@ -16,9 +15,6 @@ import {
   NATIVE_WRAPPED_TOKEN_ADDRESS,
   GELATO_CORE_ADDRESS,
   GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER,
-  GELATO_LIMIT_ORDERS_MODULE_ADDRESS,
-  GELATO_LIMIT_ORDERS_MODULE_FLASHBOTS_ADDRESS,
-  HANDLERS_ADDRESSES,
   NETWORK_HANDLERS,
   SLIPPAGE_BPS,
   SUBGRAPH_URL,
@@ -28,8 +24,8 @@ import {
   ERC20OrderRouter,
   ERC20OrderRouter__factory,
   ERC20__factory,
-  GelatoLimitOrders as GelatoLimitOrdersContract,
-  GelatoLimitOrders__factory,
+  GelatoLimitOrders as GelatoCoreContract,
+  GelatoLimitOrders__factory as GelatoCore__factory,
 } from "../contracts/types";
 import {
   queryCancelledOrders,
@@ -43,9 +39,10 @@ import {
   ChainId,
   Order,
   TransactionData,
-  TransactionDataWithSecret,
 } from "../types";
-import { isEthereumChain, isNetworkGasToken } from "../utils";
+import { isEthereumChain } from "../utils";
+
+
 
 export const isValidChainIdAndHandler = (
   chainId: ChainId,
@@ -69,18 +66,18 @@ export const isETHOrWETH = (
   );
 };
 
-export class GelatoLimitOrders {
-  private _chainId: ChainId;
-  private _provider: Provider | undefined;
-  private _signer: Signer | undefined;
-  private _gelatoLimitOrders: GelatoLimitOrdersContract;
-  private _erc20OrderRouter: ERC20OrderRouter;
-  private _moduleAddress: string;
-  private _subgraphUrl: string;
-  private _abiEncoder: utils.AbiCoder;
-  private _handlerAddress?: string;
-  private _handler?: Handler;
-  private _isFlashbotsProtected: boolean;
+
+export class GelatoCore {
+  public _chainId: ChainId;
+  public _provider: Provider | undefined;
+  public _signer: Signer | undefined;
+  public _gelatoCore: GelatoCoreContract;
+  public _erc20OrderRouter: ERC20OrderRouter;
+  public _moduleAddress: string;
+  public _subgraphUrl: string;
+  public _abiEncoder: utils.AbiCoder;
+  public _handlerAddress?: string;
+  public _handler?: Handler;
 
   public static slippageBPS = SLIPPAGE_BPS;
   public static gelatoFeeBPS = TWO_BPS_GELATO_FEE;
@@ -113,33 +110,28 @@ export class GelatoLimitOrders {
     return this._moduleAddress;
   }
 
-  get contract(): GelatoLimitOrdersContract {
-    return this._gelatoLimitOrders;
+  get contract(): GelatoCoreContract {
+    return this._gelatoCore;
   }
 
   get erc20OrderRouter(): ERC20OrderRouter {
     return this._erc20OrderRouter;
   }
 
-  get isFlashbotsProtected(): boolean {
-    return this._isFlashbotsProtected;
+  get abiEncoder(): any {
+    return this._abiEncoder;
   }
+
 
   constructor(
     chainId: ChainId,
+    moduleAddress: string,
     signerOrProvider?: Signer | Provider,
     handler?: Handler,
-    isFlashbotsProtected = false
+    handlerAddress?: string
   ) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {
       throw new Error("Invalid chainId and handler");
-    } else if (
-      isFlashbotsProtected &&
-      (handler || !isFlashbotsCompatibleChainId(chainId))
-    ) {
-      throw new Error(
-        "Invalid chainId or handler for Flashbots bundle submission. handler must be undefined, and chainId either 1 (mainnet) or 5 (goerli)"
-      );
     }
 
     this._chainId = chainId;
@@ -153,28 +145,22 @@ export class GelatoLimitOrders {
         ? signerOrProvider.provider
         : undefined;
 
-    this._gelatoLimitOrders = this._signer
-      ? GelatoLimitOrders__factory.connect(
+    this._gelatoCore = this._signer
+      ? GelatoCore__factory.connect(
         GELATO_CORE_ADDRESS[this._chainId],
         this._signer
       )
       : this._provider
-        ? GelatoLimitOrders__factory.connect(
+        ? GelatoCore__factory.connect(
           GELATO_CORE_ADDRESS[this._chainId],
           this._provider
         )
         : (new Contract(
           GELATO_CORE_ADDRESS[this._chainId],
-          GelatoLimitOrders__factory.createInterface()
-        ) as GelatoLimitOrdersContract);
-    this._moduleAddress = isFlashbotsProtected
-      ? GELATO_LIMIT_ORDERS_MODULE_FLASHBOTS_ADDRESS[this._chainId]
-      : GELATO_LIMIT_ORDERS_MODULE_ADDRESS[this._chainId];
-    this._handler = handler;
-    this._handlerAddress = handler
-      ? HANDLERS_ADDRESSES[this._chainId][handler]?.toLowerCase()
-      : undefined;
-    this._isFlashbotsProtected = isFlashbotsProtected;
+          GelatoCore__factory.createInterface()
+        ) as GelatoCoreContract);
+
+
 
     this._abiEncoder = new utils.AbiCoder();
 
@@ -192,139 +178,16 @@ export class GelatoLimitOrders {
           GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
           ERC20OrderRouter__factory.createInterface()
         ) as ERC20OrderRouter);
-  }
-
-  public async encodeLimitOrderSubmission(
-    inputToken: string,
-    outputToken: string,
-    inputAmount: BigNumberish,
-    minReturn: BigNumberish,
-    owner: string,
-    checkAllowance = true
-  ): Promise<TransactionData> {
-    const { payload } = await this.encodeLimitOrderSubmissionWithSecret(
-      inputToken,
-      outputToken,
-      inputAmount,
-      minReturn,
-      owner,
-      checkAllowance
-    );
-
-    return payload;
-  }
-
-  public async encodeLimitOrderSubmissionWithSecret(
-    inputToken: string,
-    outputToken: string,
-    inputAmount: BigNumberish,
-    minReturnToBeParsed: BigNumberish,
-    owner: string,
-    checkAllowance = true
-  ): Promise<TransactionDataWithSecret> {
-    const randomSecret = utils.hexlify(utils.randomBytes(19)).replace("0x", "");
-    // 0x67656c61746f6e6574776f726b = gelatonetwork in hex
-    const fullSecret = `0x67656c61746f6e6574776f726b${randomSecret}`;
-
-    const { privateKey: secret, address: witness } = new Wallet(fullSecret);
-
-    const { minReturn } = !isEthereumChain(this._chainId)
-      ? this.getFeeAndSlippageAdjustedMinReturn(minReturnToBeParsed)
-      : { minReturn: minReturnToBeParsed };
-
-    const payload = await this._encodeSubmitData(
-      inputToken,
-      outputToken,
-      owner,
-      witness,
-      inputAmount,
-      minReturn,
-      secret,
-      checkAllowance
-    );
-
-    const encodedData = this._handlerAddress
-      ? this._abiEncoder.encode(
-        ["address", "uint256", "address"],
-        [outputToken, minReturn, this._handlerAddress]
-      )
-      : this._abiEncoder.encode(
-        ["address", "uint256"],
-        [outputToken, minReturn]
-      );
-
-    return {
-      payload,
-      secret,
-      witness,
-      order: {
-        id: this._getKey({
-          module: this._moduleAddress,
-          inputToken,
-          owner,
-          witness,
-          data: encodedData,
-        } as Order),
-        module: this._moduleAddress.toLowerCase(),
-        data: encodedData,
-        inputToken: inputToken.toLowerCase(),
-        outputToken: outputToken.toLowerCase(),
-        owner: owner.toLowerCase(),
-        witness: witness.toLowerCase(),
-        inputAmount: inputAmount.toString(),
-        minReturn: minReturn.toString(),
-        adjustedMinReturn: minReturnToBeParsed.toString(),
-        inputData: payload.data.toString(),
-        secret: secret.toLowerCase(),
-        handler: this._handlerAddress ?? null,
-      },
-    };
-  }
-
-  public async submitLimitOrder(
-    inputToken: string,
-    outputToken: string,
-    inputAmount: BigNumberish,
-    minReturn: BigNumberish,
-    checkAllowance = true,
-    overrides?: Overrides
-  ): Promise<ContractTransaction> {
-    if (!this._signer) throw new Error("No signer");
-
-    if (
-      this._isFlashbotsProtected &&
-      !isETHOrWETH(inputToken, this._chainId) &&
-      !isETHOrWETH(outputToken, this._chainId)
-    ) {
-      throw new Error(
-        "Flashbots protection requires inputToken or outputToken to be ETH or Wrapped, so that miner fee can be discounted. This requirement will be relaxed in future versions."
-      );
-    }
-
-    const owner = await this._signer.getAddress();
-
-    const txData = await this.encodeLimitOrderSubmission(
-      inputToken,
-      outputToken,
-      inputAmount,
-      minReturn,
-      owner,
-      checkAllowance
-    );
-
-    return this._signer.sendTransaction({
-      ...overrides,
-      to: txData.to,
-      data: txData.data,
-      value: BigNumber.from(txData.value),
-    });
+    this._handler = handler;
+    this._handlerAddress = handlerAddress;
+    this._moduleAddress = moduleAddress;
   }
 
   public async encodeLimitOrderCancellation(
     order: Order,
     checkIsActiveOrder?: boolean
   ): Promise<TransactionData> {
-    if (!this._gelatoLimitOrders)
+    if (!this._gelatoCore)
       throw new Error("No gelato limit orders contract");
 
     if (!order.inputToken) throw new Error("No input token in order");
@@ -339,7 +202,7 @@ export class GelatoLimitOrders {
         throw new Error("Order not found. Please review your order data.");
     }
 
-    const data = this._gelatoLimitOrders.interface.encodeFunctionData(
+    const data = this._gelatoCore.interface.encodeFunctionData(
       "cancelOrder",
       [
         this._moduleAddress,
@@ -352,7 +215,7 @@ export class GelatoLimitOrders {
 
     return {
       data,
-      to: this._gelatoLimitOrders.address,
+      to: this._gelatoCore.address,
       value: constants.Zero,
     };
   }
@@ -363,7 +226,7 @@ export class GelatoLimitOrders {
     overrides?: Overrides
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
-    if (!this._gelatoLimitOrders)
+    if (!this._gelatoCore)
       throw new Error("No gelato limit orders contract");
 
     if (!order.inputToken) throw new Error("No input token in order");
@@ -383,7 +246,7 @@ export class GelatoLimitOrders {
     if (owner.toLowerCase() !== order.owner.toLowerCase())
       throw new Error("Owner and signer mismatch");
 
-    return this._gelatoLimitOrders.cancelOrder(
+    return this._gelatoCore.cancelOrder(
       this._moduleAddress,
       order.inputToken,
       order.owner,
@@ -416,7 +279,7 @@ export class GelatoLimitOrders {
 
   public async isActiveOrder(order: Order): Promise<boolean> {
     if (!this._provider) throw new Error("No provider");
-    if (!this._gelatoLimitOrders)
+    if (!this._gelatoCore)
       throw new Error("No gelato limit orders contract");
 
     if (!order.module) throw new Error("No module in order");
@@ -425,7 +288,7 @@ export class GelatoLimitOrders {
     if (!order.witness) throw new Error("No witness in order");
     if (!order.data) throw new Error("No data in order");
 
-    return this._gelatoLimitOrders.existOrder(
+    return this._gelatoCore.existOrder(
       order.module,
       order.inputToken,
       order.owner,
@@ -462,7 +325,7 @@ export class GelatoLimitOrders {
 
   public getFeeAndSlippageAdjustedMinReturn(
     outputAmount: BigNumberish,
-    extraSlippageBPS?: number
+    extraSlippageBPS?: number,
   ): {
     minReturn: string;
     slippage: string;
@@ -477,17 +340,17 @@ export class GelatoLimitOrders {
     }
 
     const gelatoFee = BigNumber.from(outputAmount)
-      .mul(GelatoLimitOrders.gelatoFeeBPS)
+      .mul(GelatoCore.gelatoFeeBPS)
       .div(10000)
       .gte(1)
       ? BigNumber.from(outputAmount)
-        .mul(GelatoLimitOrders.gelatoFeeBPS)
+        .mul(GelatoCore.gelatoFeeBPS)
         .div(10000)
       : BigNumber.from(1);
 
     const slippageBPS = extraSlippageBPS
-      ? GelatoLimitOrders.slippageBPS + extraSlippageBPS
-      : GelatoLimitOrders.slippageBPS;
+      ? GelatoCore.slippageBPS + extraSlippageBPS
+      : GelatoCore.slippageBPS;
 
     const slippage = BigNumber.from(outputAmount).mul(slippageBPS).div(10000);
 
@@ -507,11 +370,11 @@ export class GelatoLimitOrders {
     if (isEthereumChain(this._chainId))
       throw new Error("Method not available for current chain.");
 
-    const gelatoFee = BigNumber.from(GelatoLimitOrders.gelatoFeeBPS);
+    const gelatoFee = BigNumber.from(GelatoCore.gelatoFeeBPS);
 
     const slippage = extraSlippageBPS
-      ? BigNumber.from(GelatoLimitOrders.slippageBPS + extraSlippageBPS)
-      : BigNumber.from(GelatoLimitOrders.slippageBPS);
+      ? BigNumber.from(GelatoCore.slippageBPS + extraSlippageBPS)
+      : BigNumber.from(GelatoCore.slippageBPS);
 
     const fees = gelatoFee.add(slippage);
 
@@ -656,83 +519,12 @@ export class GelatoLimitOrders {
       });
   }
 
-  private _getKey(order: Order): string {
+  public _getKey(order: Order): string {
     return utils.keccak256(
       this._abiEncoder.encode(
         ["address", "address", "address", "address", "bytes"],
         [order.module, order.inputToken, order.owner, order.witness, order.data]
       )
     );
-  }
-
-  private async _encodeSubmitData(
-    inputToken: string,
-    outputToken: string,
-    owner: string,
-    witness: string,
-    amount: BigNumberish,
-    minReturn: BigNumberish,
-    secret: string,
-    checkAllowance: boolean
-  ): Promise<TransactionData> {
-    if (!this._provider) throw new Error("No provider");
-
-    if (inputToken.toLowerCase() === outputToken.toLowerCase())
-      throw new Error("Input token and output token can not be equal");
-
-    const encodedData = this._handlerAddress
-      ? this._abiEncoder.encode(
-        ["address", "uint256", "address"],
-        [outputToken, minReturn, this._handlerAddress]
-      )
-      : this._abiEncoder.encode(
-        ["address", "uint256"],
-        [outputToken, minReturn]
-      );
-
-    let data, value, to;
-    if (isNetworkGasToken(inputToken)) {
-      const encodedEthOrder = await this._gelatoLimitOrders.encodeEthOrder(
-        this._moduleAddress,
-        ETH_ADDRESS, // we also use ETH_ADDRESS if it's MATIC
-        owner,
-        witness,
-        encodedData,
-        secret
-      );
-      data = this._gelatoLimitOrders.interface.encodeFunctionData(
-        "depositEth",
-        [encodedEthOrder]
-      );
-      value = amount;
-      to = this._gelatoLimitOrders.address;
-    } else {
-      if (checkAllowance) {
-        const allowance = await ERC20__factory.connect(
-          inputToken,
-          this._provider
-        ).allowance(owner, this._erc20OrderRouter.address);
-
-        if (allowance.lt(amount))
-          throw new Error("Insufficient token allowance for placing order");
-      }
-
-      data = this._erc20OrderRouter.interface.encodeFunctionData(
-        "depositToken",
-        [
-          amount,
-          this._moduleAddress,
-          inputToken,
-          owner,
-          witness,
-          encodedData,
-          secret,
-        ]
-      );
-      value = constants.Zero;
-      to = this._erc20OrderRouter.address;
-    }
-
-    return { data, value, to };
   }
 }
