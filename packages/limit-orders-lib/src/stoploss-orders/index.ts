@@ -49,7 +49,7 @@ export class GelatoStoplossOrders extends GelatoCore {
 
   }
 
-  public async submitOrder(
+  public async submitStoplossOrder(
     inputToken: string,
     outputToken: string,
     inputAmount: BigNumberish,
