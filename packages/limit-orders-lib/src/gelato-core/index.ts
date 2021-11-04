@@ -36,6 +36,7 @@ import {
 } from "../utils/queries";
 import {
   Handler,
+  StoplossHandler,
   ChainId,
   Order,
   TransactionData,
@@ -46,7 +47,7 @@ import { isEthereumChain } from "../utils";
 
 export const isValidChainIdAndHandler = (
   chainId: ChainId,
-  handler: Handler
+  handler: Handler | StoplossHandler
 ): boolean => {
   return NETWORK_HANDLERS[chainId].includes(handler);
 };
@@ -77,7 +78,7 @@ export class GelatoCore {
   public _subgraphUrl: string;
   public _abiEncoder: utils.AbiCoder;
   public _handlerAddress?: string;
-  public _handler?: Handler;
+  public _handler?: Handler | StoplossHandler;
 
   public static slippageBPS = SLIPPAGE_BPS;
   public static gelatoFeeBPS = TWO_BPS_GELATO_FEE;
@@ -98,7 +99,7 @@ export class GelatoCore {
     return this._subgraphUrl;
   }
 
-  get handler(): Handler | undefined {
+  get handler(): Handler | StoplossHandler | undefined {
     return this._handler;
   }
 
@@ -127,7 +128,7 @@ export class GelatoCore {
     chainId: ChainId,
     moduleAddress: string,
     signerOrProvider?: Signer | Provider,
-    handler?: Handler,
+    handler?: Handler | StoplossHandler,
     handlerAddress?: string
   ) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {

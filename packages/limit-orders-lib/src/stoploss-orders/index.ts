@@ -19,7 +19,7 @@ import {
 } from "../contracts/types";
 
 import {
-  Handler,
+  StoplossHandler,
   ChainId,
   Order,
   TransactionData,
@@ -33,7 +33,7 @@ export class GelatoStoplossOrders extends GelatoCore {
   constructor(
     chainId: ChainId,
     signerOrProvider?: Signer | Provider,
-    handler?: Handler,
+    handler?: StoplossHandler,
   ) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {
       throw new Error("Invalid chainId and handler");
@@ -53,12 +53,14 @@ export class GelatoStoplossOrders extends GelatoCore {
     inputToken: string,
     outputToken: string,
     inputAmount: BigNumberish,
-    stoploss: BigNumberish,
+    maxReturn: BigNumberish,
     minReturn: BigNumberish,
     checkAllowance = true,
     overrides?: Overrides
   ): Promise<ContractTransaction> {
     if (!this.signer) throw new Error("No signer");
+
+    if (minReturn.toString() >= maxReturn.toString()) throw new Error("minReturn to high");
 
     const owner = await this.signer.getAddress();
 
@@ -66,7 +68,7 @@ export class GelatoStoplossOrders extends GelatoCore {
       inputToken,
       outputToken,
       inputAmount,
-      stoploss,
+      maxReturn,
       minReturn,
       owner,
       checkAllowance
@@ -84,7 +86,7 @@ export class GelatoStoplossOrders extends GelatoCore {
     inputToken: string,
     outputToken: string,
     inputAmount: BigNumberish,
-    stoploss: BigNumberish,
+    maxReturn: BigNumberish,
     minReturn: BigNumberish,
     owner: string,
     checkAllowance = true
@@ -93,7 +95,7 @@ export class GelatoStoplossOrders extends GelatoCore {
       inputToken,
       outputToken,
       inputAmount,
-      stoploss,
+      maxReturn,
       minReturn,
       owner,
       checkAllowance
@@ -107,7 +109,7 @@ export class GelatoStoplossOrders extends GelatoCore {
     inputToken: string,
     outputToken: string,
     inputAmount: BigNumberish,
-    stoplossToBeParsed: BigNumberish,
+    maxReturnToBeParsed: BigNumberish,
     minReturnToBeParsed: BigNumberish,
     owner: string,
     checkAllowance = true
@@ -118,9 +120,9 @@ export class GelatoStoplossOrders extends GelatoCore {
 
     const { privateKey: secret, address: witness } = new Wallet(fullSecret);
 
-    const { minReturn: stoploss } = !isEthereumChain(this.chainId)
-      ? this.getFeeAndSlippageAdjustedMinReturn(stoplossToBeParsed)
-      : { minReturn: stoplossToBeParsed };
+    const { minReturn: maxReturn } = !isEthereumChain(this.chainId)
+      ? this.getFeeAndSlippageAdjustedMinReturn(maxReturnToBeParsed)
+      : { minReturn: maxReturnToBeParsed };
 
     const { minReturn } = !isEthereumChain(this.chainId)
       ? this.getFeeAndSlippageAdjustedMinReturn(minReturnToBeParsed)
@@ -132,7 +134,7 @@ export class GelatoStoplossOrders extends GelatoCore {
       owner,
       witness,
       inputAmount,
-      stoploss,
+      maxReturn,
       minReturn,
       secret,
       checkAllowance
@@ -140,12 +142,12 @@ export class GelatoStoplossOrders extends GelatoCore {
 
     const encodedData = this.handlerAddress
       ? this.abiEncoder.encode(
-        ["address", "uint256", "uint256", "address"],
-        [outputToken, stoploss, minReturn, this.handlerAddress]
+        ["address", "uint256", "address", "uint256"],
+        [outputToken, minReturn, this.handlerAddress, maxReturn]
       )
       : this.abiEncoder.encode(
-        ["address", "uint256", "uint256"],
-        [outputToken, stoploss, minReturn,]
+        ["address", "uint256", "address", "uint256"],
+        [outputToken, minReturn, , maxReturn]
       );
 
     return {
@@ -168,7 +170,7 @@ export class GelatoStoplossOrders extends GelatoCore {
         witness: witness.toLowerCase(),
         inputAmount: inputAmount.toString(),
         minReturn: minReturn.toString(),
-        stoploss: stoploss.toString(),
+        maxReturn: maxReturn.toString(),
         adjustedMinReturn: minReturnToBeParsed.toString(),
         inputData: payload.data.toString(),
         secret: secret.toLowerCase(),
@@ -183,7 +185,7 @@ export class GelatoStoplossOrders extends GelatoCore {
     owner: string,
     witness: string,
     amount: BigNumberish,
-    stoploss: BigNumberish,
+    maxReturn: BigNumberish,
     minReturn: BigNumberish,
     secret: string,
     checkAllowance: boolean
@@ -196,11 +198,11 @@ export class GelatoStoplossOrders extends GelatoCore {
     const encodedData = this.handlerAddress
       ? this.abiEncoder.encode(
         ["address", "uint256", "address", "uint256",],
-        [outputToken, minReturn, this.handlerAddress, stoploss]
+        [outputToken, minReturn, this.handlerAddress, maxReturn]
       )
       : this.abiEncoder.encode(
         ["address", "uint256", "address", "uint256"],
-        [outputToken, minReturn, , stoploss]
+        [outputToken, minReturn, , maxReturn]
       );
 
     let data, value, to;

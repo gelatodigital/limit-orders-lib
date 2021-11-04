@@ -7,12 +7,14 @@ export type Handler =
   | "spookyswap"
   | "uniswap"
   | "quickswap"
-  | "quickswap_stoploss"
   | "spiritswap"
   | "bombswap"
   | "polydex"
   | "cafeswap"
   | "pancakeswap";
+
+export type StoplossHandler = | "quickswap_stoploss";
+
 
 export interface TransactionData {
   to: string;
@@ -38,7 +40,7 @@ export interface Order {
   inputToken: string;
   outputToken: string;
   minReturn: string;
-  stoploss?: string;
+  maxReturn?: string;
   adjustedMinReturn: string;
   module: string;
   witness: string;
@@ -67,7 +69,7 @@ export interface PartialOrder {
   inputToken: string;
   outputToken: string;
   minReturn: string;
-  stoploss?: string;
+  maxReturn?: string;
   adjustedMinReturn: string;
   module: string;
   witness: string;
