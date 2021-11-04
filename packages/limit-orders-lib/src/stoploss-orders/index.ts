@@ -195,12 +195,12 @@ export class GelatoStoplossOrders extends GelatoCore {
 
     const encodedData = this.handlerAddress
       ? this.abiEncoder.encode(
-        ["address", "uint256", "uint256", "address"],
-        [outputToken, stoploss, minReturn, this.handlerAddress]
+        ["address", "uint256", "address", "uint256",],
+        [outputToken, minReturn, this.handlerAddress, stoploss]
       )
       : this.abiEncoder.encode(
-        ["address", "uint256", "uint256"],
-        [outputToken, stoploss, minReturn,]
+        ["address", "uint256", "address", "uint256"],
+        [outputToken, minReturn, , stoploss]
       );
 
     let data, value, to;

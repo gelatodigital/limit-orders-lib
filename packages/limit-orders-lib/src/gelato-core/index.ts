@@ -13,7 +13,7 @@ import {
   CHAIN_ID,
   ETH_ADDRESS,
   NATIVE_WRAPPED_TOKEN_ADDRESS,
-  GELATO_CORE_ADDRESS,
+  GELATO_LIMIT_ORDERS_ADDRESS,
   GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER,
   NETWORK_HANDLERS,
   SLIPPAGE_BPS,
@@ -147,16 +147,16 @@ export class GelatoCore {
 
     this._gelatoCore = this._signer
       ? GelatoCore__factory.connect(
-        GELATO_CORE_ADDRESS[this._chainId],
+        GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
         this._signer
       )
       : this._provider
         ? GelatoCore__factory.connect(
-          GELATO_CORE_ADDRESS[this._chainId],
+          GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           this._provider
         )
         : (new Contract(
-          GELATO_CORE_ADDRESS[this._chainId],
+          GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           GelatoCore__factory.createInterface()
         ) as GelatoCoreContract);
 
