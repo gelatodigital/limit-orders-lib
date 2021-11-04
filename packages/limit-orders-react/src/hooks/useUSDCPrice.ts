@@ -83,7 +83,22 @@ export default function useUSDCPrice(
     // use v2 price if available, v3 as fallback
     if (v2USDCTrade) {
       const { numerator, denominator } = v2USDCTrade.route.midPrice;
-      return new Price(currency, chainId == 56 ? USDC_BSC : USDC, denominator, numerator);
+      return new Price(
+        currency, 
+        chainId === 1
+          ? USDC 
+          : chainId === 56
+          ? USDC_BSC
+          : chainId === 137
+          ? USDC_MATIC
+          : chainId === 250
+          ? USDC_FANTOM
+          : chainId === 43114
+          ? USDC_AVAX
+          : undefined,
+        denominator, 
+        numerator
+      );
     }
     // } else if (v3USDCTrade.state === V3TradeState.VALID && v3USDCTrade.trade) {
     //   const { numerator, denominator } = v3USDCTrade.trade.route.midPrice
