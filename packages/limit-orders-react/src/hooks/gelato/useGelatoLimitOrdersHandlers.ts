@@ -3,6 +3,8 @@ import { Order } from "@gelatonetwork/limit-orders-lib";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Overrides } from "@ethersproject/contracts";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
+import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
+
 import { useOrderActionHandlers } from "../../state/gorder/hooks";
 import { Field } from "../../types";
 import { Currency, Price } from "@uniswap/sdk-core";
@@ -49,12 +51,8 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const gasPrice = useGasPrice();
 
-  const {
-    onSwitchTokens,
-    onCurrencySelection,
-    onUserInput,
-    onChangeRateType,
-  } = useOrderActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
+    useOrderActionHandlers();
 
   const handleLimitOrderSubmission = useCallback(
     async (
@@ -79,17 +77,14 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
         throw new Error("No signer");
       }
 
-      const {
-        witness,
-        payload,
-        order,
-      } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-        orderToSubmit.inputToken,
-        orderToSubmit.outputToken,
-        orderToSubmit.inputAmount,
-        orderToSubmit.outputAmount,
-        orderToSubmit.owner
-      );
+      const { witness, payload, order } =
+        await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+          orderToSubmit.inputToken,
+          orderToSubmit.outputToken,
+          orderToSubmit.inputAmount,
+          orderToSubmit.outputAmount,
+          orderToSubmit.owner
+        );
 
       const tx = await gelatoLimitOrders.signer.sendTransaction({
         ...(overrides ?? { gasPrice }),
@@ -151,7 +146,10 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       const tx = await gelatoLimitOrders.cancelLimitOrder(
         orderToCancel,
         checkIfOrderExists,
-        overrides ?? { gasPrice, gasLimit: 600000 }
+        overrides ?? {
+          gasPrice,
+          gasLimit: isEthereumChain(chainId) ? 600_000 : 2_000_000,
+        }
       );
 
       const now = Math.round(Date.now() / 1000);
