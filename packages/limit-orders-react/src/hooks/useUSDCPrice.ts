@@ -19,7 +19,10 @@ const usdcCurrencyAmountFANTOM = CurrencyAmount.fromRawAmount(
   USDC_FANTOM,
   100_000e6
 );
-const usdcCurrencyAmountBSC = CurrencyAmount.fromRawAmount(USDC_BSC, 100_000e18);
+const usdcCurrencyAmountBSC = CurrencyAmount.fromRawAmount(
+  USDC_BSC,
+  100_000e18
+);
 const usdcCurrencyAmountAVAX = CurrencyAmount.fromRawAmount(
   USDC_AVAX,
   100_000e6
@@ -84,9 +87,9 @@ export default function useUSDCPrice(
     if (v2USDCTrade) {
       const { numerator, denominator } = v2USDCTrade.route.midPrice;
       return new Price(
-        currency, 
+        currency,
         chainId === 1
-          ? USDC 
+          ? USDC
           : chainId === 56
           ? USDC_BSC
           : chainId === 137
@@ -95,8 +98,8 @@ export default function useUSDCPrice(
           ? USDC_FANTOM
           : chainId === 43114
           ? USDC_AVAX
-          : undefined,
-        denominator, 
+          : USDC,
+        denominator,
         numerator
       );
     }
