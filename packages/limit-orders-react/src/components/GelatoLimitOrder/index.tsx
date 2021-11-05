@@ -512,7 +512,7 @@ export default function GelatoLimitOrder({
                     sliderWidth={16}
                     translate={22}
                   />
-                  <QuestionHelper text="With frontrun protection enabled Gelato bots will use flashbots to execute your orders. This feature is still in beta and your order might not be filled." />
+                  <QuestionHelper text="With frontrun protection enabled Gelato bots will use mistX Labs flashbots SDK to execute your orders. This feature is still in beta and your order might not be filled." />
                 </RowFixed>
               </Row>
             )}
