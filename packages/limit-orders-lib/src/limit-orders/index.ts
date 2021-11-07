@@ -332,6 +332,7 @@ export class GelatoLimitOrders {
     if (!order.outputToken) throw new Error("No output token in order");
     if (!order.minReturn) throw new Error("No minReturn in order");
     if (!order.owner) throw new Error("No owner");
+    if (!order.module) throw new Error("No module in order");
 
     if (checkIsActiveOrder) {
       const isActiveOrder = await this.isActiveOrder(order);
@@ -341,13 +342,7 @@ export class GelatoLimitOrders {
 
     const data = this._gelatoLimitOrders.interface.encodeFunctionData(
       "cancelOrder",
-      [
-        this._moduleAddress,
-        order.inputToken,
-        order.owner,
-        order.witness,
-        order.data,
-      ]
+      [order.module, order.inputToken, order.owner, order.witness, order.data]
     );
 
     return {
@@ -371,6 +366,7 @@ export class GelatoLimitOrders {
     if (!order.outputToken) throw new Error("No output token in order");
     if (!order.minReturn) throw new Error("No minReturn in order");
     if (!order.data) throw new Error("No data in order");
+    if (!order.module) throw new Error("No module in order");
 
     if (checkIsActiveOrder) {
       const isActiveOrder = await this.isActiveOrder(order);
@@ -384,13 +380,13 @@ export class GelatoLimitOrders {
       throw new Error("Owner and signer mismatch");
 
     return this._gelatoLimitOrders.cancelOrder(
-      this._moduleAddress,
+      order.module,
       order.inputToken,
       order.owner,
       order.witness,
       order.data,
       overrides ?? {
-        gasLimit: isEthereumChain(this._chainId) ? 500000 : 1500000,
+        gasLimit: isEthereumChain(this._chainId) ? 600_000 : 2_000_000,
       }
     );
   }
