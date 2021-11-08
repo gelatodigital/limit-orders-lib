@@ -48,8 +48,12 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
   const addTransaction = useTransactionAdder();
 
-  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRateType } =
-    useOrderActionHandlers();
+  const {
+    onSwitchTokens,
+    onCurrencySelection,
+    onUserInput,
+    onChangeRateType,
+  } = useOrderActionHandlers();
 
   const handleLimitOrderSubmission = useCallback(
     async (
@@ -74,14 +78,17 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
         throw new Error("No signer");
       }
 
-      const { witness, payload, order } =
-        await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
-          orderToSubmit.inputToken,
-          orderToSubmit.outputToken,
-          orderToSubmit.inputAmount,
-          orderToSubmit.outputAmount,
-          orderToSubmit.owner
-        );
+      const {
+        witness,
+        payload,
+        order,
+      } = await gelatoLimitOrders.encodeLimitOrderSubmissionWithSecret(
+        orderToSubmit.inputToken,
+        orderToSubmit.outputToken,
+        orderToSubmit.inputAmount,
+        orderToSubmit.outputAmount,
+        orderToSubmit.owner
+      );
 
       const tx = await gelatoLimitOrders.signer.sendTransaction({
         ...(overrides ?? {}),
