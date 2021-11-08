@@ -352,6 +352,20 @@ export class GelatoLimitOrders {
         ]);
 
         if (subgraphOrder) {
+          if (subgraphOrder.status !== "open") {
+            if (subgraphOrder.status === "cancelled") {
+              throw new Error(
+                `Order status is not open. Current order status: ${subgraphOrder.status}. Cancellation transaction hash: ${subgraphOrder.cancelledTxHash}`
+              );
+            }
+
+            if (subgraphOrder.status === "executed") {
+              throw new Error(
+                `Order status is not open. Current order status: ${subgraphOrder.status}. Execution transaction hash: ${subgraphOrder.executedTxHash}`
+              );
+            }
+          }
+
           _order = { ...order, ...subgraphOrder };
         }
         // eslint-disable-next-line no-empty
