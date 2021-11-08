@@ -2,12 +2,7 @@ import { gql } from "graphql-request";
 
 export const GET_ORDER_BY_ID = gql`
   query getOrdersByOwner($id: String) {
-    orders(
-      first: 1000
-      orderBy: updatedAtBlock
-      orderDirection: desc
-      where: { id: $id }
-    ) {
+    orders(where: { id: $id }) {
       id
       owner
       inputToken
