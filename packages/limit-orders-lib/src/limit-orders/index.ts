@@ -13,7 +13,6 @@ import { Signer } from "@ethersproject/abstract-signer";
 import {
   CHAIN_ID,
   ETH_ADDRESS,
-  NATIVE_WRAPPED_TOKEN_ADDRESS,
   GELATO_LIMIT_ORDERS_ADDRESS,
   GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER,
   GELATO_LIMIT_ORDERS_MODULE_ADDRESS,
@@ -56,17 +55,6 @@ export const isValidChainIdAndHandler = (
 
 export const isFlashbotsCompatibleChainId = (chainId: ChainId): boolean => {
   return chainId == CHAIN_ID.MAINNET || chainId == CHAIN_ID.GOERLI;
-};
-
-export const isETHOrWETH = (
-  tokenAddress: string,
-  chainID: ChainId
-): boolean => {
-  const WETH_ADDRESS = NATIVE_WRAPPED_TOKEN_ADDRESS[chainID];
-  return (
-    tokenAddress.toLowerCase() === ETH_ADDRESS.toLowerCase() ||
-    tokenAddress.toLowerCase() === WETH_ADDRESS.toLowerCase()
-  );
 };
 
 export class GelatoLimitOrders {
@@ -290,16 +278,6 @@ export class GelatoLimitOrders {
     overrides?: Overrides
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
-
-    if (
-      this._isFlashbotsProtected &&
-      !isETHOrWETH(inputToken, this._chainId) &&
-      !isETHOrWETH(outputToken, this._chainId)
-    ) {
-      throw new Error(
-        "Flashbots protection requires inputToken or outputToken to be ETH or Wrapped, so that miner fee can be discounted. This requirement will be relaxed in future versions."
-      );
-    }
 
     const owner = await this._signer.getAddress();
 
