@@ -281,7 +281,10 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
 
   const parsedAmounts = useMemo(
     () => ({
-      input: independentField === Field.INPUT ? parsedAmount : inputAmount,
+      input:
+        independentField === Field.INPUT
+          ? parsedAmount
+          : inputAmount ?? trade?.inputAmount,
       output:
         independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount,
     }),
@@ -298,7 +301,8 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
 
   if (
     (parsedAmounts.input || parsedAmounts.output) &&
-    (currencies.input || currencies.output) &&
+    currencies.input &&
+    currencies.output &&
     !trade
   ) {
     const extraMessage =
@@ -347,7 +351,10 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
   }
 
   const formattedAmounts = {
-    input: inputValue ?? "",
+    input:
+      inputValue && inputValue !== ""
+        ? inputValue
+        : parsedAmounts.input?.toSignificant(6) ?? "",
     output:
       independentField === Field.OUTPUT
         ? typedValue
