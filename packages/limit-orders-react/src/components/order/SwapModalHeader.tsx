@@ -1,4 +1,4 @@
-import { Currency, Percent, TradeType } from "@uniswap/sdk-core";
+import { Currency, TradeType } from "@uniswap/sdk-core";
 import { Trade } from "@uniswap/v2-sdk";
 import React, { useState } from "react";
 import { ArrowDown, AlertTriangle } from "react-feather";

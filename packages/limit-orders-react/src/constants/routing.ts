@@ -59,6 +59,7 @@ const WETH_ONLY: ChainTokenList = {
   [42]: [WETH9[42]],
   [56]: [WBNB_BSC],
   [250]: [WETH_FANTOM],
+  [137]: [WETH_MATIC],
   [43114]: [WAVAX_AVAX],
 };
 // used to construct intermediary pairs for trading
@@ -109,7 +110,7 @@ export const SUGGESTED_BASES: ChainCurrencyList = {
 export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
   ...WETH_ONLY,
   [1]: [...WETH_ONLY[1], DAI, USDC, USDT, WBTC],
-  [127]: MATIC_BASES,
+  [137]: MATIC_BASES,
   [250]: FANTOM_BASES,
 };
 
