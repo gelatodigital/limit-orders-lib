@@ -1,7 +1,11 @@
 import { Order } from "@gelatonetwork/limit-orders-lib";
-import { get, set } from "local-storage";
+import { get, set, clear } from "local-storage";
 
 const LS_ORDERS = "gorders_";
+
+export function clearOrdersLocalStorage() {
+  return clear();
+}
 
 export function lsKey(key: string, account: string, chainId: number) {
   return key + account.toString() + chainId.toString();

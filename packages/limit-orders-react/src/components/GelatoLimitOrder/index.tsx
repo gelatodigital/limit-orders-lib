@@ -218,16 +218,13 @@ export default function GelatoLimitOrder({
 
   const allowedSlippage = new Percent(40, 10_000);
   const userHasSpecifiedInputOutput = Boolean(
-    (independentField === Field.INPUT || independentField === Field.OUTPUT) &&
-      currencies.input &&
-      currencies.output
+    currencies.input && currencies.output
   );
   const routeNotFound = !trade?.route;
   const isLoadingRoute =
-    parsedAmounts.input &&
-    !parsedAmounts.output &&
-    currencies.input &&
-    currencies.output;
+    userHasSpecifiedInputOutput &&
+    ((parsedAmounts.input && !parsedAmounts.output) ||
+      (!parsedAmounts.input && parsedAmounts.output));
 
   const maxInputAmount: CurrencyAmount<Currency> | undefined = maxAmountSpend(
     currencyBalances.input
@@ -548,16 +545,10 @@ export default function GelatoLimitOrder({
                 <ButtonLight onClick={toggleWalletModal}>
                   Connect Wallet
                 </ButtonLight>
-              ) : routeNotFound &&
-                userHasSpecifiedInputOutput &&
-                parsedAmounts.input ? (
+              ) : routeNotFound && isLoadingRoute ? (
                 <GreyCard style={{ textAlign: "center" }}>
                   <TYPE.main mb="4px">
-                    {isLoadingRoute ? (
-                      <Dots>Loading</Dots>
-                    ) : (
-                      `Insufficient liquidity for this trade.`
-                    )}
+                    <Dots>Loading</Dots>
                   </TYPE.main>
                 </GreyCard>
               ) : showApproveFlow ? (
@@ -587,7 +578,7 @@ export default function GelatoLimitOrder({
                           {approvalState === ApprovalState.APPROVED
                             ? `You can now use your ${currencies.input?.symbol} to place orders.`
                             : `Allow the Gelato Limit Orders to use your 
-                              ${currencies.input?.symbol}`}
+                              ${currencies.input?.symbol}.`}
                         </span>
                         {approvalState === ApprovalState.PENDING ||
                         (approvalSubmitted &&
