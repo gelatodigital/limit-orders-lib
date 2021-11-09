@@ -180,7 +180,7 @@ export interface DerivedOrderInfo {
 
 // from the current swap inputs, compute the best trade and return it.
 export function useDerivedOrderInfo(): DerivedOrderInfo {
-  const { account, handler } = useWeb3();
+  const { account, handler, chainId } = useWeb3();
 
   const {
     independentField,
@@ -292,12 +292,23 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     parsedAmounts.output = desiredRateAppliedAsCurrencyAmount;
   }
 
-  if (!parsedAmounts.input || !parsedAmounts.output) {
-    inputError = inputError ?? "Enter an amount";
-  }
-
   if (!currencies.input || !currencies.output) {
     inputError = inputError ?? "Select a token";
+  }
+
+  if (
+    (parsedAmounts.input || parsedAmounts.output) &&
+    (currencies.input || currencies.output) &&
+    !trade
+  ) {
+    const extraMessage =
+      chainId === 1 ? ". Only Uniswap V2 pools supported" : "";
+    inputError =
+      inputError ?? "Insufficient liquidity for this trade" + extraMessage;
+  }
+
+  if (!parsedAmounts.input || !parsedAmounts.output) {
+    inputError = inputError ?? "Enter an amount";
   }
 
   const price = useMemo(() => {
@@ -308,6 +319,14 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
       quoteAmount: parsedAmounts.output,
     });
   }, [parsedAmounts.input, parsedAmounts.output]);
+
+  // compare input to balance
+  const [balanceIn, amountIn] = [currencyBalances.input, parsedAmounts.input];
+
+  if (balanceIn && amountIn && balanceIn.lessThan(amountIn)) {
+    inputError =
+      inputError ?? "Insufficient " + amountIn.currency.symbol + " balance";
+  }
 
   if (price && trade) {
     if (
@@ -325,14 +344,6 @@ export function useDerivedOrderInfo(): DerivedOrderInfo {
     )
       inputError =
         inputError ?? "Only possible to place buy orders below market rate";
-  }
-
-  // compare input to balance
-  const [balanceIn, amountIn] = [currencyBalances.input, parsedAmounts.input];
-
-  if (balanceIn && amountIn && balanceIn.lessThan(amountIn)) {
-    inputError =
-      inputError ?? "Insufficient " + amountIn.currency.symbol + " balance";
   }
 
   const formattedAmounts = {

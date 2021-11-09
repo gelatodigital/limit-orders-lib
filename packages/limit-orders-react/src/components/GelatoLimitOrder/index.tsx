@@ -550,6 +550,7 @@ export default function GelatoLimitOrder({
                 </ButtonLight>
               ) : routeNotFound &&
                 userHasSpecifiedInputOutput &&
+                !inputError &&
                 parsedAmounts.input ? (
                 <GreyCard style={{ textAlign: "center" }}>
                   <TYPE.main mb="4px">
@@ -587,7 +588,7 @@ export default function GelatoLimitOrder({
                           {approvalState === ApprovalState.APPROVED
                             ? `You can now use your ${currencies.input?.symbol} to place orders.`
                             : `Allow the Gelato Limit Orders to use your 
-                              ${currencies.input?.symbol}`}
+                              ${currencies.input?.symbol}.`}
                         </span>
                         {approvalState === ApprovalState.PENDING ||
                         (approvalSubmitted &&

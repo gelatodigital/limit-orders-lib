@@ -29,6 +29,7 @@ import {
   useApproveCallbackFromInputCurrencyAmount,
 } from "./hooks/useApproveCallback";
 import { useTransactionAdder } from "./state/gtransactions/hooks";
+import { clearOrdersLocalStorage } from "./utils/localStorageOrders";
 
 export function GelatoProvider({
   chainId,
@@ -103,4 +104,5 @@ export {
   ApprovalState,
   useApproveCallbackFromInputCurrencyAmount,
   useTransactionAdder,
+  clearOrdersLocalStorage,
 };
