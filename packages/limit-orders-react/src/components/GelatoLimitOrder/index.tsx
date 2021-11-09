@@ -550,7 +550,6 @@ export default function GelatoLimitOrder({
                 </ButtonLight>
               ) : routeNotFound &&
                 userHasSpecifiedInputOutput &&
-                !inputError &&
                 parsedAmounts.input ? (
                 <GreyCard style={{ textAlign: "center" }}>
                   <TYPE.main mb="4px">
