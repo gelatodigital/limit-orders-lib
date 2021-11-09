@@ -1,5 +1,35 @@
 import { gql } from "graphql-request";
 
+export const GET_ORDER_BY_ID = gql`
+  query getOrdersByOwner($id: String) {
+    orders(where: { id: $id }) {
+      id
+      owner
+      inputToken
+      outputToken
+      minReturn
+      module
+      witness
+      secret
+      inputAmount
+      vault
+      bought
+      auxData
+      status
+      createdTxHash
+      executedTxHash
+      cancelledTxHash
+      blockNumber
+      createdAt
+      updatedAt
+      updatedAtBlock
+      updatedAtBlockHash
+      data
+      inputData
+    }
+  }
+`;
+
 export const GET_ALL_ORDERS_BY_OWNER = gql`
   query getOrdersByOwner($owner: String) {
     orders(
