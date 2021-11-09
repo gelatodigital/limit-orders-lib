@@ -27,7 +27,6 @@ export const queryOrder = async (
 
     return _getUniqueOrdersWithHandler(allOrders).pop() ?? null;
   } catch (error) {
-    console.log(error);
     throw new Error("Could not query subgraph for all orders");
   }
 };
@@ -56,7 +55,6 @@ export const queryOrders = async (
 
     return _getUniqueOrdersWithHandler(allOrders);
   } catch (error) {
-    console.log(error);
     throw new Error("Could not query subgraph for all orders");
   }
 };
