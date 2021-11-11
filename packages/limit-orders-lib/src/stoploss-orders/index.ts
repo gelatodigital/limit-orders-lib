@@ -12,39 +12,43 @@ import { Signer } from "@ethersproject/abstract-signer";
 import {
   ETH_ADDRESS,
   GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS,
-  STOPLOSS_HANDLERS_ADDRESSES,
+  HANDLERS_ADDRESSES,
 } from "../constants";
 import {
   ERC20__factory,
 } from "../contracts/types";
 
 import {
-  StoplossHandler,
+  Handler,
   ChainId,
   Order,
   TransactionData,
   TransactionDataWithSecret,
 } from "../types";
 import { isEthereumChain, isNetworkGasToken } from "../utils";
-import { isValidChainIdAndHandler, GelatoCore } from "../gelato-core";
+import { isValidChainIdAndHandler, GelatoBase } from "../gelato-base";
 
 
-export class GelatoStoplossOrders extends GelatoCore {
+export class GelatoStoplossOrders extends GelatoBase {
   constructor(
     chainId: ChainId,
     signerOrProvider?: Signer | Provider,
-    handler?: StoplossHandler,
+    handler?: Handler,
   ) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {
       throw new Error("Invalid chainId and handler");
     }
+    const sotplossHandlers = ["quickswap_stoploss"]
 
+    if (handler && !sotplossHandlers.includes(handler)) {
+      throw new Error("Wrong handler");
+    }
 
     const moduleAddress = GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS[chainId];
 
     if (!moduleAddress) throw new Error("Invalid chainId and handler");
 
-    const handlerAddress = handler === "quickswap_stoploss" ? STOPLOSS_HANDLERS_ADDRESSES[chainId][handler]?.toLowerCase() : undefined;
+    const handlerAddress = handler === "quickswap_stoploss" ? HANDLERS_ADDRESSES[chainId][handler]?.toLowerCase() : undefined;
     super(chainId, moduleAddress, signerOrProvider, handler, handlerAddress);
 
   }
@@ -54,22 +58,24 @@ export class GelatoStoplossOrders extends GelatoCore {
     outputToken: string,
     inputAmount: BigNumberish,
     maxReturn: BigNumberish,
-    minReturn: BigNumberish,
+    userSlippage: number,
     checkAllowance = true,
     overrides?: Overrides
   ): Promise<ContractTransaction> {
     if (!this.signer) throw new Error("No signer");
 
-    if (minReturn.toString() >= maxReturn.toString()) throw new Error("minReturn to high");
+    if (!maxReturn) throw new Error("No Stoploss defined");
+
+    if (!userSlippage) throw new Error("No slippage defined");
 
     const owner = await this.signer.getAddress();
 
-    const txData = await this.encodeLimitOrderSubmission(
+    const txData = await this.encodeStoplossOrderSubmission(
       inputToken,
       outputToken,
       inputAmount,
       maxReturn,
-      minReturn,
+      userSlippage,
       owner,
       checkAllowance
     );
@@ -82,21 +88,21 @@ export class GelatoStoplossOrders extends GelatoCore {
     });
   }
 
-  public async encodeLimitOrderSubmission(
+  public async encodeStoplossOrderSubmission(
     inputToken: string,
     outputToken: string,
     inputAmount: BigNumberish,
     maxReturn: BigNumberish,
-    minReturn: BigNumberish,
+    userSlippage: number,
     owner: string,
     checkAllowance = true
   ): Promise<TransactionData> {
-    const { payload } = await this.encodeLimitOrderSubmissionWithSecret(
+    const { payload } = await this.encodeStoplossOrderSubmissionWithSecret(
       inputToken,
       outputToken,
       inputAmount,
       maxReturn,
-      minReturn,
+      userSlippage,
       owner,
       checkAllowance
     );
@@ -105,15 +111,19 @@ export class GelatoStoplossOrders extends GelatoCore {
   }
 
 
-  public async encodeLimitOrderSubmissionWithSecret(
+  public async encodeStoplossOrderSubmissionWithSecret(
     inputToken: string,
     outputToken: string,
     inputAmount: BigNumberish,
     maxReturnToBeParsed: BigNumberish,
-    minReturnToBeParsed: BigNumberish,
+    userSlippage: number,
     owner: string,
     checkAllowance = true
   ): Promise<TransactionDataWithSecret> {
+    if (!maxReturnToBeParsed) throw new Error("No Stoploss defined");
+
+    if (!userSlippage) throw new Error("No slippage defined");
+
     const randomSecret = utils.hexlify(utils.randomBytes(19)).replace("0x", "");
     // 0x67656c61746f6e6574776f726b = gelatonetwork in hex
     const fullSecret = `0x67656c61746f6e6574776f726b${randomSecret}`;
@@ -124,9 +134,7 @@ export class GelatoStoplossOrders extends GelatoCore {
       ? this.getFeeAndSlippageAdjustedMinReturn(maxReturnToBeParsed)
       : { minReturn: maxReturnToBeParsed };
 
-    const { minReturn } = !isEthereumChain(this.chainId)
-      ? this.getFeeAndSlippageAdjustedMinReturn(minReturnToBeParsed)
-      : { minReturn: minReturnToBeParsed };
+    const { minReturn } = this.getFeeAndSlippageAdjustedMinReturn(maxReturnToBeParsed, userSlippage);
 
     const payload = await this._encodeSubmitData(
       inputToken,
@@ -150,6 +158,34 @@ export class GelatoStoplossOrders extends GelatoCore {
         [outputToken, minReturn, , maxReturn]
       );
 
+    console.log("LIMIT ORDER LIB ORDER!!!", {
+      payload,
+      secret,
+      witness,
+      order: {
+        id: this._getKey({
+          module: this.moduleAddress,
+          inputToken,
+          owner,
+          witness,
+          data: encodedData,
+        } as Order),
+        module: this.moduleAddress.toLowerCase(),
+        data: encodedData,
+        inputToken: inputToken.toLowerCase(),
+        outputToken: outputToken.toLowerCase(),
+        owner: owner.toLowerCase(),
+        witness: witness.toLowerCase(),
+        inputAmount: inputAmount.toString(),
+        minReturn: minReturn.toString(),
+        maxReturn: maxReturn.toString(),
+        adjustedMinReturn: minReturn.toString(),
+        inputData: payload.data.toString(),
+        secret: secret.toLowerCase(),
+        handler: this.handlerAddress ?? null,
+      },
+    })
+
     return {
       payload,
       secret,
@@ -171,7 +207,7 @@ export class GelatoStoplossOrders extends GelatoCore {
         inputAmount: inputAmount.toString(),
         minReturn: minReturn.toString(),
         maxReturn: maxReturn.toString(),
-        adjustedMinReturn: minReturnToBeParsed.toString(),
+        adjustedMinReturn: minReturn.toString(),
         inputData: payload.data.toString(),
         secret: secret.toLowerCase(),
         handler: this.handlerAddress ?? null,

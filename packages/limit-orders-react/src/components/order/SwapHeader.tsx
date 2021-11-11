@@ -81,10 +81,30 @@ const OrdersHeaderTabs = ({
 export default function SwapHeader({
   handleActiveTab,
   activeTab,
+  type,
 }: {
-  handleActiveTab: (tab: "sell" | "buy") => void;
-  activeTab: string;
+  handleActiveTab?: (tab: "sell" | "buy") => void;
+  activeTab?: string;
+  type?: string;
 }) {
+
+  if (type === "stoploss") {
+    return (
+      <StyledSwapHeader>
+        <RowBetween>
+          <RowFixed>
+            <TYPE.black fontWeight={500} fontSize={16}>
+              Stoploss Order
+            </TYPE.black>
+          </RowFixed>
+        </RowBetween>
+      </StyledSwapHeader>)
+  } else
+
+    if (!handleActiveTab || !activeTab) {
+      return null
+    }
+
   return (
     <StyledSwapHeader>
       <RowBetween>

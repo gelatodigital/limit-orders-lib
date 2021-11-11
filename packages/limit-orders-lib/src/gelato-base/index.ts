@@ -24,8 +24,8 @@ import {
   ERC20OrderRouter,
   ERC20OrderRouter__factory,
   ERC20__factory,
-  GelatoLimitOrders as GelatoCoreContract,
-  GelatoLimitOrders__factory as GelatoCore__factory,
+  GelatoLimitOrders as GelatoBaseContract,
+  GelatoLimitOrders__factory as GelatoBase__factory,
 } from "../contracts/types";
 import {
   queryCancelledOrders,
@@ -36,7 +36,6 @@ import {
 } from "../utils/queries";
 import {
   Handler,
-  StoplossHandler,
   ChainId,
   Order,
   TransactionData,
@@ -47,7 +46,7 @@ import { isEthereumChain } from "../utils";
 
 export const isValidChainIdAndHandler = (
   chainId: ChainId,
-  handler: Handler | StoplossHandler
+  handler: Handler
 ): boolean => {
   return NETWORK_HANDLERS[chainId].includes(handler);
 };
@@ -68,17 +67,17 @@ export const isETHOrWETH = (
 };
 
 
-export class GelatoCore {
+export class GelatoBase {
   public _chainId: ChainId;
   public _provider: Provider | undefined;
   public _signer: Signer | undefined;
-  public _gelatoCore: GelatoCoreContract;
+  public _gelatoCore: GelatoBaseContract;
   public _erc20OrderRouter: ERC20OrderRouter;
   public _moduleAddress: string;
   public _subgraphUrl: string;
   public _abiEncoder: utils.AbiCoder;
   public _handlerAddress?: string;
-  public _handler?: Handler | StoplossHandler;
+  public _handler?: Handler;
 
   public static slippageBPS = SLIPPAGE_BPS;
   public static gelatoFeeBPS = TWO_BPS_GELATO_FEE;
@@ -99,7 +98,7 @@ export class GelatoCore {
     return this._subgraphUrl;
   }
 
-  get handler(): Handler | StoplossHandler | undefined {
+  get handler(): Handler | undefined {
     return this._handler;
   }
 
@@ -111,7 +110,7 @@ export class GelatoCore {
     return this._moduleAddress;
   }
 
-  get contract(): GelatoCoreContract {
+  get contract(): GelatoBaseContract {
     return this._gelatoCore;
   }
 
@@ -128,7 +127,7 @@ export class GelatoCore {
     chainId: ChainId,
     moduleAddress: string,
     signerOrProvider?: Signer | Provider,
-    handler?: Handler | StoplossHandler,
+    handler?: Handler,
     handlerAddress?: string
   ) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {
@@ -147,19 +146,19 @@ export class GelatoCore {
         : undefined;
 
     this._gelatoCore = this._signer
-      ? GelatoCore__factory.connect(
+      ? GelatoBase__factory.connect(
         GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
         this._signer
       )
       : this._provider
-        ? GelatoCore__factory.connect(
+        ? GelatoBase__factory.connect(
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           this._provider
         )
         : (new Contract(
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
-          GelatoCore__factory.createInterface()
-        ) as GelatoCoreContract);
+          GelatoBase__factory.createInterface()
+        ) as GelatoBaseContract);
 
 
 
@@ -341,17 +340,17 @@ export class GelatoCore {
     }
 
     const gelatoFee = BigNumber.from(outputAmount)
-      .mul(GelatoCore.gelatoFeeBPS)
+      .mul(GelatoBase.gelatoFeeBPS)
       .div(10000)
       .gte(1)
       ? BigNumber.from(outputAmount)
-        .mul(GelatoCore.gelatoFeeBPS)
+        .mul(GelatoBase.gelatoFeeBPS)
         .div(10000)
       : BigNumber.from(1);
 
     const slippageBPS = extraSlippageBPS
-      ? GelatoCore.slippageBPS + extraSlippageBPS
-      : GelatoCore.slippageBPS;
+      ? GelatoBase.slippageBPS + extraSlippageBPS
+      : GelatoBase.slippageBPS;
 
     const slippage = BigNumber.from(outputAmount).mul(slippageBPS).div(10000);
 
@@ -371,11 +370,11 @@ export class GelatoCore {
     if (isEthereumChain(this._chainId))
       throw new Error("Method not available for current chain.");
 
-    const gelatoFee = BigNumber.from(GelatoCore.gelatoFeeBPS);
+    const gelatoFee = BigNumber.from(GelatoBase.gelatoFeeBPS);
 
     const slippage = extraSlippageBPS
-      ? BigNumber.from(GelatoCore.slippageBPS + extraSlippageBPS)
-      : BigNumber.from(GelatoCore.slippageBPS);
+      ? BigNumber.from(GelatoBase.slippageBPS + extraSlippageBPS)
+      : BigNumber.from(GelatoBase.slippageBPS);
 
     const fees = gelatoFee.add(slippage);
 

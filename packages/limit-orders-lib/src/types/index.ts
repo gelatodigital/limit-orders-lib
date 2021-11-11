@@ -11,10 +11,8 @@ export type Handler =
   | "bombswap"
   | "polydex"
   | "cafeswap"
-  | "pancakeswap";
-
-export type StoplossHandler = | "quickswap_stoploss";
-
+  | "pancakeswap"
+  | "quickswap_stoploss";
 
 export interface TransactionData {
   to: string;

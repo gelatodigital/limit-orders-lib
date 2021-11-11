@@ -19,6 +19,7 @@ import {
   HelpCircle,
 } from "react-feather";
 import { Text } from "rebass";
+import { Input as NumericalInput } from "../NumericalInput";
 import styled from "styled-components";
 import {
   ButtonConfirmed,
@@ -40,7 +41,7 @@ import {
 } from "../order/styleds";
 import SwapHeader from "../order/SwapHeader";
 import TradePrice from "../order/TradePrice";
-import { useGelatoLimitOrders } from "../../hooks/gelato";
+import { useGelatoStoplossOrders } from "../../hooks/gelato";
 import { useIsSwapUnsupported } from "../../hooks/useIsSwapUnsupported";
 import { useUSDCValue } from "../../hooks/useUSDCPrice";
 import { Field } from "../../state/gorder/actions";
@@ -59,6 +60,7 @@ import {
 import Loader from "../Loader";
 import CurrencyLogo from "../CurrencyLogo";
 import { NATIVE } from "../../constants/addresses";
+import Slippage from "../order/Slippage";
 
 const StyledInfo = styled(Info)`
   opacity: 0.4;
@@ -88,26 +90,28 @@ const PoweredByWrapper = styled(PoweredByGelato) <{ size: number }>`
   margin-left: 0.25rem;
 `;
 
-interface GelatoLimitOrderProps {
+interface GelatoStoplossOrderProps {
   showCommonBases?: boolean;
 }
 
-export default function GelatoLimitOrder({
+export default function GelatoStoplossOrder({
   showCommonBases = true,
-}: GelatoLimitOrderProps) {
+}: GelatoStoplossOrderProps) {
   const { account, toggleWalletModal } = useWeb3();
 
   const theme = useTheme();
+
+  const [maxAmount, setMaxAmount] = useState("0")
 
   const recipient = account ?? null;
 
   const {
     handlers: {
       handleInput,
-      handleRateType,
       handleCurrencySelection,
       handleSwitchTokens,
-      handleLimitOrderSubmission,
+      handleStoplossOrderSubmission,
+      handleSlippage
     },
     derivedOrderInfo: {
       parsedAmounts,
@@ -118,9 +122,10 @@ export default function GelatoLimitOrder({
       inputError,
       rawAmounts,
       price,
+      slippage
     },
     orderState: { independentField, rateType },
-  } = useGelatoLimitOrders();
+  } = useGelatoStoplossOrders();
 
   const fiatValueInput = useUSDCValue(parsedAmounts.input);
 
@@ -144,13 +149,6 @@ export default function GelatoLimitOrder({
 
   const isValid = !inputError;
 
-  const [activeTab, setActiveTab] = useState<"sell" | "buy">("sell");
-  const handleActiveTab = (tab: "sell" | "buy") => {
-    if (activeTab === tab) return;
-
-    handleRateType(rateType, price);
-    setActiveTab(tab);
-  };
   const handleTypeInput = useCallback(
     (value: string) => {
       handleInput(Field.INPUT, value);
@@ -203,7 +201,7 @@ export default function GelatoLimitOrder({
     }
   }, [approvalState, approvalSubmitted]);
 
-  const allowedSlippage = new Percent(40, 10_000);
+  const allowedSlippage = new Percent(slippage, 10_000);
   const userHasSpecifiedInputOutput = Boolean(
     (independentField === Field.INPUT || independentField === Field.OUTPUT) &&
     currencies.input &&
@@ -225,7 +223,7 @@ export default function GelatoLimitOrder({
   );
 
   const handleSwap = useCallback(() => {
-    if (!handleLimitOrderSubmission) {
+    if (!handleStoplossOrderSubmission) {
       return;
     }
 
@@ -258,7 +256,7 @@ export default function GelatoLimitOrder({
         throw new Error("No account");
       }
 
-      handleLimitOrderSubmission({
+      handleStoplossOrderSubmission({
         inputToken: currencies.input?.isNative
           ? NATIVE
           : currencies.input?.wrapped.address,
@@ -267,6 +265,7 @@ export default function GelatoLimitOrder({
           : currencies.output?.wrapped.address,
         inputAmount: rawAmounts.input,
         outputAmount: rawAmounts.output,
+        slippage,
         owner: account,
       })
         .then(({ hash }) => {
@@ -297,7 +296,7 @@ export default function GelatoLimitOrder({
       });
     }
   }, [
-    handleLimitOrderSubmission,
+    handleStoplossOrderSubmission,
     tradeToConfirm,
     showConfirm,
     currencies.input?.wrapped.address,
@@ -373,10 +372,23 @@ export default function GelatoLimitOrder({
     await approveCallback();
   }, [approveCallback]);
 
+  const [activeTab, setActiveTab] = useState(1);
+  const [slippageValue, setSlippage] = useState("2");
+
+  const handleSlippageInput = (value: string) => {
+    handleSlippage(value)
+    setSlippage(value)
+  }
+
+  useEffect(() => {
+    setActiveTab(1)
+    handleSlippageInput("2")
+  }, [])
+
   return (
     <Fragment>
       <AppBody>
-        <SwapHeader handleActiveTab={handleActiveTab} activeTab={activeTab} />
+        <SwapHeader type={"stoploss"} />
         <Wrapper id="limit-order-page">
           <ConfirmSwapModal
             isOpen={showConfirm}
@@ -480,6 +492,9 @@ export default function GelatoLimitOrder({
                 rateType={rateType}
                 id="limit-order-currency-output"
               />
+              <Row>
+                <Slippage handleActiveTab={setActiveTab} activeTab={activeTab} value={slippageValue} handleInput={handleSlippageInput} />
+              </Row>
             </div>
 
             <Row
@@ -504,6 +519,7 @@ export default function GelatoLimitOrder({
                 </RowFixed>
               ) : null}
             </Row>
+
 
             <BottomGrouping>
               {swapIsUnsupported ? (
