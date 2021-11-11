@@ -16,7 +16,6 @@ import SwapModalHeader from "./SwapModalHeader";
 export default function ConfirmSwapModal({
   trade,
   onAcceptChanges,
-  allowedSlippage,
   onConfirm,
   onDismiss,
   recipient,

@@ -1,4 +1,3 @@
-import { Order } from "@gelatonetwork/limit-orders-lib";
 import React, { Fragment, useCallback } from "react";
 import { Text } from "rebass";
 import { ButtonError } from "../Button";

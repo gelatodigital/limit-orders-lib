@@ -59,6 +59,11 @@ import {
 import Loader from "../Loader";
 import CurrencyLogo from "../CurrencyLogo";
 import { NATIVE } from "../../constants/addresses";
+import { useFrontrunProtected } from "../../state/gapplication/hooks";
+import { updateFrontrunProtected } from "../../state/gapplication/actions";
+import { useDispatch } from "react-redux";
+import Toggle from "react-styled-toggle";
+import QuestionHelper from "../QuestionHelper";
 
 const StyledInfo = styled(Info)`
   opacity: 0.4;
@@ -95,11 +100,19 @@ interface GelatoLimitOrderProps {
 export default function GelatoLimitOrder({
   showCommonBases = true,
 }: GelatoLimitOrderProps) {
-  const { account, toggleWalletModal } = useWeb3();
+  const { account, chainId, toggleWalletModal } = useWeb3();
 
   const theme = useTheme();
 
   const recipient = account ?? null;
+
+  const frontrunProtected = useFrontrunProtected();
+
+  const dispatch = useDispatch();
+
+  const handleFrontrunToggle = () => {
+    dispatch(updateFrontrunProtected(!frontrunProtected));
+  };
 
   const {
     handlers: {
@@ -205,16 +218,13 @@ export default function GelatoLimitOrder({
 
   const allowedSlippage = new Percent(40, 10_000);
   const userHasSpecifiedInputOutput = Boolean(
-    (independentField === Field.INPUT || independentField === Field.OUTPUT) &&
-    currencies.input &&
-    currencies.output
+    currencies.input && currencies.output
   );
   const routeNotFound = !trade?.route;
   const isLoadingRoute =
-    parsedAmounts.input &&
-    !parsedAmounts.output &&
-    currencies.input &&
-    currencies.output;
+    userHasSpecifiedInputOutput &&
+    ((parsedAmounts.input && !parsedAmounts.output) ||
+      (!parsedAmounts.input && parsedAmounts.output));
 
   const maxInputAmount: CurrencyAmount<Currency> | undefined = maxAmountSpend(
     currencyBalances.input
@@ -482,6 +492,27 @@ export default function GelatoLimitOrder({
               />
             </div>
 
+            {chainId == 1 && (
+              <Row style={{ justifyContent: "flex-end" }}>
+                <RowFixed>
+                  <Toggle
+                    name="flashbots"
+                    disabled={false}
+                    checked={frontrunProtected}
+                    value={""}
+                    onChange={() => handleFrontrunToggle()}
+                    labelLeft={"Frontrun Protection"}
+                    labelRight={""}
+                    height={24}
+                    sliderHeight={16}
+                    width={44}
+                    sliderWidth={16}
+                    translate={22}
+                  />
+                  <QuestionHelper text="With frontrun protection enabled Gelato bots will use mistX Labs flashbots SDK to execute your orders. This feature is still in beta." />
+                </RowFixed>
+              </Row>
+            )}
             <Row
               style={{ justifyContent: !trade ? "center" : "space-between" }}
             >
@@ -514,16 +545,10 @@ export default function GelatoLimitOrder({
                 <ButtonLight onClick={toggleWalletModal}>
                   Connect Wallet
                 </ButtonLight>
-              ) : routeNotFound &&
-                userHasSpecifiedInputOutput &&
-                parsedAmounts.input ? (
+              ) : routeNotFound && isLoadingRoute ? (
                 <GreyCard style={{ textAlign: "center" }}>
                   <TYPE.main mb="4px">
-                    {isLoadingRoute ? (
-                      <Dots>Loading</Dots>
-                    ) : (
-                      `Insufficient liquidity for this trade.`
-                    )}
+                    <Dots>Loading</Dots>
                   </TYPE.main>
                 </GreyCard>
               ) : showApproveFlow ? (
@@ -553,7 +578,7 @@ export default function GelatoLimitOrder({
                           {approvalState === ApprovalState.APPROVED
                             ? `You can now use your ${currencies.input?.symbol} to place orders.`
                             : `Allow the Gelato Limit Orders to use your 
-                              ${currencies.input?.symbol}`}
+                              ${currencies.input?.symbol}.`}
                         </span>
                         {approvalState === ApprovalState.PENDING ||
                           (approvalSubmitted &&

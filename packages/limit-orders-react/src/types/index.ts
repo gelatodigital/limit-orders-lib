@@ -9,6 +9,7 @@ export const NativeCurrency = {
   3: "ETH",
   56: "BNB",
   137: "MATIC",
+  43114: "AVAX",
 };
 
 export interface LimitOrderState {

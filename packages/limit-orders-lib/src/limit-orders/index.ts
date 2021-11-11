@@ -13,7 +13,6 @@ import { Signer } from "@ethersproject/abstract-signer";
 import {
   CHAIN_ID,
   ETH_ADDRESS,
-  NATIVE_WRAPPED_TOKEN_ADDRESS,
   GELATO_LIMIT_ORDERS_ADDRESS,
   GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER,
   GELATO_LIMIT_ORDERS_MODULE_ADDRESS,
@@ -35,6 +34,7 @@ import {
   queryCancelledOrders,
   queryExecutedOrders,
   queryOpenOrders,
+  queryOrder,
   queryOrders,
   queryPastOrders,
 } from "../utils/queries";
@@ -56,17 +56,6 @@ export const isValidChainIdAndHandler = (
 
 export const isFlashbotsCompatibleChainId = (chainId: ChainId): boolean => {
   return chainId == CHAIN_ID.MAINNET || chainId == CHAIN_ID.GOERLI;
-};
-
-export const isETHOrWETH = (
-  tokenAddress: string,
-  chainID: ChainId
-): boolean => {
-  const WETH_ADDRESS = NATIVE_WRAPPED_TOKEN_ADDRESS[chainID];
-  return (
-    tokenAddress.toLowerCase() === ETH_ADDRESS.toLowerCase() ||
-    tokenAddress.toLowerCase() === WETH_ADDRESS.toLowerCase()
-  );
 };
 
 export class GelatoLimitOrders {
@@ -291,16 +280,6 @@ export class GelatoLimitOrders {
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
 
-    if (
-      this._isFlashbotsProtected &&
-      !isETHOrWETH(inputToken, this._chainId) &&
-      !isETHOrWETH(outputToken, this._chainId)
-    ) {
-      throw new Error(
-        "Flashbots protection requires inputToken or outputToken to be ETH or Wrapped, so that miner fee can be discounted. This requirement will be relaxed in future versions."
-      );
-    }
-
     const owner = await this._signer.getAddress();
 
     const txData = await this.encodeLimitOrderSubmission(
@@ -332,6 +311,7 @@ export class GelatoLimitOrders {
     if (!order.outputToken) throw new Error("No output token in order");
     if (!order.minReturn) throw new Error("No minReturn in order");
     if (!order.owner) throw new Error("No owner");
+    if (!order.module) throw new Error("No module in order");
 
     if (checkIsActiveOrder) {
       const isActiveOrder = await this.isActiveOrder(order);
@@ -341,13 +321,7 @@ export class GelatoLimitOrders {
 
     const data = this._gelatoLimitOrders.interface.encodeFunctionData(
       "cancelOrder",
-      [
-        this._moduleAddress,
-        order.inputToken,
-        order.owner,
-        order.witness,
-        order.data,
-      ]
+      [order.module, order.inputToken, order.owner, order.witness, order.data]
     );
 
     return {
@@ -366,14 +340,45 @@ export class GelatoLimitOrders {
     if (!this._gelatoLimitOrders)
       throw new Error("No gelato limit orders contract");
 
-    if (!order.inputToken) throw new Error("No input token in order");
-    if (!order.witness) throw new Error("No witness in order");
-    if (!order.outputToken) throw new Error("No output token in order");
-    if (!order.minReturn) throw new Error("No minReturn in order");
-    if (!order.data) throw new Error("No data in order");
+    let _order = order;
+
+    if (order.id) {
+      try {
+        const subgraphOrder = await Promise.race([
+          this.getOrder(order.id),
+          new Promise((resolve) => setTimeout(resolve, 5_000)).then(() => {
+            throw new Error("Timeout");
+          }),
+        ]);
+
+        if (subgraphOrder) {
+          if (subgraphOrder.status === "cancelled") {
+            throw new Error(
+              `Order status is not open. Current order status: ${subgraphOrder.status}. Cancellation transaction hash: ${subgraphOrder.cancelledTxHash}`
+            );
+          }
+
+          if (subgraphOrder.status === "executed") {
+            throw new Error(
+              `Order status is not open. Current order status: ${subgraphOrder.status}. Execution transaction hash: ${subgraphOrder.executedTxHash}`
+            );
+          }
+
+          _order = { ...order, ...subgraphOrder };
+        }
+        // eslint-disable-next-line no-empty
+      } catch (error) {}
+    }
+
+    if (!_order.inputToken) throw new Error("No input token in order");
+    if (!_order.witness) throw new Error("No witness in order");
+    if (!_order.outputToken) throw new Error("No output token in order");
+    if (!_order.minReturn) throw new Error("No minReturn in order");
+    if (!_order.data) throw new Error("No data in order");
+    if (!_order.module) throw new Error("No module in order");
 
     if (checkIsActiveOrder) {
-      const isActiveOrder = await this.isActiveOrder(order);
+      const isActiveOrder = await this.isActiveOrder(_order);
       if (!isActiveOrder)
         throw new Error("Order not found. Please review your order data.");
     }
@@ -384,13 +389,13 @@ export class GelatoLimitOrders {
       throw new Error("Owner and signer mismatch");
 
     return this._gelatoLimitOrders.cancelOrder(
-      this._moduleAddress,
-      order.inputToken,
-      order.owner,
-      order.witness,
-      order.data,
+      _order.module,
+      _order.inputToken,
+      _order.owner,
+      _order.witness,
+      _order.data,
       overrides ?? {
-        gasLimit: isEthereumChain(this._chainId) ? 500000 : 1500000,
+        gasLimit: isEthereumChain(this._chainId) ? 600_000 : 2_000_000,
       }
     );
   }
@@ -543,6 +548,22 @@ export class GelatoLimitOrders {
         .mul(factor)
         .div(inputAmount)
         .toString();
+    }
+  }
+
+  public async getOrder(orderId: string): Promise<Order | null> {
+    const isEthereumNetwork = isEthereumChain(this._chainId);
+    const order = await queryOrder(orderId, this._chainId);
+
+    if (order) {
+      return {
+        ...order,
+        adjustedMinReturn: isEthereumNetwork
+          ? order.minReturn
+          : this.getAdjustedMinReturn(order.minReturn),
+      };
+    } else {
+      return null;
     }
   }
 

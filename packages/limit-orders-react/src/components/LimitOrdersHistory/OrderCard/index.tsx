@@ -244,7 +244,7 @@ export default function OrderCard({ order }: { order: Order }) {
 
   const executionPrice = useMemo(
     () =>
-      outputAmount && inputAmount
+      outputAmount && outputAmount.greaterThan(0) && inputAmount
         ? new Price({
             baseAmount: outputAmount,
             quoteAmount: inputAmount,

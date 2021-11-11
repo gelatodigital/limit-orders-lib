@@ -3,13 +3,14 @@ import { Order } from "@gelatonetwork/limit-orders-lib";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Overrides } from "@ethersproject/contracts";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
+import { isEthereumChain } from "@gelatonetwork/limit-orders-lib/dist/utils";
+
 import { useOrderActionHandlers } from "../../state/gorder/hooks";
 import { Field } from "../../types";
 import { Currency, Price } from "@uniswap/sdk-core";
 import { Rate } from "../../state/gorder/actions";
 import { useWeb3 } from "../../web3";
 import { useTransactionAdder } from "../../state/gtransactions/hooks";
-import useGasPrice from "../useGasPrice";
 import useGelatoLimitOrdersLib from "./useGelatoLimitOrdersLib";
 
 export interface GelatoLimitOrdersHandlers {
@@ -46,8 +47,6 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
   const gelatoLimitOrders = useGelatoLimitOrdersLib();
 
   const addTransaction = useTransactionAdder();
-
-  const gasPrice = useGasPrice();
 
   const {
     onSwitchTokens,
@@ -92,7 +91,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       );
 
       const tx = await gelatoLimitOrders.signer.sendTransaction({
-        ...(overrides ?? { gasPrice }),
+        ...(overrides ?? {}),
         to: payload.to,
         data: payload.data,
         value: BigNumber.from(payload.value),
@@ -114,7 +113,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
       return tx;
     },
-    [addTransaction, chainId, gasPrice, gelatoLimitOrders]
+    [addTransaction, chainId, gelatoLimitOrders]
   );
 
   const handleLimitOrderCancellation = useCallback(
@@ -151,7 +150,9 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
       const tx = await gelatoLimitOrders.cancelLimitOrder(
         orderToCancel,
         checkIfOrderExists,
-        overrides ?? { gasPrice, gasLimit: 600000 }
+        overrides ?? {
+          gasLimit: isEthereumChain(chainId) ? 600_000 : 2_000_000,
+        }
       );
 
       const now = Math.round(Date.now() / 1000);
@@ -173,7 +174,7 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
       return tx;
     },
-    [gelatoLimitOrders, chainId, account, gasPrice, addTransaction]
+    [gelatoLimitOrders, chainId, account, addTransaction]
   );
 
   const handleInput = useCallback(

@@ -1,7 +1,35 @@
 import { request } from "graphql-request";
 import { OLD_SUBGRAPH_URL, SUBGRAPH_URL } from "../../constants";
 import { Order } from "../../types";
-import { GET_ALL_ORDERS_BY_OWNER } from "./constants";
+import { GET_ALL_ORDERS_BY_OWNER, GET_ORDER_BY_ID } from "./constants";
+
+export const queryOrder = async (
+  orderId: string,
+  chainId: number
+): Promise<Order | null> => {
+  try {
+    const dataFromOldSubgraph = OLD_SUBGRAPH_URL[chainId]
+      ? await request(OLD_SUBGRAPH_URL[chainId], GET_ORDER_BY_ID, {
+          id: orderId.toLowerCase(),
+        })
+      : { orders: [] };
+
+    const dataFromNewSubgraph = SUBGRAPH_URL[chainId]
+      ? await request(SUBGRAPH_URL[chainId], GET_ORDER_BY_ID, {
+          id: orderId.toLowerCase(),
+        })
+      : { orders: [] };
+
+    const allOrders = [
+      ...dataFromOldSubgraph.orders,
+      ...dataFromNewSubgraph.orders,
+    ];
+
+    return _getUniqueOrdersWithHandler(allOrders).pop() ?? null;
+  } catch (error) {
+    throw new Error("Could not query subgraph for all orders");
+  }
+};
 
 export const queryOrders = async (
   owner: string,
@@ -27,7 +55,6 @@ export const queryOrders = async (
 
     return _getUniqueOrdersWithHandler(allOrders);
   } catch (error) {
-    console.log(error);
     throw new Error("Could not query subgraph for all orders");
   }
 };
