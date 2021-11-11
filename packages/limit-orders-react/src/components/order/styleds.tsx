@@ -1,4 +1,3 @@
-
 import { transparentize } from "polished";
 import React from "react";
 import { AlertTriangle } from "react-feather";
@@ -46,37 +45,37 @@ export const BottomGrouping = styled.div`
   /* background-color: ${({ theme }) => theme.bg1}; */
 `;
 
-export const ErrorText = styled(Text) <{ severity?: 0 | 1 | 2 | 3 | 4 }>`
+export const ErrorText = styled(Text)<{ severity?: 0 | 1 | 2 | 3 | 4 }>`
   color: ${({ theme, severity }) =>
     severity === 3 || severity === 4
       ? theme.red1
       : severity === 2
-        ? theme.yellow2
-        : severity === 1
-          ? theme.text1
-          : theme.text2};
+      ? theme.yellow2
+      : severity === 1
+      ? theme.text1
+      : theme.text2};
 `;
 
-export const ErrorPill = styled(Text) <{ severity?: 0 | 1 | 2 | 3 | 4 }>`
+export const ErrorPill = styled(Text)<{ severity?: 0 | 1 | 2 | 3 | 4 }>`
   border-radius: 8px;
 
   color: ${({ theme, severity }) =>
     severity === 3 || severity === 4
       ? theme.red1
       : severity === 2
-        ? theme.yellow2
-        : severity === 1
-          ? theme.text1
-          : theme.text3};
+      ? theme.yellow2
+      : severity === 1
+      ? theme.text1
+      : theme.text3};
 
   /* background-color: ${({ theme, severity }) =>
     severity === 3 || severity === 4
       ? transparentize(0.9, theme.red1)
       : severity === 2
-        ? transparentize(0.9, theme.yellow2)
-        : severity === 1
-          ? transparentize(0.9, theme.text1)
-          : transparentize(0.9, theme.green1)}; */
+      ? transparentize(0.9, theme.yellow2)
+      : severity === 1
+      ? transparentize(0.9, theme.text1)
+      : transparentize(0.9, theme.green1)}; */
 `;
 
 export const StyledBalanceMaxMini = styled.button`
