@@ -38,6 +38,10 @@ const TRADERJOE_FACTORY_ADDRESS = "0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10";
 const TRADERJOE_INIT_CODE_HASH =
   "0x0bbca9af0511ad1a1da383135cf3a8d2ac620e549ef9f6ae3a4c33c2fed0af91";
 
+const DEFYSWAP_FACTORY_ADDRESS = "0xAffdbEAE1ec595cba4C262Bdb52A6083aEc2e2a6";
+const DEFYSWAP_INIT_CODE_HASH =
+  "0x28612bce471572b813dde946a942d1fee6ca4be6437ac8c23a7ca01a3b127ba6";
+
 const getSpiritSwapPairAddress = (tokenA: Token, tokenB: Token): string => {
   const tokens = tokenA.sortsBefore(tokenB)
     ? [tokenA, tokenB]
@@ -158,6 +162,21 @@ const getTraderJoePairAddress = (tokenA: Token, tokenB: Token): string => {
   );
 };
 
+const getDefySwapPairAddress = (tokenA: Token, tokenB: Token): string => {
+  const tokens = tokenA.sortsBefore(tokenB)
+    ? [tokenA, tokenB]
+    : [tokenB, tokenA]; // does safety checks
+
+  return getCreate2Address(
+    DEFYSWAP_FACTORY_ADDRESS,
+    keccak256(
+      ["bytes"],
+      [pack(["address", "address"], [tokens[0].address, tokens[1].address])]
+    ),
+    DEFYSWAP_INIT_CODE_HASH
+  );
+};
+
 export const calculatePairAddressByHandler = (
   tokenA: Token,
   tokenB: Token,
@@ -180,6 +199,8 @@ export const calculatePairAddressByHandler = (
         return getSpiritSwapPairAddress(tokenA, tokenB);
       case "spookyswap":
         return getSpookySwapPairAddress(tokenA, tokenB);
+      case "defyswap":
+        return getDefySwapPairAddress(tokenA, tokenB);
       default:
         return getSpookySwapPairAddress(tokenA, tokenB);
     }

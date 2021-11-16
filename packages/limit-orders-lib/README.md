@@ -24,10 +24,10 @@ Instantiate GelatoLimitOrders
 ```typescript
 import { GelatoLimitOrders, utils } from "@gelatonetwork/limit-orders-lib";
 
-// Supported networks: Mainnet = 1; Ropsten = 3; Polygon = 137; Fantom = 250
+// Supported networks: Mainnet = 1; Ropsten = 3; Polygon = 137; Fantom = 250; Avalanche = 43114;  BSC = 56
 const chainId = 1;
 const signerOrProvider = await provider.getSigner();
-const handler = "uniswap"; // "spookyswap" | "uniswap" | "quickswap" | "spiritswap" | "bombswap" | "polydex" | "cafeswap" | "pancakeswap" | "traderjoe";
+const handler = "uniswap"; // "spookyswap" | "uniswap" | "quickswap" | "spiritswap" | "bombswap" | "polydex" | "cafeswap" | "pancakeswap" | "traderjoe" | "defyswap";
 
 const gelatoLimitOrders = new GelatoLimitOrders(
   chainId as ChainId,
