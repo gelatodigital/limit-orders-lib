@@ -12,7 +12,8 @@ export type Handler =
   | "polydex"
   | "cafeswap"
   | "pancakeswap"
-  | "traderjoe";
+  | "traderjoe"
+  | "defyswap";
 
 export interface TransactionData {
   to: string;
