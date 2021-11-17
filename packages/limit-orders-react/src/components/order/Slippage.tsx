@@ -114,7 +114,7 @@ const SlippageInputTab = ({
 }) => (
   <StyledSlippageTab>
     <StyledTab
-      id={`stoploss-order-slippage-tap`}
+      id={`stoplimit-order-slippage-tap`}
       active={active}
       onClick={onClick}
       minWidth={"85px"}
@@ -123,6 +123,7 @@ const SlippageInputTab = ({
         value={active ? value : title}
         onUserInput={onUserInput}
         fontSize={"16px"}
+        error={parseFloat(value) >= 100 || parseFloat(value) < 0}
       />
       {active && "%"}
     </StyledTab>
@@ -156,12 +157,7 @@ export default function Slippage({
   };
 
   const handleInputValidator = (newValue: string) => {
-    if (!newValue || parseFloat(newValue) === NaN || parseFloat(newValue) < 0) {
-      handleInput("0");
-    } else if (parseFloat(newValue) >= 100) {
-      handleInput("99");
-    }
-    else {
+    if (!isNaN(parseFloat(newValue))) {
       handleInput(newValue);
     }
   }

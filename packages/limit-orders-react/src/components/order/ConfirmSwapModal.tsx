@@ -25,6 +25,7 @@ export default function ConfirmSwapModal({
   txHash,
   inputAmount,
   outputAmount,
+  type,
 }: {
   isOpen: boolean;
   trade: Trade<Currency, Currency, TradeType> | undefined;
@@ -39,6 +40,7 @@ export default function ConfirmSwapModal({
   onDismiss: () => void;
   inputAmount: CurrencyAmount<Currency> | undefined;
   outputAmount: CurrencyAmount<Currency> | undefined;
+  type: "limit" | "stop";
 }) {
   // const showAcceptChanges = useMemo(
   //   () =>
@@ -58,6 +60,7 @@ export default function ConfirmSwapModal({
         recipient={recipient}
         showAcceptChanges={false}
         onAcceptChanges={onAcceptChanges}
+        type={type}
       />
     );
   }, [onAcceptChanges, recipient, trade]);
@@ -76,9 +79,8 @@ export default function ConfirmSwapModal({
   // text to show while loading
   const pendingText = `Submitting order to swap ${inputAmount?.toSignificant(
     6
-  )} ${inputAmount?.currency?.symbol} for ${outputAmount?.toSignificant(6)} ${
-    outputAmount?.currency?.symbol
-  }`;
+  )} ${inputAmount?.currency?.symbol} for ${outputAmount?.toSignificant(6)} ${outputAmount?.currency?.symbol
+    }`;
 
   const confirmationContent = useCallback(
     () =>

@@ -1,14 +1,15 @@
 import useGelatoLimitOrders from "./useGelatoLimitOrders";
 import useGelatoLimitOrdersHandlers from "./useGelatoLimitOrdersHandlers";
 import useGelatoLimitOrdersHistory from "./useGelatoLimitOrdersHistory";
-import useGelatoStoplossOrders from "./useGelatoStoplossOrders";
-import useGelatoStoplossOrdersLib from "./useGelatoStoplossOrdersLib";
-import useGelatoStoplossOrdersHandlers from "./useGelatoStoplossOrdersHandlers";
-
+import useGelatoStopLimitOrders from "./useGelatoStopLimitOrders";
+import useGelatoStopLimitOrdersLib from "./useGelatoStopLimitOrdersLib";
+import useGelatoStopLimitOrdersHandlers from "./useGelatoStopLimitOrdersHandlers";
+import useGelatoStopLimitOrdersHistory from "./useGelatoStopLimitOrdersHistory";
 export {
-  useGelatoStoplossOrders,
-  useGelatoStoplossOrdersLib,
-  useGelatoStoplossOrdersHandlers,
+  useGelatoStopLimitOrders,
+  useGelatoStopLimitOrdersLib,
+  useGelatoStopLimitOrdersHandlers,
+  useGelatoStopLimitOrdersHistory,
   useGelatoLimitOrders,
   useGelatoLimitOrdersHandlers,
   useGelatoLimitOrdersHistory,

@@ -1,19 +1,19 @@
 import { useCallback } from "react";
-import { Order } from "@gelatonetwork/limit-orders-lib";
+import { StopLimitOrder } from "@gelatonetwork/limit-orders-lib";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Overrides } from "@ethersproject/contracts";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { useOrderActionHandlers } from "../../state/gstoploss/hooks";
+import { useOrderActionHandlers } from "../../state/gstoplimit/hooks";
 import { Field } from "../../types";
 import { Currency, Price } from "@uniswap/sdk-core";
-import { Rate } from "../../state/gstoploss/actions";
+import { Rate } from "../../state/gstoplimit/actions";
 import { useWeb3 } from "../../web3";
 import { useTransactionAdder } from "../../state/gtransactions/hooks";
 import useGasPrice from "../useGasPrice";
-import useGelatoStoplossOrdersLib from "./useGelatoStoplossOrdersLib";
+import useGelatoStopLimitOrdersLib from "./useGelatoStopLimitOrdersLib";
 
-export interface GelatoStoplossOrdersHandlers {
-  handleStoplossOrderSubmission: (orderToSubmit: {
+export interface GelatoStopLimitOrdersHandlers {
+  handleStopLimitOrderSubmission: (orderToSubmit: {
     inputToken: string;
     outputToken: string;
     inputAmount: string;
@@ -22,8 +22,8 @@ export interface GelatoStoplossOrdersHandlers {
     owner: string;
     overrides?: Overrides;
   }) => Promise<TransactionResponse>;
-  handleStoplossOrderCancellation: (
-    order: Order,
+  handleStopLimitOrderCancellation: (
+    order: StopLimitOrder,
     orderDetails?: {
       inputTokenSymbol: string;
       outputTokenSymbol: string;
@@ -43,12 +43,10 @@ export interface GelatoStoplossOrdersHandlers {
   handleSlippage: (slippage: string) => void;
 }
 
-export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersHandlers {
+export default function useGelatoStopLimitOrdersHandlers(): GelatoStopLimitOrdersHandlers {
   const { chainId, account } = useWeb3();
 
-  const gelatoStoplossOrders = useGelatoStoplossOrdersLib();
-
-  console.log("gelatoStoplossOrders", gelatoStoplossOrders);
+  const gelatoStopLimitOrders = useGelatoStopLimitOrdersLib();
 
   const addTransaction = useTransactionAdder();
 
@@ -62,7 +60,7 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
     onSlippageInput,
   } = useOrderActionHandlers();
 
-  const handleStoplossOrderSubmission = useCallback(
+  const handleStopLimitOrderSubmission = useCallback(
     async (
       orderToSubmit: {
         inputToken: string;
@@ -74,7 +72,7 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
       },
       overrides?: Overrides
     ) => {
-      if (!gelatoStoplossOrders) {
+      if (!gelatoStopLimitOrders) {
         throw new Error("Could not reach Gelato Limit Orders library");
       }
 
@@ -82,7 +80,7 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
         throw new Error("No chainId");
       }
 
-      if (!gelatoStoplossOrders?.signer) {
+      if (!gelatoStopLimitOrders?.signer) {
         throw new Error("No signer");
       }
 
@@ -90,7 +88,7 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
         witness,
         payload,
         order,
-      } = await gelatoStoplossOrders.encodeStoplossOrderSubmissionWithSecret(
+      } = await gelatoStopLimitOrders.encodeStopLimitOrderSubmissionWithSecret(
         orderToSubmit.inputToken,
         orderToSubmit.outputToken,
         orderToSubmit.inputAmount,
@@ -99,7 +97,7 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
         orderToSubmit.owner
       );
 
-      const tx = await gelatoStoplossOrders.signer.sendTransaction({
+      const tx = await gelatoStopLimitOrders.signer.sendTransaction({
         ...(overrides ?? { gasPrice }),
         to: payload.to,
         data: payload.data,
@@ -117,17 +115,17 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
           witness,
           status: "open",
           updatedAt: now.toString(),
-        } as Order,
+        } as StopLimitOrder,
       });
 
       return tx;
     },
-    [addTransaction, chainId, gasPrice, gelatoStoplossOrders]
+    [addTransaction, chainId, gasPrice, gelatoStopLimitOrders]
   );
 
-  const handleStoplossOrderCancellation = useCallback(
+  const handleStopLimitOrderCancellation = useCallback(
     async (
-      orderToCancel: Order,
+      orderToCancel: StopLimitOrder,
       orderDetails?: {
         inputTokenSymbol: string;
         outputTokenSymbol: string;
@@ -137,7 +135,7 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
       },
       overrides?: Overrides
     ) => {
-      if (!gelatoStoplossOrders) {
+      if (!gelatoStopLimitOrders) {
         throw new Error("Could not reach Gelato Limit Orders library");
       }
 
@@ -149,15 +147,17 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
         throw new Error("No account");
       }
 
+      console.log("DATA", orderToCancel)
+
       const checkIfOrderExists = Boolean(
         orderToCancel.module &&
-          orderToCancel.inputToken &&
-          orderToCancel.owner &&
-          orderToCancel.witness &&
-          orderToCancel.data
+        orderToCancel.inputToken &&
+        orderToCancel.owner &&
+        orderToCancel.witness &&
+        orderToCancel.data
       );
 
-      const tx = await gelatoStoplossOrders.cancelLimitOrder(
+      const tx = await gelatoStopLimitOrders.cancelLimitOrder(
         orderToCancel,
         checkIfOrderExists,
         overrides ?? { gasPrice, gasLimit: 600000 }
@@ -182,7 +182,7 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
 
       return tx;
     },
-    [gelatoStoplossOrders, chainId, account, gasPrice, addTransaction]
+    [gelatoStopLimitOrders, chainId, account, gasPrice, addTransaction]
   );
 
   const handleInput = useCallback(
@@ -224,8 +224,8 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
   );
 
   return {
-    handleStoplossOrderSubmission,
-    handleStoplossOrderCancellation,
+    handleStopLimitOrderSubmission,
+    handleStopLimitOrderCancellation,
     handleInput,
     handleCurrencySelection,
     handleSwitchTokens,

@@ -1,4 +1,4 @@
-import { Order } from "@gelatonetwork/limit-orders-lib";
+import { Order, StopLimitOrder } from "@gelatonetwork/limit-orders-lib";
 import { get, set, clear } from "local-storage";
 
 const LS_ORDERS = "gorders_";
@@ -16,7 +16,7 @@ export function getLSOrders(chainId: number, account: string, pending = false) {
     ? lsKey(LS_ORDERS + "pending_", account, chainId)
     : lsKey(LS_ORDERS, account, chainId);
 
-  const orders = get<Order[]>(key);
+  const orders = get<Order[] | StopLimitOrder[]>(key);
 
   return orders ? getUniqueOrders(orders) : [];
 }
@@ -24,7 +24,7 @@ export function getLSOrders(chainId: number, account: string, pending = false) {
 export function saveOrder(
   chainId: number,
   account: string,
-  order: Order,
+  order: Order | StopLimitOrder,
   pending = false
 ) {
   const key = pending
@@ -48,7 +48,7 @@ export function saveOrder(
 export function removeOrder(
   chainId: number,
   account: string,
-  order: Order,
+  order: Order | StopLimitOrder,
   pending = false
 ) {
   const key = pending
@@ -85,7 +85,7 @@ export function confirmOrderCancellation(
 
   if (success && confirmedOrder) {
     const ordersKey = lsKey(LS_ORDERS, account, chainId);
-    const orders = get<Order[]>(ordersKey);
+    const orders = get<Order[] | StopLimitOrder[]>(ordersKey);
     if (orders) {
       const ordersToSave = removeOrder(chainId, account, confirmedOrder);
       ordersToSave.push({
@@ -112,7 +112,7 @@ export function confirmOrderSubmission(
 ) {
   const creationHash = submissionHash.toLowerCase();
   const pendingKey = lsKey(LS_ORDERS + "pending_", account, chainId);
-  const pendingOrders = get<Order[]>(pendingKey);
+  const pendingOrders = get<Order[] | StopLimitOrder[]>(pendingKey);
   const confirmedOrder = pendingOrders.find(
     (order) => order.createdTxHash?.toLowerCase() === creationHash
   );
@@ -143,7 +143,7 @@ export function confirmOrderSubmission(
   }
 }
 
-export const getUniqueOrders = (allOrders: Order[]): Order[] => [
+export const getUniqueOrders = (allOrders: Order[] | StopLimitOrder[]): Order[] | StopLimitOrder[] => [
   ...new Map(
     allOrders
       // sort by `updatedAt` asc so that the most recent one will be used

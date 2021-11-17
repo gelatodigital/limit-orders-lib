@@ -11,7 +11,7 @@ import {
   setSlippage,
 } from "./actions";
 
-export interface StoplossOrderState {
+export interface StopLimitOrderState {
   readonly independentField: Field;
   readonly typedValue: string;
   readonly inputValue?: string;
@@ -28,7 +28,7 @@ export interface StoplossOrderState {
   readonly slippage: number;
 }
 
-export const initialState: StoplossOrderState = {
+export const initialState: StopLimitOrderState = {
   independentField: Field.INPUT,
   typedValue: "",
   inputValue: "",
@@ -43,7 +43,7 @@ export const initialState: StoplossOrderState = {
   slippage: 0,
 };
 
-export default createReducer<StoplossOrderState>(initialState, (builder) =>
+export default createReducer<StopLimitOrderState>(initialState, (builder) =>
   builder
     .addCase(selectCurrency, (state, { payload: { currencyId, field } }) => {
       const otherField = field === Field.INPUT ? Field.OUTPUT : Field.INPUT;
@@ -98,6 +98,6 @@ export default createReducer<StoplossOrderState>(initialState, (builder) =>
       state.rateType = rateType;
     })
     .addCase(setSlippage, (state, { payload: { slippage } }) => {
-      state.slippage = parseFloat(slippage) * 10000;
+      state.slippage = parseFloat(slippage) * 100;
     })
 );

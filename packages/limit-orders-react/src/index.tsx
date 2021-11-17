@@ -12,14 +12,16 @@ import { tryParseAmount } from "./state/gorder/hooks";
 import {
   useGelatoLimitOrders,
   useGelatoLimitOrdersHandlers,
-  useGelatoStoplossOrders,
-  useGelatoStoplossOrdersHandlers,
-  useGelatoStoplossOrdersLib,
+  useGelatoStopLimitOrders,
+  useGelatoStopLimitOrdersHandlers,
+  useGelatoStopLimitOrdersHistory,
+  useGelatoStopLimitOrdersLib,
 } from "./hooks/gelato";
 import useGelatoLimitOrdersHistory from "./hooks/gelato/useGelatoLimitOrdersHistory";
 import useGelatoLimitOrdersLib from "./hooks/gelato/useGelatoLimitOrdersLib";
 import GelatoLimitOrderPanel from "./components/GelatoLimitOrder";
-import GelatoStoplossOrderPanel from "./components/GelatoStoplossOrder";
+import GelatoStopLimitOrderPanel from "./components/GelatoStopLimitOrder";
+import GelatoStopLimitOrdersHistoryPanel from "./components/StopLimitOrdersHistory";
 import GelatoLimitOrdersHistoryPanel from "./components/LimitOrdersHistory";
 import { Web3Provider } from "./web3";
 import useGasPrice from "./hooks/useGasPrice";
@@ -93,12 +95,14 @@ export {
   useGelatoLimitOrdersHandlers,
   useGelatoLimitOrdersHistory,
   useGelatoLimitOrdersLib,
-  useGelatoStoplossOrders,
-  useGelatoStoplossOrdersHandlers,
-  useGelatoStoplossOrdersLib,
+  useGelatoStopLimitOrders,
+  useGelatoStopLimitOrdersHandlers,
+  useGelatoStopLimitOrdersHistory,
+  useGelatoStopLimitOrdersLib,
   useGasPrice,
   GelatoLimitOrderPanel,
-  GelatoStoplossOrderPanel,
+  GelatoStopLimitOrderPanel,
+  GelatoStopLimitOrdersHistoryPanel,
   GelatoLimitOrdersHistoryPanel,
   gelatoReducers,
   GELATO_PERSISTED_KEYS,

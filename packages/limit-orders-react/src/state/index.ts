@@ -1,7 +1,7 @@
 import gapplication from "./gapplication/reducer";
 import guser from "./guser/reducer";
 import gorder from "./gorder/reducer";
-import gstoploss from "./gstoploss/reducer";
+import gstoplimit from "./gstoplimit/reducer";
 
 import glists from "./glists/reducer";
 import gmulticall from "./gmulticall/reducer";
@@ -18,7 +18,7 @@ export const gelatoReducers = {
   gapplication,
   guser,
   gorder,
-  gstoploss,
+  gstoplimit,
   gmulticall,
   glists,
   gtransactions,

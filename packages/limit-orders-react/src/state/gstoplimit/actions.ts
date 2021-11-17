@@ -14,20 +14,20 @@ export enum Rate {
 export const selectCurrency = createAction<{
   field: Field;
   currencyId: string;
-}>("gstoploss/selectCurrency");
+}>("gstoplimit/selectCurrency");
 export const switchCurrencies = createAction<void>(
-  "gstoploss/switchCurrencies"
+  "gstoplimit/switchCurrencies"
 );
 export const typeInput = createAction<{ field: Field; typedValue: string }>(
-  "gstoploss/typeInput"
+  "gstoplimit/typeInput"
 );
 export const setRecipient = createAction<{ recipient: string | null }>(
-  "gstoploss/setRecipient"
+  "gstoplimit/setRecipient"
 );
 export const setRateType = createAction<{ rateType: Rate }>(
-  "gstoploss/setRateType"
+  "gstoplimit/setRateType"
 );
 
 export const setSlippage = createAction<{ slippage: string }>(
-  "gstoploss/setSlippage"
+  "gstoplimit/setSlippage"
 );

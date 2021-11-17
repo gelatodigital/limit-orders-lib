@@ -20,6 +20,8 @@ import { DarkGreyCard } from "../Card";
 import TradePrice from "../order/TradePrice";
 import useTheme from "../../hooks/useTheme";
 import { useGelatoLimitOrders } from "../../hooks/gelato";
+import { useGelatoStopLimitOrders } from "../../hooks/gelato";
+import { AdvancedStopLimitSwapDetails } from "./AdvancedStopLimitSwapDetails";
 
 export const ArrowWrapper = styled.div`
   padding: 4px;
@@ -42,19 +44,22 @@ export default function SwapModalHeader({
   recipient,
   showAcceptChanges,
   onAcceptChanges,
+  type,
 }: {
   trade?: Trade<Currency, Currency, TradeType>;
   recipient: string | null;
   showAcceptChanges: boolean;
   onAcceptChanges: () => void;
+  type: "limit" | "stop";
 }) {
   const theme = useTheme();
 
   const [showInverted, setShowInverted] = useState<boolean>(false);
 
+
   const {
     derivedOrderInfo: { price, parsedAmounts },
-  } = useGelatoLimitOrders();
+  } = type === "limit" ? useGelatoLimitOrders() : useGelatoStopLimitOrders();
 
   const inputAmount = parsedAmounts.input;
   const outputAmount = parsedAmounts.output;
@@ -91,7 +96,7 @@ export default function SwapModalHeader({
                 fontWeight={500}
                 color={
                   showAcceptChanges &&
-                  trade?.tradeType === TradeType.EXACT_OUTPUT
+                    trade?.tradeType === TradeType.EXACT_OUTPUT
                     ? theme.primary1
                     : ""
                 }
@@ -153,7 +158,7 @@ export default function SwapModalHeader({
       </RowBetween>
 
       <LightCard style={{ padding: ".75rem", marginTop: "0.5rem" }}>
-        <AdvancedSwapDetails />
+        {type === "stop" ? <AdvancedStopLimitSwapDetails /> : <AdvancedSwapDetails />}
       </LightCard>
 
       {showAcceptChanges ? (

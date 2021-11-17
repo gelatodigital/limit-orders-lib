@@ -19,7 +19,6 @@ import {
   HelpCircle,
 } from "react-feather";
 import { Text } from "rebass";
-import { Input as NumericalInput } from "../NumericalInput";
 import styled from "styled-components";
 import {
   ButtonConfirmed,
@@ -41,7 +40,7 @@ import {
 } from "../order/styleds";
 import SwapHeader from "../order/SwapHeader";
 import TradePrice from "../order/TradePrice";
-import { useGelatoStoplossOrders } from "../../hooks/gelato";
+import { useGelatoStopLimitOrders } from "../../hooks/gelato";
 import { useIsSwapUnsupported } from "../../hooks/useIsSwapUnsupported";
 import { useUSDCValue } from "../../hooks/useUSDCPrice";
 import { Field } from "../../state/gorder/actions";
@@ -77,7 +76,7 @@ enum Rate {
   MUL = "MUL",
 }
 
-const PoweredByWrapper = styled(PoweredByGelato)<{ size: number }>`
+const PoweredByWrapper = styled(PoweredByGelato) <{ size: number }>`
   ${({ theme }) => theme.flexColumnNoWrap};
   height: ${() => "26px"};
   width: ${({ size }) => (size ? size + "px" : "32px")};
@@ -90,18 +89,16 @@ const PoweredByWrapper = styled(PoweredByGelato)<{ size: number }>`
   margin-left: 0.25rem;
 `;
 
-interface GelatoStoplossOrderProps {
+interface GelatoStopLimitOrderProps {
   showCommonBases?: boolean;
 }
 
-export default function GelatoStoplossOrder({
+export default function GelatoStopLimitOrder({
   showCommonBases = true,
-}: GelatoStoplossOrderProps) {
+}: GelatoStopLimitOrderProps) {
   const { account, toggleWalletModal } = useWeb3();
 
   const theme = useTheme();
-
-  const [maxAmount, setMaxAmount] = useState("0");
 
   const recipient = account ?? null;
 
@@ -110,7 +107,7 @@ export default function GelatoStoplossOrder({
       handleInput,
       handleCurrencySelection,
       handleSwitchTokens,
-      handleStoplossOrderSubmission,
+      handleStopLimitOrderSubmission,
       handleSlippage,
     },
     derivedOrderInfo: {
@@ -125,7 +122,7 @@ export default function GelatoStoplossOrder({
       slippage,
     },
     orderState: { independentField, rateType },
-  } = useGelatoStoplossOrders();
+  } = useGelatoStopLimitOrders();
 
   const fiatValueInput = useUSDCValue(parsedAmounts.input);
 
@@ -204,8 +201,8 @@ export default function GelatoStoplossOrder({
   const allowedSlippage = new Percent(slippage, 10_000);
   const userHasSpecifiedInputOutput = Boolean(
     (independentField === Field.INPUT || independentField === Field.OUTPUT) &&
-      currencies.input &&
-      currencies.output
+    currencies.input &&
+    currencies.output
   );
   const routeNotFound = !trade?.route;
   const isLoadingRoute =
@@ -219,11 +216,11 @@ export default function GelatoStoplossOrder({
   );
   const showMaxButton = Boolean(
     maxInputAmount?.greaterThan(0) &&
-      !parsedAmounts.input?.equalTo(maxInputAmount)
+    !parsedAmounts.input?.equalTo(maxInputAmount)
   );
 
   const handleSwap = useCallback(() => {
-    if (!handleStoplossOrderSubmission) {
+    if (!handleStopLimitOrderSubmission) {
       return;
     }
 
@@ -256,7 +253,7 @@ export default function GelatoStoplossOrder({
         throw new Error("No account");
       }
 
-      handleStoplossOrderSubmission({
+      handleStopLimitOrderSubmission({
         inputToken: currencies.input?.isNative
           ? NATIVE
           : currencies.input?.wrapped.address,
@@ -296,7 +293,7 @@ export default function GelatoStoplossOrder({
       });
     }
   }, [
-    handleStoplossOrderSubmission,
+    handleStopLimitOrderSubmission,
     tradeToConfirm,
     showConfirm,
     currencies.input?.wrapped.address,
@@ -388,7 +385,7 @@ export default function GelatoStoplossOrder({
   return (
     <Fragment>
       <AppBody>
-        <SwapHeader type={"stoploss"} />
+        <SwapHeader type={"stoplimit"} />
         <Wrapper id="limit-order-page">
           <ConfirmSwapModal
             isOpen={showConfirm}
@@ -404,6 +401,7 @@ export default function GelatoStoplossOrder({
             onDismiss={handleConfirmDismiss}
             inputAmount={parsedAmounts.input}
             outputAmount={parsedAmounts.output}
+            type={"stop"}
           />
 
           <AutoColumn gap={"md"}>
@@ -572,19 +570,19 @@ export default function GelatoStoplossOrder({
                           {/* we need to shorten this string on mobile */}
                           {approvalState === ApprovalState.APPROVED
                             ? `You can now use your ${currencies.input?.symbol} to place orders.`
-                            : `Allow the Gelato Limit Orders to use your 
+                            : `Allow the Gelato Stop Limit Orders to use your 
                               ${currencies.input?.symbol}`}
                         </span>
                         {approvalState === ApprovalState.PENDING ||
-                        (approvalSubmitted &&
-                          approvalState === ApprovalState.NOT_APPROVED) ? (
+                          (approvalSubmitted &&
+                            approvalState === ApprovalState.NOT_APPROVED) ? (
                           <Loader stroke="white" />
                         ) : approvalSubmitted &&
                           approvalState === ApprovalState.APPROVED ? (
                           <CheckCircle size="20" color={theme.green1} />
                         ) : (
                           <MouseoverTooltip
-                            text={`You must give the Gelato Limit Orders smart contracts
+                            text={`You must give the Gelato Stop Limit Orders smart contracts
                                 permission to use your 
                                 ${currencies.input?.symbol}. You only have to do
                                 this once per token.`}

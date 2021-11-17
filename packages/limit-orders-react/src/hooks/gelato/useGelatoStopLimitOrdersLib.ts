@@ -1,20 +1,19 @@
 import { useMemo } from "react";
 import {
-  GelatoStoplossOrders,
+  GelatoStopLimitOrders,
   ChainId,
   Handler,
 } from "@gelatonetwork/limit-orders-lib";
 import { useWeb3 } from "../../web3";
 
-export default function useGelatoStoplossOrdersLib():
-  | GelatoStoplossOrders
+export default function useGelatoStopLimitOrdersLib():
+  | GelatoStopLimitOrders
   | undefined {
   const { chainId, library } = useWeb3();
-  console.log("chainId, librar", chainId, library?.getSigner())
   return useMemo(() => {
     try {
       return chainId && library
-        ? new GelatoStoplossOrders(
+        ? new GelatoStopLimitOrders(
           chainId as ChainId,
           library?.getSigner(),
           "quickswap_stoploss" as Handler
@@ -22,7 +21,7 @@ export default function useGelatoStoplossOrdersLib():
         : undefined;
     } catch (error) {
       console.error(
-        `Could not instantiate GelatoStoplossOrders: ${(error as Error).message
+        `Could not instantiate GelatoStopLimitOrders: ${(error as Error).message
         }`
       );
       return undefined;
