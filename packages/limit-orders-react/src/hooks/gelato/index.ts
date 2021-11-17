@@ -2,7 +2,7 @@ import useGelatoLimitOrders from "./useGelatoLimitOrders";
 import useGelatoLimitOrdersHandlers from "./useGelatoLimitOrdersHandlers";
 import useGelatoLimitOrdersHistory from "./useGelatoLimitOrdersHistory";
 import useGelatoStoplossOrders from "./useGelatoStoplossOrders";
-import useGelatoStoplossOrdersLib from "./useGelatoStoplossOrdersLib"
+import useGelatoStoplossOrdersLib from "./useGelatoStoplossOrdersLib";
 import useGelatoStoplossOrdersHandlers from "./useGelatoStoplossOrdersHandlers";
 
 export {
@@ -11,5 +11,5 @@ export {
   useGelatoStoplossOrdersHandlers,
   useGelatoLimitOrders,
   useGelatoLimitOrdersHandlers,
-  useGelatoLimitOrdersHistory
+  useGelatoLimitOrdersHistory,
 };

@@ -21,15 +21,20 @@ import {
 import {
   Handler,
   ChainId,
+  StopLimitOrder,
   Order,
   TransactionData,
   TransactionDataWithSecret,
 } from "../types";
 import { isEthereumChain, isNetworkGasToken } from "../utils";
 import { isValidChainIdAndHandler, GelatoBase } from "../gelato-base";
+import {
+  queryStopLimitOrders,
+  queryOrders
+} from "../utils/queries";
 
 
-export class GelatoStoplossOrders extends GelatoBase {
+export class GelatoStopLimitOrders extends GelatoBase {
   constructor(
     chainId: ChainId,
     signerOrProvider?: Signer | Provider,
@@ -53,7 +58,7 @@ export class GelatoStoplossOrders extends GelatoBase {
 
   }
 
-  public async submitStoplossOrder(
+  public async submitStopLimitOrder(
     inputToken: string,
     outputToken: string,
     inputAmount: BigNumberish,
@@ -64,13 +69,13 @@ export class GelatoStoplossOrders extends GelatoBase {
   ): Promise<ContractTransaction> {
     if (!this.signer) throw new Error("No signer");
 
-    if (!maxReturn) throw new Error("No Stoploss defined");
+    if (!maxReturn) throw new Error("No StopLimit defined");
 
     if (!userSlippage) throw new Error("No slippage defined");
 
     const owner = await this.signer.getAddress();
 
-    const txData = await this.encodeStoplossOrderSubmission(
+    const txData = await this.encodeStopLimitOrderSubmission(
       inputToken,
       outputToken,
       inputAmount,
@@ -88,7 +93,7 @@ export class GelatoStoplossOrders extends GelatoBase {
     });
   }
 
-  public async encodeStoplossOrderSubmission(
+  public async encodeStopLimitOrderSubmission(
     inputToken: string,
     outputToken: string,
     inputAmount: BigNumberish,
@@ -97,7 +102,7 @@ export class GelatoStoplossOrders extends GelatoBase {
     owner: string,
     checkAllowance = true
   ): Promise<TransactionData> {
-    const { payload } = await this.encodeStoplossOrderSubmissionWithSecret(
+    const { payload } = await this.encodeStopLimitOrderSubmissionWithSecret(
       inputToken,
       outputToken,
       inputAmount,
@@ -111,7 +116,7 @@ export class GelatoStoplossOrders extends GelatoBase {
   }
 
 
-  public async encodeStoplossOrderSubmissionWithSecret(
+  public async encodeStopLimitOrderSubmissionWithSecret(
     inputToken: string,
     outputToken: string,
     inputAmount: BigNumberish,
@@ -120,7 +125,7 @@ export class GelatoStoplossOrders extends GelatoBase {
     owner: string,
     checkAllowance = true
   ): Promise<TransactionDataWithSecret> {
-    if (!maxReturnToBeParsed) throw new Error("No Stoploss defined");
+    if (!maxReturnToBeParsed) throw new Error("No StopLimit defined");
 
     if (!userSlippage) throw new Error("No slippage defined");
 
@@ -158,34 +163,6 @@ export class GelatoStoplossOrders extends GelatoBase {
         [outputToken, minReturn, , maxReturn]
       );
 
-    console.log("LIMIT ORDER LIB ORDER!!!", {
-      payload,
-      secret,
-      witness,
-      order: {
-        id: this._getKey({
-          module: this.moduleAddress,
-          inputToken,
-          owner,
-          witness,
-          data: encodedData,
-        } as Order),
-        module: this.moduleAddress.toLowerCase(),
-        data: encodedData,
-        inputToken: inputToken.toLowerCase(),
-        outputToken: outputToken.toLowerCase(),
-        owner: owner.toLowerCase(),
-        witness: witness.toLowerCase(),
-        inputAmount: inputAmount.toString(),
-        minReturn: minReturn.toString(),
-        maxReturn: maxReturn.toString(),
-        adjustedMinReturn: minReturn.toString(),
-        inputData: payload.data.toString(),
-        secret: secret.toLowerCase(),
-        handler: this.handlerAddress ?? null,
-      },
-    })
-
     return {
       payload,
       secret,
@@ -197,7 +174,7 @@ export class GelatoStoplossOrders extends GelatoBase {
           owner,
           witness,
           data: encodedData,
-        } as Order),
+        } as StopLimitOrder),
         module: this.moduleAddress.toLowerCase(),
         data: encodedData,
         inputToken: inputToken.toLowerCase(),
@@ -285,6 +262,44 @@ export class GelatoStoplossOrders extends GelatoBase {
     }
 
     return { data, value, to };
+  }
+
+  public async getOpenOrders(
+    owner: string,
+    includeOrdersWithNullHandler = false
+  ): Promise<Order[]> {
+    const orders = await queryStopLimitOrders(owner, this._chainId);
+    return orders
+      .map((order) => ({
+        ...order,
+        adjustedMinReturn: this.getAdjustedMinReturn(order.minReturn),
+      }))
+      .filter((order) => {
+        if (this._handler && !order.handler) {
+          return includeOrdersWithNullHandler ? true : false;
+        } else {
+          return this._handler ? order.handler === this._handlerAddress : true;
+        }
+      });
+  }
+
+  public async getOrders(
+    owner: string,
+    includeOrdersWithNullHandler = false
+  ): Promise<Order[]> {
+    const orders = await queryStopLimitOrders(owner, this._chainId);
+    return orders
+      .map((order) => ({
+        ...order,
+        adjustedMinReturn: this.getAdjustedMinReturn(order.minReturn),
+      }))
+      .filter((order) => {
+        if (this._handler && !order.handler) {
+          return includeOrdersWithNullHandler ? true : false;
+        } else {
+          return this._handler ? order.handler === this._handlerAddress : true;
+        }
+      });
   }
 
 }

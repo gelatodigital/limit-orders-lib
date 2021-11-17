@@ -48,6 +48,8 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
 
   const gelatoStoplossOrders = useGelatoStoplossOrdersLib();
 
+  console.log("gelatoStoplossOrders", gelatoStoplossOrders);
+
   const addTransaction = useTransactionAdder();
 
   const gasPrice = useGasPrice();
@@ -57,7 +59,7 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
     onCurrencySelection,
     onUserInput,
     onChangeRateType,
-    onSlippageInput
+    onSlippageInput,
   } = useOrderActionHandlers();
 
   const handleStoplossOrderSubmission = useCallback(
@@ -149,10 +151,10 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
 
       const checkIfOrderExists = Boolean(
         orderToCancel.module &&
-        orderToCancel.inputToken &&
-        orderToCancel.owner &&
-        orderToCancel.witness &&
-        orderToCancel.data
+          orderToCancel.inputToken &&
+          orderToCancel.owner &&
+          orderToCancel.witness &&
+          orderToCancel.data
       );
 
       const tx = await gelatoStoplossOrders.cancelLimitOrder(
@@ -221,7 +223,6 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
     [onSlippageInput]
   );
 
-
   return {
     handleStoplossOrderSubmission,
     handleStoplossOrderCancellation,
@@ -229,6 +230,6 @@ export default function useGelatoStoplossOrdersHandlers(): GelatoStoplossOrdersH
     handleCurrencySelection,
     handleSwitchTokens,
     handleRateType,
-    handleSlippage
+    handleSlippage,
   };
 }

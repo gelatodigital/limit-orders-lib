@@ -77,7 +77,7 @@ enum Rate {
   MUL = "MUL",
 }
 
-const PoweredByWrapper = styled(PoweredByGelato) <{ size: number }>`
+const PoweredByWrapper = styled(PoweredByGelato)<{ size: number }>`
   ${({ theme }) => theme.flexColumnNoWrap};
   height: ${() => "26px"};
   width: ${({ size }) => (size ? size + "px" : "32px")};
@@ -101,7 +101,7 @@ export default function GelatoStoplossOrder({
 
   const theme = useTheme();
 
-  const [maxAmount, setMaxAmount] = useState("0")
+  const [maxAmount, setMaxAmount] = useState("0");
 
   const recipient = account ?? null;
 
@@ -111,7 +111,7 @@ export default function GelatoStoplossOrder({
       handleCurrencySelection,
       handleSwitchTokens,
       handleStoplossOrderSubmission,
-      handleSlippage
+      handleSlippage,
     },
     derivedOrderInfo: {
       parsedAmounts,
@@ -122,7 +122,7 @@ export default function GelatoStoplossOrder({
       inputError,
       rawAmounts,
       price,
-      slippage
+      slippage,
     },
     orderState: { independentField, rateType },
   } = useGelatoStoplossOrders();
@@ -204,8 +204,8 @@ export default function GelatoStoplossOrder({
   const allowedSlippage = new Percent(slippage, 10_000);
   const userHasSpecifiedInputOutput = Boolean(
     (independentField === Field.INPUT || independentField === Field.OUTPUT) &&
-    currencies.input &&
-    currencies.output
+      currencies.input &&
+      currencies.output
   );
   const routeNotFound = !trade?.route;
   const isLoadingRoute =
@@ -219,7 +219,7 @@ export default function GelatoStoplossOrder({
   );
   const showMaxButton = Boolean(
     maxInputAmount?.greaterThan(0) &&
-    !parsedAmounts.input?.equalTo(maxInputAmount)
+      !parsedAmounts.input?.equalTo(maxInputAmount)
   );
 
   const handleSwap = useCallback(() => {
@@ -376,14 +376,14 @@ export default function GelatoStoplossOrder({
   const [slippageValue, setSlippage] = useState("2");
 
   const handleSlippageInput = (value: string) => {
-    handleSlippage(value)
-    setSlippage(value)
-  }
+    handleSlippage(value);
+    setSlippage(value);
+  };
 
   useEffect(() => {
-    setActiveTab(1)
-    handleSlippageInput("2")
-  }, [])
+    setActiveTab(1);
+    handleSlippageInput("2");
+  }, []);
 
   return (
     <Fragment>
@@ -493,7 +493,12 @@ export default function GelatoStoplossOrder({
                 id="limit-order-currency-output"
               />
               <Row>
-                <Slippage handleActiveTab={setActiveTab} activeTab={activeTab} value={slippageValue} handleInput={handleSlippageInput} />
+                <Slippage
+                  handleActiveTab={setActiveTab}
+                  activeTab={activeTab}
+                  value={slippageValue}
+                  handleInput={handleSlippageInput}
+                />
               </Row>
             </div>
 
@@ -519,7 +524,6 @@ export default function GelatoStoplossOrder({
                 </RowFixed>
               ) : null}
             </Row>
-
 
             <BottomGrouping>
               {swapIsUnsupported ? (
@@ -572,8 +576,8 @@ export default function GelatoStoplossOrder({
                               ${currencies.input?.symbol}`}
                         </span>
                         {approvalState === ApprovalState.PENDING ||
-                          (approvalSubmitted &&
-                            approvalState === ApprovalState.NOT_APPROVED) ? (
+                        (approvalSubmitted &&
+                          approvalState === ApprovalState.NOT_APPROVED) ? (
                           <Loader stroke="white" />
                         ) : approvalSubmitted &&
                           approvalState === ApprovalState.APPROVED ? (

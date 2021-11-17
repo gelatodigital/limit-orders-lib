@@ -15,7 +15,9 @@ export const selectCurrency = createAction<{
   field: Field;
   currencyId: string;
 }>("gstoploss/selectCurrency");
-export const switchCurrencies = createAction<void>("gstoploss/switchCurrencies");
+export const switchCurrencies = createAction<void>(
+  "gstoploss/switchCurrencies"
+);
 export const typeInput = createAction<{ field: Field; typedValue: string }>(
   "gstoploss/typeInput"
 );
@@ -28,4 +30,4 @@ export const setRateType = createAction<{ rateType: Rate }>(
 
 export const setSlippage = createAction<{ slippage: string }>(
   "gstoploss/setSlippage"
-)
+);

@@ -40,7 +40,7 @@ export const initialState: StoplossOrderState = {
   },
   rateType: Rate.MUL,
   recipient: null,
-  slippage: 0
+  slippage: 0,
 };
 
 export default createReducer<StoplossOrderState>(initialState, (builder) =>
@@ -98,6 +98,6 @@ export default createReducer<StoplossOrderState>(initialState, (builder) =>
       state.rateType = rateType;
     })
     .addCase(setSlippage, (state, { payload: { slippage } }) => {
-      state.slippage = parseInt(slippage) * 10000;
+      state.slippage = parseFloat(slippage) * 10000;
     })
 );

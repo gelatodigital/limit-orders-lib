@@ -6,9 +6,7 @@ import { darken } from "polished";
 import { MouseoverTooltipContent } from "../Tooltip";
 import { Input as NumericalInput } from "../NumericalInput";
 
-import {
-  Info,
-} from "react-feather";
+import { Info } from "react-feather";
 
 const StyledSwap = styled.div`
   padding: 1rem 1.25rem 0.5rem 1.25rem;
@@ -32,10 +30,9 @@ const Tabs = styled(Row)`
 const StyledSlippageTab = styled.div`
   width: 100%;
   color: ${({ theme }) => theme.text2};
-  
 `;
 
-const StyledTab = styled.div<{ active: boolean, minWidth?: string }>`
+const StyledTab = styled.div<{ active: boolean; minWidth?: string }>`
   ${({ theme }) => theme.flexRowNoWrap}
   align-items: right;
   border-radius: 3rem;
@@ -76,7 +73,7 @@ const StyledInfo = styled(Info)`
 `;
 
 const StyledInput = styled(NumericalInput)`
-  height: "auto"; 
+  height: "auto";
   background-color: transparent;
 `;
 
@@ -115,19 +112,31 @@ const SlippageInputTab = ({
   onUserInput: (input: string) => void;
   value: string;
 }) => (
-  <StyledSlippageTab >
+  <StyledSlippageTab>
     <StyledTab
       id={`stoploss-order-slippage-tap`}
       active={active}
       onClick={onClick}
       minWidth={"85px"}
     >
-      <StyledInput value={active ? `${value}%` : title} onUserInput={onUserInput} fontSize={"16px"} />
+      <StyledInput
+        value={active ? value : title}
+        onUserInput={onUserInput}
+        fontSize={"16px"}
+      />
+      {active && "%"}
     </StyledTab>
   </StyledSlippageTab>
 );
 
-const SlippageText = () => <>When your stop loss order is executed your tokens will be swapped. Your slippage tolerance dictates how much slippage you are willing to accept for this swap. The smaller your defined value here the more risk there is that your stop loss will not execute because of your low tolerance.</>
+const SlippageText = () => (
+  <>
+    When your stop loss order is executed your tokens will be swapped. Your
+    slippage tolerance dictates how much slippage you are willing to accept for
+    this swap. The smaller your defined value here the more risk there is that
+    your stop loss will not execute because of your low tolerance.
+  </>
+);
 
 export default function Slippage({
   handleActiveTab,
@@ -137,17 +146,25 @@ export default function Slippage({
 }: {
   handleActiveTab: (tab: number) => void;
   handleInput: (value: string) => void;
-  value: string,
+  value: string;
   activeTab: number;
 }) {
-
-
   const handleTab = (tab: number, newValue: string) => {
+    if (tab === activeTab) return
     handleActiveTab(tab);
-    handleInput(newValue)
+    handleInput(newValue);
+  };
+
+  const handleInputValidator = (newValue: string) => {
+    if (!newValue || parseFloat(newValue) === NaN || parseFloat(newValue) < 0) {
+      handleInput("0");
+    } else if (parseFloat(newValue) >= 100) {
+      handleInput("99");
+    }
+    else {
+      handleInput(newValue);
+    }
   }
-
-
 
   return (
     <StyledSwap>
@@ -181,8 +198,8 @@ export default function Slippage({
             <SlippageInputTab
               title={"Custom"}
               active={activeTab === 3}
-              onClick={() => handleTab(3, "0")}
-              onUserInput={(value) => handleInput(value)}
+              onClick={() => handleTab(3, value)}
+              onUserInput={(value) => handleInputValidator(value)}
               value={value}
             />
           </Tabs>

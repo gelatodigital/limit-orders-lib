@@ -46,7 +46,7 @@ export const HANDLERS_ADDRESSES = {
 };
 
 export const STOPLOSS_HANDLERS_ADDRESSES = {
-  // QuickSwapStoplossHandler
+  // QuickSwapStopLimitHandler
   [CHAIN_ID.MATIC]: {
     ["quickswap_stoploss"]: "0x6EA82C72732389c5149326e048A46Be9F8bec8E8",
   }
@@ -93,6 +93,11 @@ export const SUBGRAPH_URL = {
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-bsc",
   [CHAIN_ID.AVAX]:
     "https://api.thegraph.com/subgraphs/name/gelatodigital/limit-orders-avax",
+};
+
+export const STOP_LIMIT_ORDER_SUBGRAPH_URL = {
+  [CHAIN_ID.MATIC]:
+    "https://api.thegraph.com/subgraphs/name/harrytgerman/stoplimitorder",
 };
 
 export const GELATO_LIMIT_ORDERS_ADDRESS = {

@@ -1,5 +1,5 @@
 export { GelatoLimitOrders, isValidChainIdAndHandler } from "./limit-orders";
-export { GelatoStoplossOrders } from "./stoploss-orders";
+export { GelatoStopLimitOrders } from "./stoplimit-orders";
 
 export * from "./types";
 

@@ -36,6 +36,41 @@ export const GET_ALL_ORDERS_BY_OWNER = gql`
       first: 1000
       orderBy: updatedAtBlock
       orderDirection: desc
+      where: { owner: $owner, module_not: $module }
+    ) {
+      id
+      owner
+      inputToken
+      outputToken
+      minReturn
+      module
+      witness
+      secret
+      inputAmount
+      vault
+      bought
+      auxData
+      status
+      createdTxHash
+      executedTxHash
+      cancelledTxHash
+      blockNumber
+      createdAt
+      updatedAt
+      updatedAtBlock
+      updatedAtBlockHash
+      data
+      inputData
+    }
+  }
+`;
+
+export const GET_ALL_STOP_LIMIT_ORDERS_BY_OWNER = gql`
+  query getOrdersByOwner($owner: String) {
+    orders(
+      first: 1000
+      orderBy: updatedAtBlock
+      orderDirection: desc
       where: { owner: $owner }
     ) {
       id
@@ -43,6 +78,7 @@ export const GET_ALL_ORDERS_BY_OWNER = gql`
       inputToken
       outputToken
       minReturn
+      maxReturn
       module
       witness
       secret

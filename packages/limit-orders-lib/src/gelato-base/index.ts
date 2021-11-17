@@ -38,6 +38,7 @@ import {
   Handler,
   ChainId,
   Order,
+  StopLimitOrder,
   TransactionData,
 } from "../types";
 import { isEthereumChain } from "../utils";
@@ -184,7 +185,7 @@ export class GelatoBase {
   }
 
   public async encodeLimitOrderCancellation(
-    order: Order,
+    order: StopLimitOrder,
     checkIsActiveOrder?: boolean
   ): Promise<TransactionData> {
     if (!this._gelatoCore)
@@ -221,7 +222,7 @@ export class GelatoBase {
   }
 
   public async cancelLimitOrder(
-    order: Order,
+    order: StopLimitOrder,
     checkIsActiveOrder?: boolean,
     overrides?: Overrides
   ): Promise<ContractTransaction> {
@@ -277,7 +278,7 @@ export class GelatoBase {
       );
   }
 
-  public async isActiveOrder(order: Order): Promise<boolean> {
+  public async isActiveOrder(order: StopLimitOrder): Promise<boolean> {
     if (!this._provider) throw new Error("No provider");
     if (!this._gelatoCore)
       throw new Error("No gelato limit orders contract");
@@ -409,54 +410,13 @@ export class GelatoBase {
     }
   }
 
-  public async getOrders(
-    owner: string,
-    includeOrdersWithNullHandler = false
-  ): Promise<Order[]> {
-    const isEthereumNetwork = isEthereumChain(this._chainId);
-    const orders = await queryOrders(owner, this._chainId);
-    return orders
-      .map((order) => ({
-        ...order,
-        adjustedMinReturn: isEthereumNetwork
-          ? order.minReturn
-          : this.getAdjustedMinReturn(order.minReturn),
-      }))
-      .filter((order) => {
-        if (this._handler && !order.handler) {
-          return includeOrdersWithNullHandler ? true : false;
-        } else {
-          return this._handler ? order.handler === this._handlerAddress : true;
-        }
-      });
-  }
 
-  public async getOpenOrders(
-    owner: string,
-    includeOrdersWithNullHandler = false
-  ): Promise<Order[]> {
-    const isEthereumNetwork = isEthereumChain(this._chainId);
-    const orders = await queryOpenOrders(owner, this._chainId);
-    return orders
-      .map((order) => ({
-        ...order,
-        adjustedMinReturn: isEthereumNetwork
-          ? order.minReturn
-          : this.getAdjustedMinReturn(order.minReturn),
-      }))
-      .filter((order) => {
-        if (this._handler && !order.handler) {
-          return includeOrdersWithNullHandler ? true : false;
-        } else {
-          return this._handler ? order.handler === this._handlerAddress : true;
-        }
-      });
-  }
+
 
   public async getPastOrders(
     owner: string,
     includeOrdersWithNullHandler = false
-  ): Promise<Order[]> {
+  ): Promise<StopLimitOrder[] | Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryPastOrders(owner, this._chainId);
     return orders
@@ -478,7 +438,7 @@ export class GelatoBase {
   public async getExecutedOrders(
     owner: string,
     includeOrdersWithNullHandler = false
-  ): Promise<Order[]> {
+  ): Promise<StopLimitOrder[] | Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryExecutedOrders(owner, this._chainId);
     return orders
@@ -500,7 +460,7 @@ export class GelatoBase {
   public async getCancelledOrders(
     owner: string,
     includeOrdersWithNullHandler = false
-  ): Promise<Order[]> {
+  ): Promise<StopLimitOrder[] | Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryCancelledOrders(owner, this._chainId);
     return orders
@@ -519,7 +479,7 @@ export class GelatoBase {
       });
   }
 
-  public _getKey(order: Order): string {
+  public _getKey(order: StopLimitOrder): string {
     return utils.keccak256(
       this._abiEncoder.encode(
         ["address", "address", "address", "address", "bytes"],

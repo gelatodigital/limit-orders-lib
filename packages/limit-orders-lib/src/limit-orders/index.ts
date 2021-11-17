@@ -139,20 +139,20 @@ export class GelatoLimitOrders {
     this._provider = Provider.isProvider(signerOrProvider)
       ? signerOrProvider
       : Signer.isSigner(signerOrProvider)
-      ? signerOrProvider.provider
-      : undefined;
+        ? signerOrProvider.provider
+        : undefined;
 
     this._gelatoLimitOrders = this._signer
       ? GelatoLimitOrders__factory.connect(
-          GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
-          this._signer
-        )
+        GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
+        this._signer
+      )
       : this._provider
-      ? GelatoLimitOrders__factory.connect(
+        ? GelatoLimitOrders__factory.connect(
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           this._provider
         )
-      : (new Contract(
+        : (new Contract(
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           GelatoLimitOrders__factory.createInterface()
         ) as GelatoLimitOrdersContract);
@@ -169,15 +169,15 @@ export class GelatoLimitOrders {
 
     this._erc20OrderRouter = this._signer
       ? ERC20OrderRouter__factory.connect(
-          GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
-          this._signer
-        )
+        GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
+        this._signer
+      )
       : this._provider
-      ? ERC20OrderRouter__factory.connect(
+        ? ERC20OrderRouter__factory.connect(
           GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
           this._provider
         )
-      : (new Contract(
+        : (new Contract(
           GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
           ERC20OrderRouter__factory.createInterface()
         ) as ERC20OrderRouter);
@@ -234,13 +234,13 @@ export class GelatoLimitOrders {
 
     const encodedData = this._handlerAddress
       ? this._abiEncoder.encode(
-          ["address", "uint256", "address"],
-          [outputToken, minReturn, this._handlerAddress]
-        )
+        ["address", "uint256", "address"],
+        [outputToken, minReturn, this._handlerAddress]
+      )
       : this._abiEncoder.encode(
-          ["address", "uint256"],
-          [outputToken, minReturn]
-        );
+        ["address", "uint256"],
+        [outputToken, minReturn]
+      );
 
     return {
       payload,
@@ -367,7 +367,7 @@ export class GelatoLimitOrders {
           _order = { ...order, ...subgraphOrder };
         }
         // eslint-disable-next-line no-empty
-      } catch (error) {}
+      } catch (error) { }
     }
 
     if (!_order.inputToken) throw new Error("No input token in order");
@@ -409,14 +409,14 @@ export class GelatoLimitOrders {
 
     return overrides
       ? ERC20__factory.connect(inputToken, this._signer).approve(
-          this._erc20OrderRouter.address,
-          amount,
-          overrides
-        )
+        this._erc20OrderRouter.address,
+        amount,
+        overrides
+      )
       : ERC20__factory.connect(inputToken, this._signer).approve(
-          this._erc20OrderRouter.address,
-          amount
-        );
+        this._erc20OrderRouter.address,
+        amount
+      );
   }
 
   public async isActiveOrder(order: Order): Promise<boolean> {
@@ -486,8 +486,8 @@ export class GelatoLimitOrders {
       .div(10000)
       .gte(1)
       ? BigNumber.from(outputAmount)
-          .mul(GelatoLimitOrders.gelatoFeeBPS)
-          .div(10000)
+        .mul(GelatoLimitOrders.gelatoFeeBPS)
+        .div(10000)
       : BigNumber.from(1);
 
     const slippageBPS = extraSlippageBPS
@@ -703,13 +703,13 @@ export class GelatoLimitOrders {
 
     const encodedData = this._handlerAddress
       ? this._abiEncoder.encode(
-          ["address", "uint256", "address"],
-          [outputToken, minReturn, this._handlerAddress]
-        )
+        ["address", "uint256", "address"],
+        [outputToken, minReturn, this._handlerAddress]
+      )
       : this._abiEncoder.encode(
-          ["address", "uint256"],
-          [outputToken, minReturn]
-        );
+        ["address", "uint256"],
+        [outputToken, minReturn]
+      );
 
     let data, value, to;
     if (isNetworkGasToken(inputToken)) {

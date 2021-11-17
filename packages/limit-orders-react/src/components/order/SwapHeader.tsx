@@ -87,7 +87,6 @@ export default function SwapHeader({
   activeTab?: string;
   type?: string;
 }) {
-
   if (type === "stoploss") {
     return (
       <StyledSwapHeader>
@@ -98,12 +97,11 @@ export default function SwapHeader({
             </TYPE.black>
           </RowFixed>
         </RowBetween>
-      </StyledSwapHeader>)
-  } else
-
-    if (!handleActiveTab || !activeTab) {
-      return null
-    }
+      </StyledSwapHeader>
+    );
+  } else if (!handleActiveTab || !activeTab) {
+    return null;
+  }
 
   return (
     <StyledSwapHeader>

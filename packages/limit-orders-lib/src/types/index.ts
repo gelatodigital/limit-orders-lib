@@ -12,7 +12,7 @@ export type Handler =
   | "polydex"
   | "cafeswap"
   | "pancakeswap"
-  | "quickswap_stoploss";
+  | "quickswap_stoploss"
   | "traderjoe";
 
 export interface TransactionData {
@@ -61,7 +61,9 @@ export interface Order {
   inputData: string;
   handler: string | null;
 }
-
+export interface StopLimitOrder extends Order {
+  maxReturn: string;
+}
 export interface PartialOrder {
   id: string;
   owner: string;
