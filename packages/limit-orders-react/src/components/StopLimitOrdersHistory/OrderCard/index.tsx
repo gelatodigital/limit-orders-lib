@@ -8,7 +8,7 @@ import { Order } from "@gelatonetwork/limit-orders-lib";
 import useTheme from "../../../hooks/useTheme";
 import { useCurrency } from "../../../hooks/Tokens";
 import CurrencyLogo from "../../CurrencyLogo";
-import { useGelatoLimitOrdersHandlers } from "../../../hooks/gelato";
+import { useGelatoStopLimitOrdersHandlers } from "../../../hooks/gelato";
 import { CurrencyAmount, Price } from "@uniswap/sdk-core";
 import ConfirmCancellationModal from "../ConfirmCancellationModal";
 import { useTradeExactIn } from "../../../hooks/useTrade";
@@ -195,7 +195,7 @@ export default function OrderCard({ order }: { order: Order }) {
     setShowCurrentPriceInverted,
   ] = useState<boolean>(true);
 
-  const { handleLimitOrderCancellation } = useGelatoLimitOrdersHandlers();
+  const { handleStopLimitOrderCancellation } = useGelatoStopLimitOrdersHandlers();
 
   const gelatoLibrary = useGelatoStopLimitOrdersLib();
 
@@ -311,7 +311,7 @@ export default function OrderCard({ order }: { order: Order }) {
   }, [attemptingTxn, cancellationErrorMessage, txHash]);
 
   const handleCancellation = useCallback(() => {
-    if (!handleLimitOrderCancellation) {
+    if (!handleStopLimitOrderCancellation) {
       return;
     }
 
@@ -329,10 +329,11 @@ export default function OrderCard({ order }: { order: Order }) {
           outputTokenSymbol: outputToken.symbol,
           inputAmount: inputAmount.toSignificant(4),
           outputAmount: outputAmount.toSignificant(4),
+          maxOutputAmount
         }
         : undefined;
 
-    handleLimitOrderCancellation(order, orderDetails)
+    handleStopLimitOrderCancellation(order, orderDetails)
       .then(({ hash }) => {
         setCancellationState({
           attemptingTxn: false,
@@ -350,7 +351,7 @@ export default function OrderCard({ order }: { order: Order }) {
         });
       });
   }, [
-    handleLimitOrderCancellation,
+    handleStopLimitOrderCancellation,
     showConfirm,
     inputToken,
     outputToken,

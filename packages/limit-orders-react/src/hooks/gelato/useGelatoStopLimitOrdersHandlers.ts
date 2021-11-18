@@ -29,7 +29,7 @@ export interface GelatoStopLimitOrdersHandlers {
       outputTokenSymbol: string;
       inputAmount: string;
       outputAmount: string;
-      slippage: number;
+      maxOutputAmount: string;
     },
     overrides?: Overrides
   ) => Promise<TransactionResponse>;
@@ -131,7 +131,7 @@ export default function useGelatoStopLimitOrdersHandlers(): GelatoStopLimitOrder
         outputTokenSymbol: string;
         inputAmount: string;
         outputAmount: string;
-        slippage: number;
+        maxOutputAmount: string;
       },
       overrides?: Overrides
     ) => {
@@ -157,6 +157,8 @@ export default function useGelatoStopLimitOrdersHandlers(): GelatoStopLimitOrder
         orderToCancel.data
       );
 
+      console.log("checkIfOrderExists", checkIfOrderExists)
+
       const tx = await gelatoStopLimitOrders.cancelLimitOrder(
         orderToCancel,
         checkIfOrderExists,
@@ -166,7 +168,7 @@ export default function useGelatoStopLimitOrdersHandlers(): GelatoStopLimitOrder
       const now = Math.round(Date.now() / 1000);
 
       const summary = orderDetails
-        ? `Order cancellation: Swap ${orderDetails.inputAmount} ${orderDetails.inputTokenSymbol} for ${orderDetails.outputAmount} ${orderDetails.outputTokenSymbol}`
+        ? `Order cancellation: Stoploss ${orderDetails.inputAmount} ${orderDetails.inputTokenSymbol} valid at ${orderDetails.maxOutputAmount} ${orderDetails.outputTokenSymbol}`
         : "Order cancellation";
 
       addTransaction(tx, {

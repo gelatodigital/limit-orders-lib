@@ -141,10 +141,10 @@ export default function useGelatoLimitOrdersHandlers(): GelatoLimitOrdersHandler
 
       const checkIfOrderExists = Boolean(
         orderToCancel.module &&
-          orderToCancel.inputToken &&
-          orderToCancel.owner &&
-          orderToCancel.witness &&
-          orderToCancel.data
+        orderToCancel.inputToken &&
+        orderToCancel.owner &&
+        orderToCancel.witness &&
+        orderToCancel.data
       );
 
       const tx = await gelatoLimitOrders.cancelLimitOrder(

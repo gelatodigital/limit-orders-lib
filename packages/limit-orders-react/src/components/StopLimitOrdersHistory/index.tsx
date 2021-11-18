@@ -106,7 +106,6 @@ export default function StopLimitOrdersHistory() {
     [open.pending, cancelled.pending, open.confirmed]
   );
 
-  console.log("allOpenOrders", allOpenOrders)
 
   const allCancelledOrders = useMemo(() => cancelled.confirmed, [
     cancelled.confirmed,
