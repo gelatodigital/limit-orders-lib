@@ -269,6 +269,8 @@ export class GelatoStopLimitOrders extends GelatoBase {
     includeOrdersWithNullHandler = false
   ): Promise<Order[]> {
     const orders = await queryStopLimitOrders(owner, this._chainId);
+    console.log("orders!", orders)
+
     return orders
       .map((order) => ({
         ...order,
@@ -288,6 +290,8 @@ export class GelatoStopLimitOrders extends GelatoBase {
     includeOrdersWithNullHandler = false
   ): Promise<Order[]> {
     const orders = await queryStopLimitOrders(owner, this._chainId);
+    console.log("getOrders!", orders)
+
     return orders
       .map((order) => ({
         ...order,

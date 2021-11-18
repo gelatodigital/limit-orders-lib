@@ -66,12 +66,12 @@ export const GET_ALL_ORDERS_BY_OWNER = gql`
 `;
 
 export const GET_ALL_STOP_LIMIT_ORDERS_BY_OWNER = gql`
-  query getOrdersByOwner($owner: String) {
+  query getOrdersByOwner($owner: String, $module: String) {
     orders(
       first: 1000
       orderBy: updatedAtBlock
       orderDirection: desc
-      where: { owner: $owner }
+      where: { owner: $owner, module: $module }
     ) {
       id
       owner
