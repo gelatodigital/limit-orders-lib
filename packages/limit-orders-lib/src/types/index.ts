@@ -12,8 +12,9 @@ export type Handler =
   | "polydex"
   | "cafeswap"
   | "pancakeswap"
-  | "quickswap_stoploss"
-  | "traderjoe";
+  | "traderjoe"
+  | "defyswap"
+  | "quickswap_stoploss";
 
 export interface TransactionData {
   to: string;
