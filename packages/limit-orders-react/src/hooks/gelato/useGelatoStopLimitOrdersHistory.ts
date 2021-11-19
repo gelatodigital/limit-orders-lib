@@ -34,7 +34,7 @@ export default function useGelatoStopLimitOrdersHistory(
   }>({ pending: [], confirmed: [] });
   const [executedOrders, setExecutedOrders] = useState<StopLimitOrder[]>([]);
 
-  const state = useSelector<AppState, AppState["gtransactions"]>(
+  const state = useSelector<AppState, AppState["gstoplimittransactions"]>(
     (state) => state.gtransactions
   ) as any;
 
