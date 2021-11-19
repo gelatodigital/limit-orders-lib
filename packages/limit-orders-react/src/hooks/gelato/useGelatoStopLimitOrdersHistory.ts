@@ -35,7 +35,7 @@ export default function useGelatoStopLimitOrdersHistory(
   const [executedOrders, setExecutedOrders] = useState<StopLimitOrder[]>([]);
 
   const state = useSelector<AppState, AppState["gstoplimittransactions"]>(
-    (state) => state.gtransactions
+    (state) => state.gstoplimittransactions
   ) as any;
 
 
@@ -208,7 +208,6 @@ export default function useGelatoStopLimitOrdersHistory(
     chainId,
     state,
   ]);
-
 
   useEffect(() => {
     fetchOpenOrders();

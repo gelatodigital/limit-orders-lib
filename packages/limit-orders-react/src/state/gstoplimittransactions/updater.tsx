@@ -49,6 +49,7 @@ export default function Updater(): null {
 
     Object.keys(transactions)
       .filter((hash) => shouldCheck(lastBlockNumber, transactions[hash]))
+      .filter(hash => transactions[hash].order?.module === "0xE912CD26C4A4cfffc175A297F1328aB23313a1a7".toLowerCase())
       .forEach((hash) => {
         library
           .getTransactionReceipt(hash)

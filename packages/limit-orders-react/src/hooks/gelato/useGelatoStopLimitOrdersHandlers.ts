@@ -147,8 +147,6 @@ export default function useGelatoStopLimitOrdersHandlers(): GelatoStopLimitOrder
         throw new Error("No account");
       }
 
-      console.log("DATA", orderToCancel)
-
       const checkIfOrderExists = Boolean(
         orderToCancel.module &&
         orderToCancel.inputToken &&
@@ -156,8 +154,6 @@ export default function useGelatoStopLimitOrdersHandlers(): GelatoStopLimitOrder
         orderToCancel.witness &&
         orderToCancel.data
       );
-
-      console.log("checkIfOrderExists", checkIfOrderExists)
 
       const tx = await gelatoStopLimitOrders.cancelLimitOrder(
         orderToCancel,
