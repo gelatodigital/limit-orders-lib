@@ -1,7 +1,16 @@
 import { request } from "graphql-request";
-import { OLD_SUBGRAPH_URL, SUBGRAPH_URL, STOP_LIMIT_ORDER_SUBGRAPH_URL, GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS, GELATO_LIMIT_ORDERS_MODULE_ADDRESS } from "../../constants";
-import { Order, StopLimitOrder } from "../../types";
-import { GET_ALL_ORDERS_BY_OWNER, GET_ORDER_BY_ID, GET_ALL_STOP_LIMIT_ORDERS_BY_OWNER } from "./constants";
+import {
+  OLD_SUBGRAPH_URL,
+  SUBGRAPH_URL,
+  STOP_LIMIT_ORDER_SUBGRAPH_URL,
+  GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS,
+} from "../../constants";
+import { Order } from "../../types";
+import {
+  GET_ALL_ORDERS_BY_OWNER,
+  GET_ORDER_BY_ID,
+  GET_ALL_STOP_LIMIT_ORDERS_BY_OWNER,
+} from "./constants";
 
 export const queryOrder = async (
   orderId: string,
@@ -53,7 +62,6 @@ export const queryOrders = async (
       ...dataFromNewSubgraph.orders,
     ];
 
-
     return _getUniqueOrdersWithHandler(allOrders);
   } catch (error) {
     throw new Error("Could not query subgraph for all orders");
@@ -65,18 +73,23 @@ export const queryStopLimitOrders = async (
   chainId: number
 ): Promise<Order[]> => {
   try {
-
     const dataStopLimitSubgraph = STOP_LIMIT_ORDER_SUBGRAPH_URL[chainId]
-      ? await request(STOP_LIMIT_ORDER_SUBGRAPH_URL[chainId], GET_ALL_STOP_LIMIT_ORDERS_BY_OWNER, {
-        owner: owner.toLowerCase(),
-        module: STOP_LIMIT_ORDER_SUBGRAPH_URL[chainId].toLowerCase(),
-      })
+      ? await request(
+        STOP_LIMIT_ORDER_SUBGRAPH_URL[chainId],
+        GET_ALL_STOP_LIMIT_ORDERS_BY_OWNER,
+        {
+          owner: owner.toLowerCase(),
+          module:
+            GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS[chainId].toLowerCase(),
+        }
+      )
       : { orders: [] };
 
     const orders = dataStopLimitSubgraph.orders;
 
     return _getUniqueOrdersWithHandler(orders);
   } catch (error) {
+    console.error(error);
     throw new Error("Could not query subgraph for all orders");
   }
 };
@@ -87,12 +100,16 @@ export const queryOpenStopLimitOrders = async (
 ): Promise<Order[]> => {
   try {
     const dataStopLimitSubgraph = STOP_LIMIT_ORDER_SUBGRAPH_URL[chainId]
-      ? await request(STOP_LIMIT_ORDER_SUBGRAPH_URL[chainId], GET_ALL_STOP_LIMIT_ORDERS_BY_OWNER, {
-        owner: owner.toLowerCase(),
-        module: STOP_LIMIT_ORDER_SUBGRAPH_URL[chainId].toLowerCase()
-      })
+      ? await request(
+        STOP_LIMIT_ORDER_SUBGRAPH_URL[chainId],
+        GET_ALL_STOP_LIMIT_ORDERS_BY_OWNER,
+        {
+          owner: owner.toLowerCase(),
+          module:
+            GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS[chainId].toLowerCase(),
+        }
+      )
       : { orders: [] };
-
 
     const orders = dataStopLimitSubgraph.orders;
 
@@ -107,19 +124,19 @@ export const queryOpenStopLimitOrders = async (
 export const queryOpenOrders = async (
   owner: string,
   chainId: number
-): Promise<Order[] | StopLimitOrder[]> => {
+): Promise<Order[]> => {
   try {
     const dataFromOldSubgraph = OLD_SUBGRAPH_URL[chainId]
       ? await request(OLD_SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
         owner: owner.toLowerCase(),
-        module: GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS[chainId].toLowerCase()
+        module: GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS[chainId].toLowerCase(),
       })
       : { orders: [] };
 
     const dataFromNewSubgraph = SUBGRAPH_URL[chainId]
       ? await request(SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
         owner: owner.toLowerCase(),
-        module: GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS[chainId].toLowerCase()
+        module: GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS[chainId].toLowerCase(),
       })
       : { orders: [] };
 
@@ -141,7 +158,7 @@ export const queryOpenOrders = async (
 export const queryPastOrders = async (
   owner: string,
   chainId: number
-): Promise<Order[] | StopLimitOrder[]> => {
+): Promise<Order[]> => {
   try {
     const dataFromOldSubgraph = OLD_SUBGRAPH_URL[chainId]
       ? await request(OLD_SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
@@ -171,7 +188,7 @@ export const queryPastOrders = async (
 export const queryExecutedOrders = async (
   owner: string,
   chainId: number
-): Promise<Order[] | StopLimitOrder[]> => {
+): Promise<Order[]> => {
   try {
     const dataFromOldSubgraph = OLD_SUBGRAPH_URL[chainId]
       ? await request(OLD_SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {
@@ -201,7 +218,7 @@ export const queryExecutedOrders = async (
 export const queryCancelledOrders = async (
   owner: string,
   chainId: number
-): Promise<Order[] | StopLimitOrder[]> => {
+): Promise<Order[]> => {
   try {
     const dataFromOldSubgraph = OLD_SUBGRAPH_URL[chainId]
       ? await request(OLD_SUBGRAPH_URL[chainId], GET_ALL_ORDERS_BY_OWNER, {

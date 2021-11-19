@@ -14,36 +14,29 @@ import {
   GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS,
   HANDLERS_ADDRESSES,
 } from "../constants";
-import {
-  ERC20__factory,
-} from "../contracts/types";
+import { ERC20__factory } from "../contracts/types";
 
 import {
   Handler,
   ChainId,
-  StopLimitOrder,
   Order,
   TransactionData,
   TransactionDataWithSecret,
 } from "../types";
 import { isEthereumChain, isNetworkGasToken } from "../utils";
 import { isValidChainIdAndHandler, GelatoBase } from "../gelato-base";
-import {
-  queryStopLimitOrders,
-  queryOrders
-} from "../utils/queries";
-
+import { queryStopLimitOrders } from "../utils/queries";
 
 export class GelatoStopLimitOrders extends GelatoBase {
   constructor(
     chainId: ChainId,
     signerOrProvider?: Signer | Provider,
-    handler?: Handler,
+    handler?: Handler
   ) {
     if (handler && !isValidChainIdAndHandler(chainId, handler)) {
       throw new Error("Invalid chainId and handler");
     }
-    const sotplossHandlers = ["quickswap_stoploss"]
+    const sotplossHandlers = ["quickswap_stoploss"];
 
     if (handler && !sotplossHandlers.includes(handler)) {
       throw new Error("Wrong handler");
@@ -53,9 +46,11 @@ export class GelatoStopLimitOrders extends GelatoBase {
 
     if (!moduleAddress) throw new Error("Invalid chainId and handler");
 
-    const handlerAddress = handler === "quickswap_stoploss" ? HANDLERS_ADDRESSES[chainId][handler]?.toLowerCase() : undefined;
+    const handlerAddress =
+      handler === "quickswap_stoploss"
+        ? HANDLERS_ADDRESSES[chainId][handler]?.toLowerCase()
+        : undefined;
     super(chainId, moduleAddress, signerOrProvider, handler, handlerAddress);
-
   }
 
   public async submitStopLimitOrder(
@@ -115,7 +110,6 @@ export class GelatoStopLimitOrders extends GelatoBase {
     return payload;
   }
 
-
   public async encodeStopLimitOrderSubmissionWithSecret(
     inputToken: string,
     outputToken: string,
@@ -139,7 +133,10 @@ export class GelatoStopLimitOrders extends GelatoBase {
       ? this.getFeeAndSlippageAdjustedMinReturn(maxReturnToBeParsed)
       : { minReturn: maxReturnToBeParsed };
 
-    const { minReturn } = this.getFeeAndSlippageAdjustedMinReturn(maxReturnToBeParsed, userSlippage);
+    const { minReturn } = this.getFeeAndSlippageAdjustedMinReturn(
+      maxReturnToBeParsed,
+      userSlippage
+    );
 
     const payload = await this._encodeSubmitData(
       inputToken,
@@ -160,7 +157,7 @@ export class GelatoStopLimitOrders extends GelatoBase {
       )
       : this.abiEncoder.encode(
         ["address", "uint256", "address", "uint256"],
-        [outputToken, minReturn, , maxReturn]
+        [outputToken, minReturn, "", maxReturn]
       );
 
     return {
@@ -174,7 +171,7 @@ export class GelatoStopLimitOrders extends GelatoBase {
           owner,
           witness,
           data: encodedData,
-        } as StopLimitOrder),
+        } as Order),
         module: this.moduleAddress.toLowerCase(),
         data: encodedData,
         inputToken: inputToken.toLowerCase(),
@@ -210,12 +207,12 @@ export class GelatoStopLimitOrders extends GelatoBase {
 
     const encodedData = this.handlerAddress
       ? this.abiEncoder.encode(
-        ["address", "uint256", "address", "uint256",],
+        ["address", "uint256", "address", "uint256"],
         [outputToken, minReturn, this.handlerAddress, maxReturn]
       )
       : this.abiEncoder.encode(
         ["address", "uint256", "address", "uint256"],
-        [outputToken, minReturn, , maxReturn]
+        [outputToken, minReturn, "", maxReturn]
       );
 
     let data, value, to;
@@ -228,10 +225,9 @@ export class GelatoStopLimitOrders extends GelatoBase {
         encodedData,
         secret
       );
-      data = this.contract.interface.encodeFunctionData(
-        "depositEth",
-        [encodedEthOrder]
-      );
+      data = this.contract.interface.encodeFunctionData("depositEth", [
+        encodedEthOrder,
+      ]);
       value = amount;
       to = this.contract.address;
     } else {
@@ -269,7 +265,6 @@ export class GelatoStopLimitOrders extends GelatoBase {
     includeOrdersWithNullHandler = false
   ): Promise<Order[]> {
     const orders = await queryStopLimitOrders(owner, this._chainId);
-    console.log("orders!", orders)
 
     return orders
       .map((order) => ({
@@ -290,7 +285,6 @@ export class GelatoStopLimitOrders extends GelatoBase {
     includeOrdersWithNullHandler = false
   ): Promise<Order[]> {
     const orders = await queryStopLimitOrders(owner, this._chainId);
-    console.log("getOrders!", orders)
 
     return orders
       .map((order) => ({
@@ -305,6 +299,4 @@ export class GelatoStopLimitOrders extends GelatoBase {
         }
       });
   }
-
 }
-

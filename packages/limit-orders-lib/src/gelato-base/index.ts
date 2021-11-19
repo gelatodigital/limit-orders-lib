@@ -30,20 +30,15 @@ import {
 import {
   queryCancelledOrders,
   queryExecutedOrders,
-  queryOpenOrders,
-  queryOrders,
   queryPastOrders,
 } from "../utils/queries";
 import {
   Handler,
   ChainId,
   Order,
-  StopLimitOrder,
   TransactionData,
 } from "../types";
 import { isEthereumChain } from "../utils";
-
-
 
 export const isValidChainIdAndHandler = (
   chainId: ChainId,
@@ -66,7 +61,6 @@ export const isETHOrWETH = (
     tokenAddress.toLowerCase() === WETH_ADDRESS.toLowerCase()
   );
 };
-
 
 export class GelatoBase {
   public _chainId: ChainId;
@@ -123,7 +117,6 @@ export class GelatoBase {
     return this._abiEncoder;
   }
 
-
   constructor(
     chainId: ChainId,
     moduleAddress: string,
@@ -161,8 +154,6 @@ export class GelatoBase {
           GelatoBase__factory.createInterface()
         ) as GelatoBaseContract);
 
-
-
     this._abiEncoder = new utils.AbiCoder();
 
     this._erc20OrderRouter = this._signer
@@ -185,11 +176,10 @@ export class GelatoBase {
   }
 
   public async encodeLimitOrderCancellation(
-    order: StopLimitOrder,
+    order: Order,
     checkIsActiveOrder?: boolean
   ): Promise<TransactionData> {
-    if (!this._gelatoCore)
-      throw new Error("No gelato limit orders contract");
+    if (!this._gelatoCore) throw new Error("No gelato limit orders contract");
 
     if (!order.inputToken) throw new Error("No input token in order");
     if (!order.witness) throw new Error("No witness in order");
@@ -203,16 +193,13 @@ export class GelatoBase {
         throw new Error("Order not found. Please review your order data.");
     }
 
-    const data = this._gelatoCore.interface.encodeFunctionData(
-      "cancelOrder",
-      [
-        this._moduleAddress,
-        order.inputToken,
-        order.owner,
-        order.witness,
-        order.data,
-      ]
-    );
+    const data = this._gelatoCore.interface.encodeFunctionData("cancelOrder", [
+      this._moduleAddress,
+      order.inputToken,
+      order.owner,
+      order.witness,
+      order.data,
+    ]);
 
     return {
       data,
@@ -222,13 +209,12 @@ export class GelatoBase {
   }
 
   public async cancelLimitOrder(
-    order: StopLimitOrder,
+    order: Order,
     checkIsActiveOrder?: boolean,
     overrides?: Overrides
   ): Promise<ContractTransaction> {
     if (!this._signer) throw new Error("No signer");
-    if (!this._gelatoCore)
-      throw new Error("No gelato limit orders contract");
+    if (!this._gelatoCore) throw new Error("No gelato limit orders contract");
 
     if (!order.inputToken) throw new Error("No input token in order");
     if (!order.witness) throw new Error("No witness in order");
@@ -278,10 +264,9 @@ export class GelatoBase {
       );
   }
 
-  public async isActiveOrder(order: StopLimitOrder): Promise<boolean> {
+  public async isActiveOrder(order: Order): Promise<boolean> {
     if (!this._provider) throw new Error("No provider");
-    if (!this._gelatoCore)
-      throw new Error("No gelato limit orders contract");
+    if (!this._gelatoCore) throw new Error("No gelato limit orders contract");
 
     if (!order.module) throw new Error("No module in order");
     if (!order.inputToken) throw new Error("No input token in order");
@@ -326,7 +311,7 @@ export class GelatoBase {
 
   public getFeeAndSlippageAdjustedMinReturn(
     outputAmount: BigNumberish,
-    extraSlippageBPS?: number,
+    extraSlippageBPS?: number
   ): {
     minReturn: string;
     slippage: string;
@@ -344,9 +329,7 @@ export class GelatoBase {
       .mul(GelatoBase.gelatoFeeBPS)
       .div(10000)
       .gte(1)
-      ? BigNumber.from(outputAmount)
-        .mul(GelatoBase.gelatoFeeBPS)
-        .div(10000)
+      ? BigNumber.from(outputAmount).mul(GelatoBase.gelatoFeeBPS).div(10000)
       : BigNumber.from(1);
 
     const slippageBPS = extraSlippageBPS
@@ -410,13 +393,10 @@ export class GelatoBase {
     }
   }
 
-
-
-
   public async getPastOrders(
     owner: string,
     includeOrdersWithNullHandler = false
-  ): Promise<StopLimitOrder[] | Order[]> {
+  ): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryPastOrders(owner, this._chainId);
     return orders
@@ -438,7 +418,7 @@ export class GelatoBase {
   public async getExecutedOrders(
     owner: string,
     includeOrdersWithNullHandler = false
-  ): Promise<StopLimitOrder[] | Order[]> {
+  ): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryExecutedOrders(owner, this._chainId);
     return orders
@@ -460,7 +440,7 @@ export class GelatoBase {
   public async getCancelledOrders(
     owner: string,
     includeOrdersWithNullHandler = false
-  ): Promise<StopLimitOrder[] | Order[]> {
+  ): Promise<Order[]> {
     const isEthereumNetwork = isEthereumChain(this._chainId);
     const orders = await queryCancelledOrders(owner, this._chainId);
     return orders
@@ -479,7 +459,7 @@ export class GelatoBase {
       });
   }
 
-  public _getKey(order: StopLimitOrder): string {
+  public _getKey(order: Order): string {
     return utils.keccak256(
       this._abiEncoder.encode(
         ["address", "address", "address", "address", "bytes"],

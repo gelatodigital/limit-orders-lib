@@ -49,8 +49,8 @@ export const STOPLOSS_HANDLERS_ADDRESSES = {
   // QuickSwapStopLimitHandler
   [CHAIN_ID.MATIC]: {
     ["quickswap_stoploss"]: "0x6EA82C72732389c5149326e048A46Be9F8bec8E8",
-  }
-}
+  },
+};
 
 export const NETWORK_NAME = {
   [CHAIN_ID.MAINNET]: "Ethereum",

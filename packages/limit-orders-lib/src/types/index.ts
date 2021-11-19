@@ -61,9 +61,7 @@ export interface Order {
   inputData: string;
   handler: string | null;
 }
-export interface StopLimitOrder extends Order {
-  maxReturn: string;
-}
+
 export interface PartialOrder {
   id: string;
   owner: string;
