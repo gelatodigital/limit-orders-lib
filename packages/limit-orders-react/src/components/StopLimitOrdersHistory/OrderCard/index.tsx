@@ -466,7 +466,7 @@ export default function OrderCard({ order }: { order: Order }) {
             <RowBetween>
               <Text fontWeight={500} fontSize={14} color={theme.text1}>
                 {`Sell ${inputAmount ? inputAmount.toSignificant(4) : "-"} ${inputAmount?.currency.symbol ?? ""
-                  } for ${outputAmount ? outputAmount.toSignificant(4) : "-"} ${outputAmount?.currency.symbol ?? ""
+                  } for ${maxOutputAmount ? maxOutputAmount?.toSignificant(4) : "-"} ${outputAmount?.currency.symbol ?? ""
                   }`}
               </Text>
             </RowBetween>

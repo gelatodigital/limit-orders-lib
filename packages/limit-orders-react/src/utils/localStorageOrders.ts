@@ -101,22 +101,23 @@ export function confirmOrderCancellation(
   chainId: number,
   account: string,
   cancellationHash: string,
-  success = true
+  success = true,
+  stoplimit = false
 ) {
   const cancelHash = cancellationHash.toLowerCase();
-  const pendingKey = lsKey(LS_ORDERS + "pending_", account, chainId);
+  const pendingKey = stoplimit ? lsKey(LS_ORDERS + "_stop_" + "pending_", account, chainId) : lsKey(LS_ORDERS + "pending_", account, chainId);
   const pendingOrders = get<Order[]>(pendingKey);
   const confirmedOrder = pendingOrders.find(
     (order) => order.cancelledTxHash?.toLowerCase() === cancelHash
   );
 
-  if (confirmedOrder) removeOrder(chainId, account, confirmedOrder, true);
+  if (confirmedOrder) removeOrder(chainId, account, confirmedOrder, true, stoplimit);
 
   if (success && confirmedOrder) {
-    const ordersKey = lsKey(LS_ORDERS, account, chainId);
+    const ordersKey = stoplimit ? lsKey(LS_ORDERS + "_stop_", account, chainId) : lsKey(LS_ORDERS, account, chainId);
     const orders = get<Order[] | StopLimitOrder[]>(ordersKey);
     if (orders) {
-      const ordersToSave = removeOrder(chainId, account, confirmedOrder);
+      const ordersToSave = removeOrder(chainId, account, confirmedOrder, false, stoplimit);
       ordersToSave.push({
         ...confirmedOrder,
         cancelledTxHash: cancelHash,
@@ -137,25 +138,26 @@ export function confirmOrderSubmission(
   chainId: number,
   account: string,
   submissionHash: string,
-  success = true
+  success = true,
+  stoplimit = false
 ) {
   const creationHash = submissionHash.toLowerCase();
-  const pendingKey = lsKey(LS_ORDERS + "pending_", account, chainId);
+  const pendingKey = stoplimit ? lsKey(LS_ORDERS + "_stop_" + "pending_", account, chainId) : lsKey(LS_ORDERS + "pending_", account, chainId);
   const pendingOrders = get<Order[] | StopLimitOrder[]>(pendingKey);
   const confirmedOrder = pendingOrders.find(
     (order) => order.createdTxHash?.toLowerCase() === creationHash
   );
 
-  if (confirmedOrder) removeOrder(chainId, account, confirmedOrder, true);
+  if (confirmedOrder) removeOrder(chainId, account, confirmedOrder, true, stoplimit);
 
   if (success && confirmedOrder) {
-    const ordersKey = lsKey(LS_ORDERS, account, chainId);
+    const ordersKey = stoplimit ? lsKey(LS_ORDERS + "_stop_", account, chainId) : lsKey(LS_ORDERS, account, chainId);
     const orders = get<Order[]>(ordersKey);
     if (orders) {
       const ordersToSave = removeOrder(chainId, account, {
         ...confirmedOrder,
         createdTxHash: creationHash,
-      });
+      }, false, stoplimit);
       ordersToSave.push({
         ...confirmedOrder,
         createdTxHash: creationHash,

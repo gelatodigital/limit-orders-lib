@@ -97,20 +97,23 @@ export default createReducer(initialState, (builder) =>
         }
         tx.receipt = receipt;
         tx.confirmedTime = now();
+        const stoplimit = tx.order?.module === "0xe912cd26c4a4cfffc175a297f1328ab23313a1a7"
 
         if (transactions[chainId]?.[hash].type === "submission") {
           confirmOrderSubmission(
             chainId,
             receipt.from,
             hash,
-            receipt.status === 0 ? false : true
+            receipt.status === 0 ? false : true,
+            stoplimit
           );
         } else if (transactions[chainId]?.[hash].type === "cancellation") {
           confirmOrderCancellation(
             chainId,
             receipt.from,
             hash,
-            receipt.status === 0 ? false : true
+            receipt.status === 0 ? false : true,
+            stoplimit
           );
         }
       }
