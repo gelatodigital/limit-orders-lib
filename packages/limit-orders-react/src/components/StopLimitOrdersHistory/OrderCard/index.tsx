@@ -329,7 +329,7 @@ export default function OrderCard({ order }: { order: Order }) {
           outputTokenSymbol: outputToken.symbol,
           inputAmount: inputAmount.toSignificant(4),
           outputAmount: outputAmount.toSignificant(4),
-          maxOutputAmount
+          maxOutputAmount: maxPrice?.toSignificant(4)
         }
         : undefined;
 

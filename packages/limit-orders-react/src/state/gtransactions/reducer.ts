@@ -60,7 +60,11 @@ export default createReducer(initialState, (builder) =>
         };
 
         transactions[chainId] = txs;
-        if (order) saveOrder(chainId, from, order, true);
+        if (order?.module === "0xe912cd26c4a4cfffc175a297f1328ab23313a1a7") {
+          saveOrder(chainId, from, order, true, true)
+        } else {
+          order && saveOrder(chainId, from, order, true)
+        };
       }
     )
     .addCase(clearAllTransactions, (transactions, { payload: { chainId } }) => {

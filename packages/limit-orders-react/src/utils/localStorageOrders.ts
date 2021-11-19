@@ -11,10 +11,18 @@ export function lsKey(key: string, account: string, chainId: number) {
   return key + account.toString() + chainId.toString();
 }
 
-export function getLSOrders(chainId: number, account: string, pending = false) {
-  const key = pending
-    ? lsKey(LS_ORDERS + "pending_", account, chainId)
-    : lsKey(LS_ORDERS, account, chainId);
+export function getLSOrders(chainId: number, account: string, pending = false, stoplimit = false) {
+  let key;
+  if (stoplimit) {
+    key = pending
+      ? lsKey(LS_ORDERS + "_stop_" + "pending_", account, chainId)
+      : lsKey(LS_ORDERS + "_stop_", account, chainId);
+  }
+  else {
+    key = pending
+      ? lsKey(LS_ORDERS + "pending_", account, chainId)
+      : lsKey(LS_ORDERS, account, chainId);
+  }
 
   const orders = get<Order[] | StopLimitOrder[]>(key);
 
@@ -25,17 +33,28 @@ export function saveOrder(
   chainId: number,
   account: string,
   order: Order | StopLimitOrder,
-  pending = false
+  pending = false,
+  stoplimit = false
 ) {
-  const key = pending
-    ? lsKey(LS_ORDERS + "pending_", account, chainId)
-    : lsKey(LS_ORDERS, account, chainId);
-
-  if (!pending) {
-    removeOrder(chainId, account, order, true);
+  let key;
+  if (stoplimit) {
+    key = pending
+      ? lsKey(LS_ORDERS + "_stop_" + "pending_", account, chainId)
+      : lsKey(LS_ORDERS + "_stop_", account, chainId);
+  }
+  else {
+    key = pending
+      ? lsKey(LS_ORDERS + "pending_", account, chainId)
+      : lsKey(LS_ORDERS, account, chainId);
   }
 
-  const orders = removeOrder(chainId, account, order, pending);
+  if (!pending && !stoplimit) {
+    removeOrder(chainId, account, order, true);
+  } else if (!pending && stoplimit) {
+    removeOrder(chainId, account, order, true, true);
+  }
+
+  const orders = removeOrder(chainId, account, order, pending, stoplimit);
 
   if (!orders.length) {
     set(key, [order]);
@@ -49,11 +68,21 @@ export function removeOrder(
   chainId: number,
   account: string,
   order: Order | StopLimitOrder,
-  pending = false
+  pending = false,
+  stoplimit = false
 ) {
-  const key = pending
-    ? lsKey(LS_ORDERS + "pending_", account, chainId)
-    : lsKey(LS_ORDERS, account, chainId);
+  let key;
+  if (stoplimit) {
+    key = pending
+      ? lsKey(LS_ORDERS + "_stop_" + "pending_", account, chainId)
+      : lsKey(LS_ORDERS + "_stop_", account, chainId);
+  }
+  else {
+    key = pending
+      ? lsKey(LS_ORDERS + "pending_", account, chainId)
+      : lsKey(LS_ORDERS, account, chainId);
+  }
+
 
   const prev = get<Order[]>(key);
 

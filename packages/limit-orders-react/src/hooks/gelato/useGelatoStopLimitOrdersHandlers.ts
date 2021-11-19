@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { StopLimitOrder } from "@gelatonetwork/limit-orders-lib";
+import { Order } from "@gelatonetwork/limit-orders-lib";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Overrides } from "@ethersproject/contracts";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
@@ -23,13 +23,13 @@ export interface GelatoStopLimitOrdersHandlers {
     overrides?: Overrides;
   }) => Promise<TransactionResponse>;
   handleStopLimitOrderCancellation: (
-    order: StopLimitOrder,
+    order: Order,
     orderDetails?: {
       inputTokenSymbol: string;
       outputTokenSymbol: string;
       inputAmount: string;
       outputAmount: string;
-      maxOutputAmount: string;
+      maxOutputAmount: string | undefined;
     },
     overrides?: Overrides
   ) => Promise<TransactionResponse>;
@@ -115,7 +115,7 @@ export default function useGelatoStopLimitOrdersHandlers(): GelatoStopLimitOrder
           witness,
           status: "open",
           updatedAt: now.toString(),
-        } as StopLimitOrder,
+        } as Order,
       });
 
       return tx;
@@ -125,13 +125,13 @@ export default function useGelatoStopLimitOrdersHandlers(): GelatoStopLimitOrder
 
   const handleStopLimitOrderCancellation = useCallback(
     async (
-      orderToCancel: StopLimitOrder,
+      orderToCancel: Order,
       orderDetails?: {
         inputTokenSymbol: string;
         outputTokenSymbol: string;
         inputAmount: string;
         outputAmount: string;
-        maxOutputAmount: string;
+        maxOutputAmount: string | undefined;
       },
       overrides?: Overrides
     ) => {
