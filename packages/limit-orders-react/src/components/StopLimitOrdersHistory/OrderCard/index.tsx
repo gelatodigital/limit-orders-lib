@@ -221,15 +221,22 @@ export default function OrderCard({ order }: { order: Order }) {
       order.minReturn,
       isEthereum,
     ]
-  );
+  )
 
   const rawMaxReturn = useMemo(
     () =>
-      order.maxReturn,
+      order.adjustedMinReturn
+        ? order.adjustedMinReturn
+        : gelatoLibrary && chainId && order.maxReturn
+          ? isEthereum
+            ? order.maxReturn
+            : gelatoLibrary.getAdjustedMinReturn(order.maxReturn)
+          : undefined,
     [
       chainId,
       gelatoLibrary,
       order.maxReturn,
+      order.adjustedMinReturn,
       isEthereum,
     ]
   );
@@ -466,7 +473,7 @@ export default function OrderCard({ order }: { order: Order }) {
             <RowBetween>
               <Text fontWeight={500} fontSize={14} color={theme.text1}>
                 {`Sell ${inputAmount ? inputAmount.toSignificant(4) : "-"} ${inputAmount?.currency.symbol ?? ""
-                  } for ${maxOutputAmount ? maxOutputAmount?.toSignificant(4) : "-"} ${outputAmount?.currency.symbol ?? ""
+                  } for ${maxOutputAmount ? maxOutputAmount.toSignificant(4) : "-"} ${maxOutputAmount?.currency.symbol ?? ""
                   }`}
               </Text>
             </RowBetween>
