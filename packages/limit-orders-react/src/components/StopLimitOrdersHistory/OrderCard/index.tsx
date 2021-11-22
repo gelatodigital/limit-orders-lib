@@ -336,7 +336,7 @@ export default function OrderCard({ order }: { order: Order }) {
           outputTokenSymbol: outputToken.symbol,
           inputAmount: inputAmount.toSignificant(4),
           outputAmount: outputAmount.toSignificant(4),
-          maxOutputAmount: maxPrice?.toSignificant(4)
+          maxOutputAmount: maxOutputAmount?.toSignificant(4)
         }
         : undefined;
 
@@ -473,7 +473,7 @@ export default function OrderCard({ order }: { order: Order }) {
             <RowBetween>
               <Text fontWeight={500} fontSize={14} color={theme.text1}>
                 {`Stop Limit trigger price at ${inputAmount ? inputAmount.toSignificant(4) : "-"} ${inputAmount?.currency.symbol ?? ""
-                  } for ${maxOutputAmount ? maxOutputAmount.toSignificant(4) : "-"} ${maxOutputAmount?.currency.symbol ?? ""
+                  } for ${maxOutputAmount ? maxOutputAmount?.toSignificant(4) : "-"} ${maxOutputAmount?.currency.symbol ?? ""
                   }`}
               </Text>
             </RowBetween>
