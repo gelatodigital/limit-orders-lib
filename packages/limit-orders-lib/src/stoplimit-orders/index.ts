@@ -25,7 +25,10 @@ import {
 } from "../types";
 import { isEthereumChain, isNetworkGasToken } from "../utils";
 import { isValidChainIdAndHandler, GelatoBase } from "../gelato-base";
-import { queryStopLimitOrders } from "../utils/queries";
+import {
+  queryStopLimitOrders, queryStopLimitExecutedOrders,
+  queryStopLimitCancelledOrders
+} from "../utils/queries";
 
 export class GelatoStopLimitOrders extends GelatoBase {
   constructor(
@@ -290,6 +293,44 @@ export class GelatoStopLimitOrders extends GelatoBase {
       .map((order) => ({
         ...order,
         adjustedMinReturn: this.getAdjustedMinReturn(order.minReturn),
+      }))
+      .filter((order) => {
+        if (this._handler && !order.handler) {
+          return includeOrdersWithNullHandler ? true : false;
+        } else {
+          return this._handler ? order.handler === this._handlerAddress : true;
+        }
+      });
+  }
+
+  public async getExecutedOrders(
+    owner: string,
+    includeOrdersWithNullHandler = false
+  ): Promise<Order[]> {
+    const orders = await queryStopLimitExecutedOrders(owner, this._chainId);
+    return orders
+      .map((order) => ({
+        ...order,
+        adjustedMinReturn: this.getAdjustedMinReturn(order.minReturn)
+      }))
+      .filter((order) => {
+        if (this._handler && !order.handler) {
+          return includeOrdersWithNullHandler ? true : false;
+        } else {
+          return this._handler ? order.handler === this._handlerAddress : true;
+        }
+      });
+  }
+
+  public async getCancelledOrders(
+    owner: string,
+    includeOrdersWithNullHandler = false
+  ): Promise<Order[]> {
+    const orders = await queryStopLimitCancelledOrders(owner, this._chainId);
+    return orders
+      .map((order) => ({
+        ...order,
+        adjustedMinReturn: this.getAdjustedMinReturn(order.minReturn)
       }))
       .filter((order) => {
         if (this._handler && !order.handler) {

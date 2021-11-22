@@ -260,3 +260,60 @@ const _getUniqueOrdersWithHandler = (allOrders: Order[]): Order[] =>
 
       return { ...order, handler };
     });
+
+
+export const queryStopLimitExecutedOrders = async (
+  owner: string,
+  chainId: number
+): Promise<Order[]> => {
+  try {
+
+    const dataStopLimitSubgraph = STOP_LIMIT_ORDER_SUBGRAPH_URL[chainId]
+      ? await request(
+        STOP_LIMIT_ORDER_SUBGRAPH_URL[chainId],
+        GET_ALL_STOP_LIMIT_ORDERS_BY_OWNER,
+        {
+          owner: owner.toLowerCase(),
+          module:
+            GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS[chainId].toLowerCase(),
+        }
+      )
+      : { orders: [] };
+
+    const orders = dataStopLimitSubgraph.orders;
+
+
+    return _getUniqueOrdersWithHandler(orders).filter(
+      (order) => order.status === "executed"
+    );
+  } catch (error) {
+    throw new Error("Could not query subgraph for executed orders");
+  }
+};
+
+export const queryStopLimitCancelledOrders = async (
+  owner: string,
+  chainId: number
+): Promise<Order[]> => {
+  try {
+    const dataStopLimitSubgraph = STOP_LIMIT_ORDER_SUBGRAPH_URL[chainId]
+      ? await request(
+        STOP_LIMIT_ORDER_SUBGRAPH_URL[chainId],
+        GET_ALL_STOP_LIMIT_ORDERS_BY_OWNER,
+        {
+          owner: owner.toLowerCase(),
+          module:
+            GELATO_STOPLOSS_ORDERS_MODULE_ADDRESS[chainId].toLowerCase(),
+        }
+      )
+      : { orders: [] };
+
+    const orders = dataStopLimitSubgraph.orders;
+
+    return _getUniqueOrdersWithHandler(orders).filter(
+      (order) => order.status === "cancelled"
+    );
+  } catch (error) {
+    throw new Error("Could not query subgraph for cancelled orders");
+  }
+};

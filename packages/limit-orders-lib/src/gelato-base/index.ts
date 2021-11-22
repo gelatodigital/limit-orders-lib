@@ -415,49 +415,6 @@ export class GelatoBase {
       });
   }
 
-  public async getExecutedOrders(
-    owner: string,
-    includeOrdersWithNullHandler = false
-  ): Promise<Order[]> {
-    const isEthereumNetwork = isEthereumChain(this._chainId);
-    const orders = await queryExecutedOrders(owner, this._chainId);
-    return orders
-      .map((order) => ({
-        ...order,
-        adjustedMinReturn: isEthereumNetwork
-          ? order.minReturn
-          : this.getAdjustedMinReturn(order.minReturn),
-      }))
-      .filter((order) => {
-        if (this._handler && !order.handler) {
-          return includeOrdersWithNullHandler ? true : false;
-        } else {
-          return this._handler ? order.handler === this._handlerAddress : true;
-        }
-      });
-  }
-
-  public async getCancelledOrders(
-    owner: string,
-    includeOrdersWithNullHandler = false
-  ): Promise<Order[]> {
-    const isEthereumNetwork = isEthereumChain(this._chainId);
-    const orders = await queryCancelledOrders(owner, this._chainId);
-    return orders
-      .map((order) => ({
-        ...order,
-        adjustedMinReturn: isEthereumNetwork
-          ? order.minReturn
-          : this.getAdjustedMinReturn(order.minReturn),
-      }))
-      .filter((order) => {
-        if (this._handler && !order.handler) {
-          return includeOrdersWithNullHandler ? true : false;
-        } else {
-          return this._handler ? order.handler === this._handlerAddress : true;
-        }
-      });
-  }
 
   public _getKey(order: Order): string {
     return utils.keccak256(
