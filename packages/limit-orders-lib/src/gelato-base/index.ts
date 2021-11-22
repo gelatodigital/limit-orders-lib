@@ -333,7 +333,7 @@ export class GelatoBase {
       : BigNumber.from(1);
 
     const slippageBPS = extraSlippageBPS
-      ? GelatoBase.slippageBPS + extraSlippageBPS
+      ? extraSlippageBPS
       : GelatoBase.slippageBPS;
 
     const slippage = BigNumber.from(outputAmount).mul(slippageBPS).div(10000);
@@ -357,7 +357,7 @@ export class GelatoBase {
     const gelatoFee = BigNumber.from(GelatoBase.gelatoFeeBPS);
 
     const slippage = extraSlippageBPS
-      ? BigNumber.from(GelatoBase.slippageBPS + extraSlippageBPS)
+      ? BigNumber.from(extraSlippageBPS)
       : BigNumber.from(GelatoBase.slippageBPS);
 
     const fees = gelatoFee.add(slippage);

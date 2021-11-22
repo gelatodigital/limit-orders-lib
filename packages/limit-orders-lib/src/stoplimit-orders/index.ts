@@ -184,7 +184,7 @@ export class GelatoStopLimitOrders extends GelatoBase {
         inputAmount: inputAmount.toString(),
         minReturn: minReturn.toString(),
         maxReturn: maxReturn.toString(),
-        adjustedMinReturn: minReturn.toString(),
+        adjustedMinReturn: maxReturnToBeParsed.toString(),
         inputData: payload.data.toString(),
         secret: secret.toLowerCase(),
         handler: this.handlerAddress ?? null,
