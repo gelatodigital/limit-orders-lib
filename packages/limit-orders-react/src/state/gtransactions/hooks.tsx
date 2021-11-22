@@ -1,5 +1,5 @@
 import { TransactionResponse } from "@ethersproject/providers";
-import { Order, StopLimitOrder } from "@gelatonetwork/limit-orders-lib";
+import { Order } from "@gelatonetwork/limit-orders-lib";
 import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -13,7 +13,7 @@ export function useTransactionAdder(): (
   response: TransactionResponse,
   customData?: {
     summary?: string;
-    order?: Order | StopLimitOrder;
+    order?: Order;
     type: TransactionType;
     approval?: { tokenAddress: string; spender: string };
   }
@@ -31,7 +31,7 @@ export function useTransactionAdder(): (
         approval,
       }: {
         summary?: string;
-        order?: Order | StopLimitOrder;
+        order?: Order;
         type: TransactionType;
         approval?: { tokenAddress: string; spender: string };
       } = { type: "submission" }

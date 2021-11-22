@@ -1,4 +1,4 @@
-import { Order, StopLimitOrder } from "@gelatonetwork/limit-orders-lib";
+import { Order } from "@gelatonetwork/limit-orders-lib";
 import { get, set, clear } from "local-storage";
 
 const LS_ORDERS = "gorders_";
@@ -24,7 +24,7 @@ export function getLSOrders(chainId: number, account: string, pending = false, s
       : lsKey(LS_ORDERS, account, chainId);
   }
 
-  const orders = get<Order[] | StopLimitOrder[]>(key);
+  const orders = get<Order[]>(key);
 
   return orders ? getUniqueOrders(orders) : [];
 }
@@ -32,7 +32,7 @@ export function getLSOrders(chainId: number, account: string, pending = false, s
 export function saveOrder(
   chainId: number,
   account: string,
-  order: Order | StopLimitOrder,
+  order: Order,
   pending = false,
   stoplimit = false
 ) {
@@ -67,7 +67,7 @@ export function saveOrder(
 export function removeOrder(
   chainId: number,
   account: string,
-  order: Order | StopLimitOrder,
+  order: Order,
   pending = false,
   stoplimit = false
 ) {
@@ -115,7 +115,7 @@ export function confirmOrderCancellation(
 
   if (success && confirmedOrder) {
     const ordersKey = stoplimit ? lsKey(LS_ORDERS + "_stop_", account, chainId) : lsKey(LS_ORDERS, account, chainId);
-    const orders = get<Order[] | StopLimitOrder[]>(ordersKey);
+    const orders = get<Order[]>(ordersKey);
     if (orders) {
       const ordersToSave = removeOrder(chainId, account, confirmedOrder, false, stoplimit);
       ordersToSave.push({
@@ -143,7 +143,7 @@ export function confirmOrderSubmission(
 ) {
   const creationHash = submissionHash.toLowerCase();
   const pendingKey = stoplimit ? lsKey(LS_ORDERS + "_stop_" + "pending_", account, chainId) : lsKey(LS_ORDERS + "pending_", account, chainId);
-  const pendingOrders = get<Order[] | StopLimitOrder[]>(pendingKey);
+  const pendingOrders = get<Order[]>(pendingKey);
   const confirmedOrder = pendingOrders.find(
     (order) => order.createdTxHash?.toLowerCase() === creationHash
   );
@@ -174,7 +174,7 @@ export function confirmOrderSubmission(
   }
 }
 
-export const getUniqueOrders = (allOrders: Order[] | StopLimitOrder[]): Order[] | StopLimitOrder[] => [
+export const getUniqueOrders = (allOrders: Order[]): Order[] => [
   ...new Map(
     allOrders
       // sort by `updatedAt` asc so that the most recent one will be used
