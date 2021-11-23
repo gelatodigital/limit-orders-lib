@@ -26,8 +26,9 @@ import {
 import { isEthereumChain, isNetworkGasToken } from "../utils";
 import { isValidChainIdAndHandler, GelatoBase } from "../gelato-base";
 import {
-  queryStopLimitOrders, queryStopLimitExecutedOrders,
-  queryStopLimitCancelledOrders
+  queryStopLimitOrders,
+  queryStopLimitExecutedOrders,
+  queryStopLimitCancelledOrders,
 } from "../utils/queries";
 
 export class GelatoStopLimitOrders extends GelatoBase {
@@ -155,13 +156,13 @@ export class GelatoStopLimitOrders extends GelatoBase {
 
     const encodedData = this.handlerAddress
       ? this.abiEncoder.encode(
-        ["address", "uint256", "address", "uint256"],
-        [outputToken, minReturn, this.handlerAddress, maxReturn]
-      )
+          ["address", "uint256", "address", "uint256"],
+          [outputToken, minReturn, this.handlerAddress, maxReturn]
+        )
       : this.abiEncoder.encode(
-        ["address", "uint256", "address", "uint256"],
-        [outputToken, minReturn, "", maxReturn]
-      );
+          ["address", "uint256", "address", "uint256"],
+          [outputToken, minReturn, "", maxReturn]
+        );
 
     return {
       payload,
@@ -210,13 +211,13 @@ export class GelatoStopLimitOrders extends GelatoBase {
 
     const encodedData = this.handlerAddress
       ? this.abiEncoder.encode(
-        ["address", "uint256", "address", "uint256"],
-        [outputToken, minReturn, this.handlerAddress, maxReturn]
-      )
+          ["address", "uint256", "address", "uint256"],
+          [outputToken, minReturn, this.handlerAddress, maxReturn]
+        )
       : this.abiEncoder.encode(
-        ["address", "uint256", "address", "uint256"],
-        [outputToken, minReturn, "", maxReturn]
-      );
+          ["address", "uint256", "address", "uint256"],
+          [outputToken, minReturn, "", maxReturn]
+        );
 
     let data, value, to;
     if (isNetworkGasToken(inputToken)) {
@@ -311,7 +312,7 @@ export class GelatoStopLimitOrders extends GelatoBase {
     return orders
       .map((order) => ({
         ...order,
-        adjustedMinReturn: this.getAdjustedMinReturn(order.minReturn)
+        adjustedMinReturn: this.getAdjustedMinReturn(order.minReturn),
       }))
       .filter((order) => {
         if (this._handler && !order.handler) {
@@ -330,7 +331,7 @@ export class GelatoStopLimitOrders extends GelatoBase {
     return orders
       .map((order) => ({
         ...order,
-        adjustedMinReturn: this.getAdjustedMinReturn(order.minReturn)
+        adjustedMinReturn: this.getAdjustedMinReturn(order.minReturn),
       }))
       .filter((order) => {
         if (this._handler && !order.handler) {

@@ -27,15 +27,8 @@ import {
   GelatoLimitOrders as GelatoBaseContract,
   GelatoLimitOrders__factory as GelatoBase__factory,
 } from "../contracts/types";
-import {
-  queryPastOrders,
-} from "../utils/queries";
-import {
-  Handler,
-  ChainId,
-  Order,
-  TransactionData,
-} from "../types";
+import { queryPastOrders } from "../utils/queries";
+import { Handler, ChainId, Order, TransactionData } from "../types";
 import { isEthereumChain } from "../utils";
 
 export const isValidChainIdAndHandler = (
@@ -134,20 +127,20 @@ export class GelatoBase {
     this._provider = Provider.isProvider(signerOrProvider)
       ? signerOrProvider
       : Signer.isSigner(signerOrProvider)
-        ? signerOrProvider.provider
-        : undefined;
+      ? signerOrProvider.provider
+      : undefined;
 
     this._gelatoCore = this._signer
       ? GelatoBase__factory.connect(
-        GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
-        this._signer
-      )
+          GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
+          this._signer
+        )
       : this._provider
-        ? GelatoBase__factory.connect(
+      ? GelatoBase__factory.connect(
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           this._provider
         )
-        : (new Contract(
+      : (new Contract(
           GELATO_LIMIT_ORDERS_ADDRESS[this._chainId],
           GelatoBase__factory.createInterface()
         ) as GelatoBaseContract);
@@ -156,15 +149,15 @@ export class GelatoBase {
 
     this._erc20OrderRouter = this._signer
       ? ERC20OrderRouter__factory.connect(
-        GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
-        this._signer
-      )
+          GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
+          this._signer
+        )
       : this._provider
-        ? ERC20OrderRouter__factory.connect(
+      ? ERC20OrderRouter__factory.connect(
           GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
           this._provider
         )
-        : (new Contract(
+      : (new Contract(
           GELATO_LIMIT_ORDERS_ERC20_ORDER_ROUTER[this._chainId],
           ERC20OrderRouter__factory.createInterface()
         ) as ERC20OrderRouter);
@@ -252,14 +245,14 @@ export class GelatoBase {
 
     return overrides
       ? ERC20__factory.connect(inputToken, this._signer).approve(
-        this._erc20OrderRouter.address,
-        amount,
-        overrides
-      )
+          this._erc20OrderRouter.address,
+          amount,
+          overrides
+        )
       : ERC20__factory.connect(inputToken, this._signer).approve(
-        this._erc20OrderRouter.address,
-        amount
-      );
+          this._erc20OrderRouter.address,
+          amount
+        );
   }
 
   public async isActiveOrder(order: Order): Promise<boolean> {
@@ -412,7 +405,6 @@ export class GelatoBase {
         }
       });
   }
-
 
   public _getKey(order: Order): string {
     return utils.keccak256(
