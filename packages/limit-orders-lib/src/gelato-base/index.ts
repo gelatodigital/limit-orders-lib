@@ -28,8 +28,6 @@ import {
   GelatoLimitOrders__factory as GelatoBase__factory,
 } from "../contracts/types";
 import {
-  queryCancelledOrders,
-  queryExecutedOrders,
   queryPastOrders,
 } from "../utils/queries";
 import {
