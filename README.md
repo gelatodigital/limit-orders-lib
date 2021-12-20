@@ -2,7 +2,7 @@
 
 # Gelato Limit Order Libraries
 
-# REPO DEPRACTED :warning:
+# REPO DEPRECATED :warning:
 
 **Please visit the new repo: [gelatodigital/swap-orders-lib](https://github.com/gelatodigital/swap-orders-lib)**
 
