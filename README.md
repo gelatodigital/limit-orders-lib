@@ -2,8 +2,9 @@
 
 # Gelato Limit Order Libraries
 
-Place limit buy and sell orders on Ethereum, Polygon and Fantom using Gelato Network.
-Use our vanilla js library, our ready to use react component or plug in our react hook to handle limit orders on your app.
+# REPO DEPRACTED :warning:
+
+**Please visit the new repo: [gelatodigital/swap-orders-lib](https://github.com/gelatodigital/swap-orders-lib)**
 
 ### Need help?
 
